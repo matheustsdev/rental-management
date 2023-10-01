@@ -1,7 +1,15 @@
 import { Request, Response } from 'express';
 import { IBaseResponse } from './baseResponse.interface';
+import { IBaseService } from './baseService.interface';
+
+export interface IServiceObject {
+    [key: string]: IBaseService<any> | null;
+}
 
 export interface IBaseController<T> {
+    services: IServiceObject;
+
+    setServices(services: IServiceObject): void;
     create(req: Request, res: Response): IBaseResponse<T>;
     readAll(req: Request, res: Response): IBaseResponse<T[]>;
     readById(req: Request, res: Response): IBaseResponse<T>;
