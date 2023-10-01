@@ -1,4 +1,5 @@
 import { Repository } from "typeorm";
+import { Express } from 'express';
 import { IBaseController, IServiceObject } from "../interfaces/baseController.interface";
 import { IBaseService } from "../interfaces/baseService.interface";
 import { DependeciesMapper } from "./dependencyMapper";
@@ -8,6 +9,7 @@ interface IBaseModuleConstructor {
     services: IBaseService<any>[];
     controllers: IBaseController<any>[];
     repositories: Repository<any>[];
+    app: Express;
 }
 
 export class BaseModule {
@@ -15,12 +17,14 @@ export class BaseModule {
     _services: IBaseService<any>[] = [];
     _controllers: IBaseController<any>[] = [];
     _repositories: Repository<any>[] = [];
+    _app: Express;
 
     constructor({
         dependencies, 
         services, 
         controllers, 
-        repositories
+        repositories,
+        app
     }: IBaseModuleConstructor) {
         
         this._dependencies = new DependeciesMapper();
@@ -31,6 +35,7 @@ export class BaseModule {
         this._services = services;
         this._controllers = controllers;
         this._repositories = repositories;
+        this._app = app;
 
         /* region Dependency Injection */
         this._controllers.forEach(controller => {
@@ -51,6 +56,8 @@ export class BaseModule {
             })
 
             controller.setServices(servicesObject);
+            controller.app = this._app;
+            controller.execute();
 
             console.log(controller.services)
         })

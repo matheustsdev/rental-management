@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, Express } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 import { IBaseController, IServiceObject } from "../interfaces/baseController.interface";
@@ -7,6 +7,7 @@ import { IBaseResponse } from "../interfaces/baseResponse.interface";
 export class BaseController<T> implements IBaseController<T> {
     dependenciesName: string[] = [];
     services: IServiceObject = {};
+    app: Express;
 
     constructor() {}
 
@@ -22,6 +23,8 @@ export class BaseController<T> implements IBaseController<T> {
         throw new Error("Method not implemented.");
     }
     readAll(req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>): IBaseResponse<T[]> {
+        console.log("ReadAll")
+
         throw new Error("Method not implemented.");
     }
     readById(req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>): IBaseResponse<T> {
@@ -32,6 +35,25 @@ export class BaseController<T> implements IBaseController<T> {
     }
     delete(req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>, res: Response<any, Record<string, any>>): IBaseResponse<null> {
         throw new Error("Method not implemented.");
+    }
+
+    execute() {
+        const routeName = this.constructor.name.split('Controller')[0].toLowerCase();
+
+        console.log("POST - ", this.constructor.name, ` - {/${routeName}}`)
+        this.app.post(`/${routeName}`, this.create);
+
+        console.log("GET - ", this.constructor.name, ` - {/${routeName}}`)
+        this.app.get(`/${routeName}`, this.readAll);
+
+        console.log("GET - ", this.constructor.name, ` - {/${routeName}/:id}`)
+        this.app.get(`/${routeName}/:id`, this.readById);
+
+        console.log("PUT - ", this.constructor.name, ` - {/${routeName}/:id}`)
+        this.app.put(`/${routeName}/:id`, this.update);
+
+        console.log("DELETE - ", this.constructor.name, ` - {/${routeName}/:id}`)
+        this.app.delete(`/${routeName}/:id`, this.delete);
     }
 
 }
