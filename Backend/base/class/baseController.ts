@@ -1,6 +1,7 @@
 import { Request, Response, Express } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
 import { ParsedQs } from "qs";
+import { EHTTPMethods, Logger } from "../../../Shared/class/logger"
 import { IBaseController, IServiceObject } from "../interfaces/baseController.interface";
 import { IBaseResponse } from "../interfaces/baseResponse.interface";
 
@@ -40,20 +41,24 @@ export class BaseController<T> implements IBaseController<T> {
     execute() {
         const routeName = this.constructor.name.split('Controller')[0].toLowerCase();
 
-        console.log("POST - ", this.constructor.name, ` - {/${routeName}}`)
+        console.group("\x1b[32mRoute: " + "/" + routeName + "\n" + "--".repeat(10) + "\x1b[0m");
+
+        Logger.route(EHTTPMethods.POST, "/")
         this.app.post(`/${routeName}`, this.create);
 
-        console.log("GET - ", this.constructor.name, ` - {/${routeName}}`)
+        Logger.route(EHTTPMethods.GET, "/")
         this.app.get(`/${routeName}`, this.readAll);
 
-        console.log("GET - ", this.constructor.name, ` - {/${routeName}/:id}`)
+        Logger.route(EHTTPMethods.GET, "/:id")
         this.app.get(`/${routeName}/:id`, this.readById);
 
-        console.log("PUT - ", this.constructor.name, ` - {/${routeName}/:id}`)
-        this.app.put(`/${routeName}/:id`, this.update);
+        Logger.route(EHTTPMethods.PATCH,  "/:id")
+        this.app.patch(`/${routeName}/:id`, this.update);
 
-        console.log("DELETE - ", this.constructor.name, ` - {/${routeName}/:id}`)
+        Logger.route(EHTTPMethods.DELETE,  "/:id")
         this.app.delete(`/${routeName}/:id`, this.delete);
+
+        console.groupEnd() 
     }
 
 }

@@ -6,5 +6,5 @@ const app = express();
 new UserModule(app);
 
 app.listen(8080, () => {
-    console.log('Server running on port 8080');
+    console.log("\n\n\n\x1b[32mServer running on port 8080");
 })

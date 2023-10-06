@@ -58,8 +58,6 @@ export class BaseModule {
             controller.setServices(servicesObject);
             controller.app = this._app;
             controller.execute();
-
-            console.log(controller.services)
         })
         /* endregion Dependency Injection */
     }
