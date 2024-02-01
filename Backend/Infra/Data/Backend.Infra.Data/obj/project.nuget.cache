@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "uqpBJzfGbFFmbxgSf7YpEZXTiwFpMnxOOIvXFB2Lc/A70moXgr45tfyf+u4w1EQ/OlAw0byxMKJ5zF3kXOIjuw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\mathe\\dev\\rental-management\\Backend\\Infra\\Data\\Backend.Infra.Data\\Backend.Infra.Data.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\mathe\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.25\\microsoft.windowsdesktop.app.ref.6.0.25.nupkg.sha512",
+    "C:\\Users\\mathe\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.25\\microsoft.netcore.app.ref.6.0.25.nupkg.sha512",
+    "C:\\Users\\mathe\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.25\\microsoft.aspnetcore.app.ref.6.0.25.nupkg.sha512"
+  ],
+  "logs": []
+}
