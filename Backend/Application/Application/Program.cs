@@ -1,3 +1,7 @@
+using Backend.Infra.Data.Context;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+
 namespace Application
 {
     public class Program
@@ -5,8 +9,13 @@ namespace Application
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            var configuration = builder.Configuration;
 
             // Add services to the container.
+
+            builder.Services.AddDbContext<DataContext>((options) => 
+                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+            );
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -25,7 +34,6 @@ namespace Application
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
-
 
             app.MapControllers();
 

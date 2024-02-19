@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "/e/wQeJ4RjSwM+lbgCdyepvBTMttb4/XxTAmrrgcVVWyvXttbm3W0BDdM5YfkgVSEI7klwGS+NT2G4s+D4/dHg==",
+  "dgSpecHash": "03GCPNbkphJz+6c6fxbNkd/Q3Wu6295RlEqKWTxOFLgO6Pk5Jdazjho21oPlUAs2dZxWw+6R8UBP2n8yDTFC1w==",
   "success": true,
-  "projectFilePath": "C:\\Users\\mathe\\dev\\rental-management\\Backend\\Infra\\CrossCutting\\Backend.Infra.CrossCutting\\Backend.Infra.CrossCutting.csproj",
+  "projectFilePath": "C:\\Users\\mathe\\dev\\rental-management\\Backend\\Infra\\CrossCutting\\Backend.Infra.CrossCutting\\Backend.CrossCutting.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mathe\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.25\\microsoft.windowsdesktop.app.ref.6.0.25.nupkg.sha512",
     "C:\\Users\\mathe\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.25\\microsoft.netcore.app.ref.6.0.25.nupkg.sha512",

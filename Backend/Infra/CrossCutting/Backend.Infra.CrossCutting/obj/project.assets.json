@@ -13,9 +13,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mathe\\dev\\rental-management\\Backend\\Infra\\CrossCutting\\Backend.Infra.CrossCutting\\Backend.Infra.CrossCutting.csproj",
-      "projectName": "Backend.Infra.CrossCutting",
-      "projectPath": "C:\\Users\\mathe\\dev\\rental-management\\Backend\\Infra\\CrossCutting\\Backend.Infra.CrossCutting\\Backend.Infra.CrossCutting.csproj",
+      "projectUniqueName": "C:\\Users\\mathe\\dev\\rental-management\\Backend\\Infra\\CrossCutting\\Backend.Infra.CrossCutting\\Backend.CrossCutting.csproj",
+      "projectName": "Backend.CrossCutting",
+      "projectPath": "C:\\Users\\mathe\\dev\\rental-management\\Backend\\Infra\\CrossCutting\\Backend.Infra.CrossCutting\\Backend.CrossCutting.csproj",
       "packagesPath": "C:\\Users\\mathe\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\mathe\\dev\\rental-management\\Backend\\Infra\\CrossCutting\\Backend.Infra.CrossCutting\\obj\\",
       "projectStyle": "PackageReference",

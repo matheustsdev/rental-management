@@ -1,9 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "vV0D1RChhjgofNoVE3jX+9F7PExvTFL3CLPETetjGOwlbs4FEfH4Cun1MY9BoScJC4KGf8TyLuT54RbXxU64Yg==",
+  "dgSpecHash": "yQLzztQzb36w6oKapDU94jcc2dU0a/2MAK1+IIgY+iEESs68rJ/mtitrwvfpV1uDDdDKTy2XnJDhtrIqGLrD2A==",
   "success": true,
   "projectFilePath": "C:\\Users\\mathe\\dev\\rental-management\\Backend\\Service\\Service\\Backend.Service.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\mathe\\.nuget\\packages\\fluentvalidation\\11.9.0\\fluentvalidation.11.9.0.nupkg.sha512",
+    "C:\\Users\\mathe\\.nuget\\packages\\fluentvalidation.aspnetcore\\11.3.0\\fluentvalidation.aspnetcore.11.3.0.nupkg.sha512",
+    "C:\\Users\\mathe\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\11.5.1\\fluentvalidation.dependencyinjectionextensions.11.5.1.nupkg.sha512",
+    "C:\\Users\\mathe\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\2.1.0\\microsoft.extensions.dependencyinjection.abstractions.2.1.0.nupkg.sha512",
     "C:\\Users\\mathe\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.25\\microsoft.windowsdesktop.app.ref.6.0.25.nupkg.sha512",
     "C:\\Users\\mathe\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.25\\microsoft.netcore.app.ref.6.0.25.nupkg.sha512",
     "C:\\Users\\mathe\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.25\\microsoft.aspnetcore.app.ref.6.0.25.nupkg.sha512"
