@@ -12,13 +12,14 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20240219004324_CreateTable-reg_categories")]
+    [Migration("20240222004553_CreateTable-reg_categories")]
     partial class CreateTablereg_categories
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("rent")
                 .HasAnnotation("ProductVersion", "6.0.26")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -38,7 +39,7 @@ namespace Backend.Data.Migrations
                     b.HasKey("Id")
                         .HasName("id_category");
 
-                    b.ToTable("reg_categories", (string)null);
+                    b.ToTable("reg_categories", "rent");
                 });
 #pragma warning restore 612, 618
         }

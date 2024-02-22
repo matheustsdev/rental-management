@@ -1,6 +1,8 @@
+using Backend.Application.Extensions;
 using Backend.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Application
 {
@@ -13,9 +15,11 @@ namespace Application
 
             // Add services to the container.
 
-            builder.Services.AddDbContext<DataContext>((options) => 
-                options.UseNpgsql(configuration.GetConnectionString("DefaultConnection"))
+            builder.Services.AddDbContext<DataContext>((optionsBuilder) => 
+                optionsBuilder.UseNpgsql(configuration.GetConnectionString("DefaultConnection"), options => options.MigrationsHistoryTable("__EFMigrationsHistory", "rent"))
             );
+
+            builder.Services.AddScoped<DbContext, DataContext>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -36,6 +40,8 @@ namespace Application
             app.UseAuthorization();
 
             app.MapControllers();
+
+            app.UseDatabaseAutoMigration();
 
             app.Run();
         }

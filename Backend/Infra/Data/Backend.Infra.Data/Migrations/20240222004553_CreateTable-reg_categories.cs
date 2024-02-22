@@ -9,8 +9,12 @@ namespace Backend.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "rent");
+
             migrationBuilder.CreateTable(
                 name: "reg_categories",
+                schema: "rent",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -25,7 +29,8 @@ namespace Backend.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "reg_categories");
+                name: "reg_categories",
+                schema: "rent");
         }
     }
 }

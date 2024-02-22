@@ -17,6 +17,7 @@ namespace Backend.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("rent")
                 .HasAnnotation("ProductVersion", "6.0.26")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -36,7 +37,7 @@ namespace Backend.Data.Migrations
                     b.HasKey("Id")
                         .HasName("id_category");
 
-                    b.ToTable("reg_categories", (string)null);
+                    b.ToTable("reg_categories", "rent");
                 });
 #pragma warning restore 612, 618
         }

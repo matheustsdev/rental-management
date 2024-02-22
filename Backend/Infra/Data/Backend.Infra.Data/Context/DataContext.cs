@@ -16,6 +16,8 @@ namespace Backend.Infra.Data.Context
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.HasDefaultSchema("rent");
+
             modelBuilder.Entity<Category>(new CategoryMap().Configure);
         }
     }
