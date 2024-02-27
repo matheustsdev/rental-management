@@ -12,6 +12,8 @@ namespace Backend.Infra.Data.Context
 			
 		public DbSet<Category> Categories { get; set; }
 
+        public DbSet<Product> Products { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -19,6 +21,7 @@ namespace Backend.Infra.Data.Context
             modelBuilder.HasDefaultSchema("rent");
 
             modelBuilder.Entity<Category>(new CategoryMap().Configure);
+            modelBuilder.Entity<Product>(new ProductMap().Configure);
         }
     }
 }

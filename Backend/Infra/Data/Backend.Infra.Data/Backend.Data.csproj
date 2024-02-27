@@ -24,11 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
+    <ProjectReference Include="..\..\..\Domain\Domain\Backend.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Domain\Domain\Backend.Domain.csproj" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>
