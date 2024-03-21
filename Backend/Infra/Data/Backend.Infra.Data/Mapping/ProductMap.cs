@@ -26,7 +26,7 @@ namespace Backend.Infra.Data.Mapping
 
             builder.Property(x => x.ReceiptDescription).HasColumnName("receipt_description").HasColumnType("varchar(500)").IsRequired(); ;
 
-            builder.Property(x => x.Price).HasColumnName("price").HasColumnType("decimal").IsRequired();
+            builder.Property(x => x.Price).HasColumnName("price").HasColumnType("decimal(18,2)").IsRequired();
         }
 
         public void ConfigureRelationships(EntityTypeBuilder<Product> builder)
