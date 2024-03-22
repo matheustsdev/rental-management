@@ -1,8 +1,10 @@
 using Backend.Application.Extensions;
+using Backend.Data.Repository;
 using Backend.Domain.Entities;
 using Backend.Domain.Interfaces;
 using Backend.Infra.Data.Context;
 using Backend.Service.Services;
+using Backend.Service.Validators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -24,7 +26,8 @@ namespace Application
             );
 
             builder.Services.AddScoped<DbContext, DataContext>();
-            builder.Services.AddScoped<IBaseService<Category>, CategoryService>();
+            builder.Services.AddScoped<IBaseService<Category, CategoryValidator, CategoryValidator>, CategoryService>();
+            builder.Services.AddScoped<IBaseRepository<Category>, CategoryRepository>();
             // builder.Services.AddScoped<IBaseService<Product>, ProductService>();
 
             builder.Services.AddControllers();

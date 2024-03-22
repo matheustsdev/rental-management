@@ -10,9 +10,9 @@ namespace Backend.Application.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        private IBaseService<Product> _baseService;
+        private IBaseService<Product, ProductCreateValidator, ProductUpdateValidator> _baseService;
 
-        public ProductController(IBaseService<Product> baseService)
+        public ProductController(IBaseService<Product, ProductCreateValidator, ProductUpdateValidator> baseService)
         {
             _baseService = baseService;
         }

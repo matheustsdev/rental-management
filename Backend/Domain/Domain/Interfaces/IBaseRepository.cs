@@ -9,7 +9,7 @@ namespace Backend.Domain.Interfaces
 {
     public interface IBaseRepository<TEntity> where TEntity: BaseEntity
     {
-        void Insert (TEntity entity);
+        Task Insert (TEntity entity);
 
         void Update (TEntity entity);
 

@@ -10,9 +10,9 @@ namespace Backend.Application.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private IBaseService<Category> _baseService;
+        private IBaseService<Category, CategoryValidator, CategoryValidator> _baseService;
 
-        public CategoryController(IBaseService<Category> baseService)
+        public CategoryController(IBaseService<Category, CategoryValidator, CategoryValidator> baseService)
         {
             _baseService = baseService;
         }

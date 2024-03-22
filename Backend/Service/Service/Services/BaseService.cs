@@ -5,7 +5,10 @@ using Backend.Domain.Interfaces;
 
 namespace Backend.Service.Services
 {
-    public class BaseService<TEntity> : IBaseService<TEntity> where TEntity : BaseEntity
+    public class BaseService<TEntity, TCreateValidator, TUpdateValidator> : IBaseService<TEntity, TCreateValidator, TUpdateValidator> 
+        where TEntity : BaseEntity
+        where TCreateValidator : AbstractValidator<TEntity>
+        where TUpdateValidator : AbstractValidator<TEntity>
     {
         private readonly IBaseRepository<TEntity> _baseRepository;
 
@@ -14,7 +17,7 @@ namespace Backend.Service.Services
             _baseRepository = baseRepository;
         }
 
-        public TEntity Add<TValidator>(TEntity entity) where TValidator : AbstractValidator<TEntity>
+        public TEntity Add<TValidator>(TEntity entity) where TValidator : TCreateValidator
         {
             Validate(entity, Activator.CreateInstance<TValidator>());
 
@@ -29,7 +32,7 @@ namespace Backend.Service.Services
 
         public TEntity GetById(Guid id) => _baseRepository.Select(id);
 
-        public TEntity Update<TValidator>(TEntity entity) where TValidator : AbstractValidator<TEntity>
+        public TEntity Update<TValidator>(TEntity entity) where TValidator : TUpdateValidator
         {
             Validate(entity, Activator.CreateInstance<TValidator>());
 

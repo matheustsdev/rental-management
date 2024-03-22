@@ -8,9 +8,12 @@ using System.Threading.Tasks;
 
 namespace Backend.Domain.Interfaces
 {
-    public interface IBaseService<TEntity> where TEntity : BaseEntity
+    public interface IBaseService<TEntity, TCreateValidator, TUpdateValidator> 
+        where TEntity : BaseEntity
+        where TCreateValidator: AbstractValidator<TEntity>
+        where TUpdateValidator: AbstractValidator<TEntity>
     {
-        TEntity Add<TValidator>(TEntity entity) where TValidator: AbstractValidator<TEntity>;
+        TEntity Add<TValidator>(TEntity entity) where TValidator: TCreateValidator;
 
         void Delete(Guid Id);
 
@@ -18,6 +21,6 @@ namespace Backend.Domain.Interfaces
 
         TEntity GetById(Guid Id);
 
-        TEntity Update<TValidator>(TEntity entity) where TValidator: AbstractValidator<TEntity>;
+        TEntity Update<TValidator>(TEntity entity) where TValidator: TUpdateValidator;
     }
 }

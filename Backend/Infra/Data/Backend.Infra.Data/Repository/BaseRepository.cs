@@ -13,10 +13,12 @@ namespace Backend.Infra.Data.Repository
             _dataContext = dataContext;
         }
 
-        public void Insert(TEntity entity)
+        public Task Insert(TEntity entity)
         {
-            _dataContext.Set<TEntity>().Add(entity);
+            Task addedEntity = _dataContext.Set<TEntity>().AddRangeAsync(entity);
             _dataContext.SaveChanges();
+
+            return addedEntity;
         }
 
         public void Update(TEntity entity)
@@ -34,6 +36,7 @@ namespace Backend.Infra.Data.Repository
         public IList<TEntity> Select() => _dataContext.Set<TEntity>().ToList();
 
         public TEntity Select(Guid id) => _dataContext.Set<TEntity>().Find(id);
+
     }
 }
 
