@@ -1,15 +1,12 @@
 using Backend.Application.Extensions;
 using Backend.Data.Repository;
+using Backend.Domain.Constants;
 using Backend.Domain.Entities;
 using Backend.Domain.Interfaces;
 using Backend.Infra.Data.Context;
 using Backend.Service.Services;
 using Backend.Service.Validators;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Application
 {
@@ -31,6 +28,11 @@ namespace Application
             // builder.Services.AddScoped<IBaseService<Product>, ProductService>();
 
             builder.Services.AddControllers();
+            builder.Services.AddControllersWithViews().AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new EnumStringConverter<EStatusResponse>());
+            });
+
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
