@@ -25,7 +25,8 @@ namespace Application
             builder.Services.AddScoped<DbContext, DataContext>();
             builder.Services.AddScoped<IBaseService<Category, CategoryValidator, CategoryValidator>, CategoryService>();
             builder.Services.AddScoped<IBaseRepository<Category>, CategoryRepository>();
-            // builder.Services.AddScoped<IBaseService<Product>, ProductService>();
+            builder.Services.AddScoped<IBaseService<Product, ProductCreateValidator, ProductUpdateValidator>, ProductService>();
+            builder.Services.AddScoped<IBaseRepository<Product>, ProductRepository>();
 
             builder.Services.AddControllers();
             builder.Services.AddControllersWithViews().AddJsonOptions(options =>

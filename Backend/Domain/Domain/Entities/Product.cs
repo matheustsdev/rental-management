@@ -16,7 +16,7 @@ namespace Backend.Domain.Entities
         
         public Guid CategoryId { get; set; }
 
-        public virtual Category Category { get; set; }
+        public virtual Category? Category { get; set; }
 
         public decimal Price { get; set; }
 

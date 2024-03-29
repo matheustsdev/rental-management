@@ -19,7 +19,7 @@ namespace Backend.Service.Validators
 
             RuleFor(x => x.ReceiptDescription);
 
-            RuleFor(x => x.Category);
+            RuleFor(x => x.CategoryId);
 
             RuleFor(x => x.Price);
 

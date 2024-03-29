@@ -25,7 +25,7 @@ namespace Backend.Service.Validators
                 .NotEmpty().WithMessage("Adicione uma descrição para o recibo.")
                 .NotNull().WithMessage("Adicione uma descrição para o recibo.");
 
-            RuleFor(x => x.Category)
+            RuleFor(x => x.CategoryId)
                 .NotEmpty().WithMessage("Adicione uma categoria.")
                 .NotNull().WithMessage("Adicione uma categoria.");
 

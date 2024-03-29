@@ -29,8 +29,15 @@ namespace Backend.Infra.Data.Repository
 
         public void Delete(Guid id)
         {
-            _dataContext.Set<TEntity>().Remove(Select(id));
-            _dataContext.SaveChanges();
+            {
+                TEntity entity = Select(id);
+                if (entity != null)
+                {
+                    entity.Deleted = true;
+                    entity.DeleteAt = DateTime.Now;
+                    Update(entity);
+                }
+            }
         }
 
         public IList<TEntity> Select() => _dataContext.Set<TEntity>().ToList();
