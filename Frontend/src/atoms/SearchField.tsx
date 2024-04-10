@@ -10,9 +10,9 @@ export function SearchField({value, onChange, ...rest }: ISearchFieldProps) {
     return (
         <InputGroup {...rest}>
             <InputLeftElement>
-                <Search />
+                <Search color="#560216" />
             </InputLeftElement>
-            <Input colorScheme='pink' value={value} onChange={onChange} />
+            <Input focusBorderColor="primary.500" value={value} onChange={onChange} />
         </InputGroup>
     )
 }

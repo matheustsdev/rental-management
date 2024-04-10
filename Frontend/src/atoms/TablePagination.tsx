@@ -32,16 +32,16 @@ export function TablePagination({ currentPage, totalPages, totalItems, itemsPerP
                             Página {currentPage} de {totalPages}
                         </Text>
                         <Flex align="center" justify="flex-end" gap="0.5rem">
-                            <Button p="0" onClick={goToFirstPage} isDisabled={currentPage === 1}>
+                            <Button p="0" onClick={goToFirstPage} isDisabled={currentPage === 1} bg="secondary.500">
                                 <ChevronsLeft />
                             </Button>
-                            <Button p="0" onClick={goToPreviousPage} isDisabled={currentPage === 1}>
+                            <Button p="0" onClick={goToPreviousPage} isDisabled={currentPage === 1} bg="secondary.500">
                                 <ChevronLeft />
                             </Button>
-                            <Button p="0" onClick={goToNextPage} isDisabled={currentPage === totalPages}>
+                            <Button p="0" onClick={goToNextPage} isDisabled={currentPage === totalPages} bg="secondary.500">
                                 <ChevronRight />
                             </Button>
-                            <Button p="0" onClick={goToLastPage} isDisabled={currentPage === totalPages}>
+                            <Button p="0" onClick={goToLastPage} isDisabled={currentPage === totalPages} bg="secondary.500">
                                 <ChevronsRight />
                             </Button>
                         </Flex>

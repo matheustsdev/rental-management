@@ -10,7 +10,7 @@ export function TableHeader({ columns }: ITableHeaderProps) {
         <Thead>
             {
                 columns.map((column) => (
-                    <Th key={column.name} p="1rem 0" textAlign="center">
+                    <Th key={column.name} p="1rem 0" textAlign="center" bg="primary.500" color="white">
                         <span>{column.name}</span>
                     </Th>
                 ))
