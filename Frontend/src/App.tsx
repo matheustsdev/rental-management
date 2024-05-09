@@ -1,8 +1,9 @@
 import { TableColumnType } from "./types/TableColumnType";
 import { DataTable } from "./molecules/DataTable";
-import { Flex } from "@chakra-ui/react";
+import { Flex, useDisclosure } from "@chakra-ui/react";
 import { CirclePlusIcon } from "lucide-react";
-import { EHierarchyStyle } from "./constants/EHierarchyStyle";
+
+import { ProductModalForm } from "./organisms/ProductModalForm";
 
 type TestType = {
   id: string;
@@ -12,6 +13,7 @@ type TestType = {
 }
 
 function App() {
+  const disclosure = useDisclosure();
 
   const tableData: TestType[] = [
     {
@@ -152,9 +154,10 @@ function App() {
       titleButtons={[{
         title: "Adicionar",
         leftIcon: <CirclePlusIcon />,
-        onClick: () => console.log("Adicionar")
+        onClick: disclosure.onOpen
       }]}
       paginate />
+      <ProductModalForm disclosureHook={disclosure} />
     </Flex>
   )
 }

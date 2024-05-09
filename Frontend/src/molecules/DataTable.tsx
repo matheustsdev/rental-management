@@ -6,7 +6,7 @@ import { TableRow } from "../atoms/TableRow";
 import { TableHeader } from "../atoms/TableHeader";
 import { TablePagination } from "../atoms/TablePagination";
 import { SearchField } from "../atoms/SearchField";
-import { TableTitleButton } from "../atoms/TableTitleButton";
+import { Button } from "../atoms/Button";
 import { EHierarchyStyle } from "../constants/EHierarchyStyle";
 import { TableTitleButtonsType } from "../types/TableTitleButtonType";
 
@@ -53,7 +53,7 @@ export function DataTable({ title, items, titleButtons, columns, paginate }: IDa
                     <Flex gap="2">
                     {
                         titleButtons?.map((button, index) => (
-                            <TableTitleButton key={index} title={button.title} leftIcon={button.leftIcon} rightIcon={button.rightIcon} type={button.type} onClick={button.onClick} />
+                            <Button key={index} title={button.title} leftIcon={button.leftIcon} rightIcon={button.rightIcon} type={button.hierarchy} onClick={button.onClick} />
                         ))
                     }
                     </Flex>

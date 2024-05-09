@@ -5,6 +5,6 @@ export type TableTitleButtonsType = {
     title: string,
     leftIcon?: ReactElement,
     rightIcon?: ReactElement,
-    type?: EHierarchyStyle,
-    onClick: () => void
+    hierarchy?: EHierarchyStyle,
+    onClick?: () => void
 }
