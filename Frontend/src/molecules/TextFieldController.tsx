@@ -1,30 +1,38 @@
-import { FormControl, FormLabel, Input, FormErrorMessage, ComponentWithAs, InputProps } from "@chakra-ui/react";
-import { forwardRef } from "react";
-import { Control, FieldValues, Path, PathValue, UseFormSetValue, FieldPath } from "react-hook-form";
+import { FormControl, FormLabel, Input, FormErrorMessage, InputProps } from "@chakra-ui/react";
+import { Control, FieldValues, FieldPath, Controller } from "react-hook-form";
 
 interface ITextFieldControllerProps<
     TFieldValues extends FieldValues = FieldValues,
     TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>
 > extends InputProps {
     control: Control<TFieldValues, any>;
-    setValue: UseFormSetValue<TFieldValues>;
-    name:  TName;
+    name: TName;
     label: string;
     error?: string;
 }
 
-interface ComponentRef {
-    ref: any;
-}
-
-export const TextFieldController = forwardRef<ComponentRef, ITextFieldControllerProps<FieldValues>>(function TextFieldController<T extends FieldValues>({ control, setValue, name, label, error,...rest }: ITextFieldControllerProps<T>, ref: any) {
+export function TextFieldController<TFieldValues extends FieldValues>({
+    control,
+    name,
+    label,
+    error,
+    ...rest
+}: ITextFieldControllerProps<TFieldValues>) {
     return (
-        <FormControl isInvalid={!!error} ref={ref}>
+        <FormControl isInvalid={!!error}>
             <FormLabel htmlFor={name}>{label}</FormLabel>
-            <Input id={name} onChange={(e) => setValue(name, e.target.value as PathValue<T, Path<T>>)} {...control} {...rest} ref={ref}/>
-            <FormErrorMessage>
-                { error }
-            </FormErrorMessage>
+            <Controller
+                name={name}
+                control={control}
+                render={({ field }) => (
+                    <Input
+                        {...field}
+                        id={name}
+                        {...rest}
+                    />
+                )}
+            />
+            <FormErrorMessage>{error}</FormErrorMessage>
         </FormControl>
-    )    
-})
+    );
+}

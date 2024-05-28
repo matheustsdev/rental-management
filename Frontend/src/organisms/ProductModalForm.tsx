@@ -1,6 +1,5 @@
-import { Flex, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, UseDisclosureReturn, Form, FormControl, FormLabel, Input, FormErrorMessage } from "@chakra-ui/react";
-import { EHierarchyStyle } from "../constants/EHierarchyStyle";
-import { Button } from "../atoms/Button";
+import { useState, useCallback } from "react";
+import { Flex, UseDisclosureReturn } from "@chakra-ui/react";
 import * as Yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -13,7 +12,7 @@ const schema = Yup.object().shape({
     price: Yup.number().required("Campo obrigatório"),
     description: Yup.string().required("Campo obrigatório"),
     receiptDescription: Yup.string().required("Campo obrigatório"),
-    categoryId: Yup.string().required("Campo obrigatório")
+    category: Yup.mixed().required("Campo obrigatório")
 });
 
 type FormSchemaType = {
@@ -21,7 +20,7 @@ type FormSchemaType = {
     price: number;
     description: string;
     receiptDescription: string;
-    categoryId: string;
+    category: any;
 }
 
 interface IProductModalForm {
@@ -30,12 +29,39 @@ interface IProductModalForm {
 
 export function ProductModalForm({ disclosureHook }: IProductModalForm) {
     const { onClose, isOpen } = disclosureHook;
-    const { control, setValue, formState: { errors }, handleSubmit } = useForm<FormSchemaType>({
+    const { control, formState: { errors }, handleSubmit, reset, setValue } = useForm<FormSchemaType>({
         resolver: yupResolver(schema),
-        reValidateMode: "onBlur"
-    })
+        reValidateMode: "onBlur",
+        defaultValues: {
+            reference: "",
+            price: 0,
+            description: "",
+            receiptDescription: "",
+            category: null
+        }
+    });
+    
+    const [stillAdding, setStillAdding] = useState(false);
 
-    const onSubmit = handleSubmit((data) => console.log(data));
+    const submitForm = useCallback((data: FormSchemaType) => {
+        console.log(data);
+        
+        if (stillAdding) {
+            reset({
+                reference: "",
+                price: 0,
+                description: "",
+                receiptDescription: "",
+                category: null
+            });
+
+            return;
+        }
+
+        onClose();
+    }, [onClose, reset, stillAdding]);
+
+    const onSubmit = handleSubmit(submitForm);
 
     return (
         <FormModal
@@ -43,42 +69,40 @@ export function ProductModalForm({ disclosureHook }: IProductModalForm) {
             isOpen={isOpen}
             onClose={onClose}
             onSubmit={onSubmit}
+            onChangeStillAdding={(value) => setStillAdding(value)}
+            stillAddingValue={stillAdding}
         >
             <Flex direction="column" gap="4">
                 <TextFieldController<FormSchemaType> 
                     control={control}
-                    setValue={setValue}
                     name="reference"
                     label="Referência"
                     error={errors.reference?.message}
                 />
                 <TextFieldController<FormSchemaType> 
                     control={control}
-                    setValue={setValue}
                     name="price"
                     label="Preço"
                     error={errors.price?.message}
                 />
                 <TextFieldController<FormSchemaType> 
                     control={control}
-                    setValue={setValue}
                     name="description"
                     label="Descrição"
                     error={errors.description?.message}
                 />
                 <TextFieldController<FormSchemaType> 
                     control={control}
-                    setValue={setValue}
                     name="receiptDescription"
                     label="Descrição para recibo"
                     error={errors.receiptDescription?.message}
                 />
                 <AutocompleteField<FormSchemaType>
                     control={control}
-                    setValue={setValue}
-                    name="categoryId"
+                    name="category"
                     label="Categoria"
-                    error={errors.categoryId?.message}
+                    setValue={setValue}
+                    error={errors.category?.message}
                     options={[
                         {id: "1", name: "Categoria 1"},
                         {id: "2", name: "Categoria 2"},

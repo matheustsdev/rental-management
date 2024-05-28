@@ -157,7 +157,9 @@ function App() {
         onClick: disclosure.onOpen
       }]}
       paginate />
-      <ProductModalForm disclosureHook={disclosure} />
+      {
+        disclosure.isOpen && <ProductModalForm disclosureHook={disclosure} />
+      }
     </Flex>
   )
 }
