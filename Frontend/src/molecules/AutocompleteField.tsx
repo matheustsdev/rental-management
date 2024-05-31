@@ -54,6 +54,7 @@ export function AutocompleteField<TFieldValues extends FieldValues>({
                             borderWidth="1px"
                             _hover={{ bg: "unset" }}
                             {...field}
+                            value={optionsLabel(field.value)}
                             {...rest}
                         />
                         <AutoCompleteList>
@@ -61,7 +62,7 @@ export function AutocompleteField<TFieldValues extends FieldValues>({
                                 <AutoCompleteItem
                                     key={`option-${option.id}`}
                                     value={option}
-                                    label={optionsLabel(option)}
+                                    label={option.name}
                                     textTransform="capitalize"
                                 />
                             ))}
