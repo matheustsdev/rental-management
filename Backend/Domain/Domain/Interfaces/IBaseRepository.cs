@@ -15,6 +15,8 @@ namespace Backend.Domain.Interfaces
 
         void Delete (Guid Id);
 
+        IList<TEntity> Select(string[] includes);
+
         IList<TEntity> Select();
 
         TEntity Select(Guid Id);

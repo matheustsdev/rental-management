@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Flex, UseDisclosureReturn } from "@chakra-ui/react";
 import * as Yup from "yup";
 import { useForm } from "react-hook-form";
@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { TextFieldController } from "../molecules/TextFieldController";
 import { FormModal } from "../molecules/Modal";
 import { AutocompleteField } from "../molecules/AutocompleteField";
+import { api } from "../hooks/api";
 
 const schema = Yup.object().shape({
     reference: Yup.string().required("Campo obrigatório"),
@@ -42,6 +43,20 @@ export function ProductModalForm({ disclosureHook }: IProductModalForm) {
     });
     
     const [stillAdding, setStillAdding] = useState(false);
+    const [categories, setCategories] = useState<any[]>([]);
+
+    const getAllCategories = useCallback(async () => {
+        try {
+            const response = await api.get("/Category");
+
+            console.log(response.data);
+            
+            setCategories(response.data.result);
+
+        } catch (error) {
+            console.log(error);
+        }
+    }, []);
 
     const submitForm = useCallback((data: FormSchemaType) => {
         console.log(data);
@@ -62,6 +77,10 @@ export function ProductModalForm({ disclosureHook }: IProductModalForm) {
     }, [onClose, reset, stillAdding]);
 
     const onSubmit = handleSubmit(submitForm);
+
+    useEffect(() => {
+        getAllCategories();
+    }, []);
 
     return (
         <FormModal
@@ -103,13 +122,8 @@ export function ProductModalForm({ disclosureHook }: IProductModalForm) {
                     label="Categoria"
                     setValue={setValue}
                     error={errors.category?.message}
-                    options={[
-                        {id: "1", name: "Categoria 1"},
-                        {id: "2", name: "Categoria 2"},
-                        {id: "3", name: "Categoria 3"},
-                        {id: "4", name: "Categoria 4"}
-                    ]}
-                    optionsLabel={(option) => option.name}
+                    options={categories}
+                    optionsLabel={(option) => option?.name ?? ""}
                 />                       
             </Flex>
         </FormModal>

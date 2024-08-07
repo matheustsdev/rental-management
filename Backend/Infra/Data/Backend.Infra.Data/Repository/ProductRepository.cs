@@ -1,6 +1,7 @@
 ﻿using Backend.Domain.Entities;
 using Backend.Infra.Data.Context;
 using Backend.Infra.Data.Repository;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Data.Repository
 {

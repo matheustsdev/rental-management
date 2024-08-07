@@ -1,9 +1,12 @@
+import { useEffect, useState, useCallback } from "react";
+
 import { TableColumnType } from "./types/TableColumnType";
 import { DataTable } from "./molecules/DataTable";
 import { Flex, useDisclosure } from "@chakra-ui/react";
 import { CirclePlusIcon } from "lucide-react";
 
 import { ProductModalForm } from "./organisms/ProductModalForm";
+import { api } from "./hooks/api";
 
 type TestType = {
   id: string;
@@ -14,6 +17,8 @@ type TestType = {
 
 function App() {
   const disclosure = useDisclosure();
+
+  const [products, setProducts] = useState<any[]>([]);
 
   const tableData: TestType[] = [
     {
@@ -114,42 +119,45 @@ function App() {
     }
   ];
 
-  const columns: TableColumnType<TestType>[] = [
+  const columns: TableColumnType<any>[] = [
     {
-      name: "ID",
-      propertyName: "id"
+      name: "Referência",
+      propertyName: "reference"
+    },
+    { 
+      name: "Descrição",
+      propertyName: "description"
     },
     {
-      name: "Nome",
-      propertyName: "name"
-    },
-    {
-      name: "Idade",
-      propertyName: "age"
-    },
-    {
-      name: "E-mail",
-      propertyName: "email"
-    },
-    {
-      name: "E-mail",
-      propertyName: "email"
-    },
-    {
-      name: "E-mail",
-      propertyName: "email"
-    },
-    {
-      name: "E-mail",
-      propertyName: "email"
+      name: "Preço",
+      propertyName: "price"
     }
   ];
+
+  const getAllProducts = useCallback(async () => {
+    try {
+      const request = await api.get("/Product");
+
+      const response = request.data;
+
+      console.log(response);
+
+      setProducts(response.result);
+
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    getAllProducts();
+  }, []);
 
   return (
     <Flex padding="1rem 4rem" direction="column">
       <DataTable 
       title="Produtos" 
-      items={tableData} 
+      items={products} 
       columns={columns}
       titleButtons={[{
         title: "Adicionar",

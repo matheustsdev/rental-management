@@ -1,6 +1,9 @@
-﻿using Backend.Domain.Entities;
+﻿using Backend.Data.Extensions;
+using Backend.Domain.Entities;
 using Backend.Domain.Interfaces;
 using Backend.Infra.Data.Context;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Backend.Infra.Data.Repository
 {
@@ -38,12 +41,27 @@ namespace Backend.Infra.Data.Repository
                     Update(entity);
                 }
             }
+        } 
+
+        public virtual IList<TEntity> Select()
+        {
+            string[] includes = Array.Empty<string>();
+
+            return Select(includes); ;
+        }
+        public virtual IList<TEntity> Select(string[] includes)
+        {
+            if (includes.Length == 0)
+            {
+                return _dataContext.Set<TEntity>().ToList();
+            }
+
+            includes = includes.ToList().ConvertAll(x => x.Substring(0, 1).ToUpper() + x.Substring(1).ToLower()).ToArray();
+
+            return _dataContext.Set<TEntity>().IncludeMultiple(includes).ToList(); 
         }
 
-        public IList<TEntity> Select() => _dataContext.Set<TEntity>().ToList();
-
         public TEntity Select(Guid id) => _dataContext.Set<TEntity>().Find(id);
-
     }
 }
 

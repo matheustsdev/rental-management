@@ -17,7 +17,7 @@ namespace Backend.Domain.Interfaces
 
         void Delete(Guid Id);
 
-        IList<TEntity> Get();
+        IList<TEntity> Get(string[]? includes);
 
         TEntity GetById(Guid Id);
 

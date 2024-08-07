@@ -7,6 +7,9 @@ using Backend.Infra.Data.Context;
 using Backend.Service.Services;
 using Backend.Service.Validators;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Backend.Application.Mappings;
 
 namespace Application
 {
@@ -14,6 +17,7 @@ namespace Application
     {
         public static void Main(string[] args)
         {
+            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
             var builder = WebApplication.CreateBuilder(args);
             var configuration = builder.Configuration;
 
@@ -28,12 +32,27 @@ namespace Application
             builder.Services.AddScoped<IBaseService<Product, ProductCreateValidator, ProductUpdateValidator>, ProductService>();
             builder.Services.AddScoped<IBaseRepository<Product>, ProductRepository>();
 
-            builder.Services.AddControllers();
-            builder.Services.AddControllersWithViews().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.Converters.Add(new EnumStringConverter<EStatusResponse>());
-            });
+            builder.Services.AddControllers()
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                });
 
+            // Configuração do AutoMapper
+            builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
+            // Configure CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(MyAllowSpecificOrigins,
+                    policy =>
+                    {
+                        policy.AllowAnyOrigin()
+                              .AllowAnyMethod()
+                              .AllowAnyHeader();
+                    });
+            });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -50,11 +69,15 @@ namespace Application
 
             app.UseHttpsRedirection();
 
+            // Apply CORS middleware before other middleware
+            app.UseCors(MyAllowSpecificOrigins);
+
             app.UseAuthorization();
 
             app.MapControllers();
 
             app.UseDatabaseAutoMigration();
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.Run();
         }

@@ -1,9 +1,12 @@
-﻿using Backend.Domain.Constants;
+﻿using AutoMapper;
+using Backend.Domain.Constants;
 using Backend.Domain.Entities;
 using Backend.Domain.Helpers;
 using Backend.Domain.Interfaces;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace Backend.Application.Controllers
 {
@@ -14,17 +17,25 @@ namespace Backend.Application.Controllers
         where TCreateValidator : AbstractValidator<TEntity>
         where TUpdateValidator : AbstractValidator<TEntity>
     {
-        private IBaseService<TEntity, TCreateValidator, TUpdateValidator> _baseService;
+        protected readonly IBaseService<TEntity, TCreateValidator, TUpdateValidator> _baseService;
+        protected readonly IMapper _mapper;
 
-        public BaseController(IBaseService<TEntity, TCreateValidator, TUpdateValidator> baseService)
+        public BaseController(IBaseService<TEntity, TCreateValidator, TUpdateValidator> baseService, IMapper mapper)
         {
             _baseService = baseService;
+            _mapper = mapper;
         }
 
         private ResponseModel<TResponseModel> CreateResponseModel<TResponseModel>(string message, TResponseModel result, EStatusResponse status)
         {
+            JsonSerializerSettings settings = new JsonSerializerSettings()
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+            };
 
-            return new ResponseModel<TResponseModel> (message, result, status);
+            var test = JsonConvert.DeserializeObject<TResponseModel>(JsonConvert.SerializeObject(result, settings));
+
+            return new ResponseModel<TResponseModel>(message, result, status);
         }
 
         [HttpPost]
@@ -46,7 +57,6 @@ namespace Backend.Application.Controllers
 
             return Execute(() => {
                 ResponseModel<TEntity> response = CreateResponseModel<TEntity>("Atualização realizada com sucesso!", _baseService.Update<TUpdateValidator>(entity), EStatusResponse.SUCCESS);
-
                 return response;
             });
         }
@@ -60,7 +70,6 @@ namespace Backend.Application.Controllers
             Execute(() =>
             {
                 _baseService.Delete(id);
-
                 return CreateResponseModel<Boolean>("Dado deletado.", true, EStatusResponse.SUCCESS);
             });
 
@@ -68,15 +77,19 @@ namespace Backend.Application.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get()
+        public virtual IActionResult Get([FromQuery] string? includes)
         {
-            return Execute(() => new ResponseModel<IList<TEntity>>("Dados retornados com sucesso.", _baseService.Get(), EStatusResponse.SUCCESS));
+            var includesList = includes?.Split(",");
+            var result = _baseService.Get(includesList);
+
+            return Execute(() => CreateResponseModel("Dados retornados com sucesso.", result, EStatusResponse.SUCCESS));
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(Guid id)
+        public virtual IActionResult Get(Guid id)
         {
-            return Execute(() => CreateResponseModel("Dado retornado com sucesso.", _baseService.GetById(id), EStatusResponse.SUCCESS));
+            var entity = _baseService.GetById(id);
+            return Execute(() => CreateResponseModel("Dado retornado com sucesso.", entity, EStatusResponse.SUCCESS));
         }
 
         private IActionResult Execute<T>(Func<ResponseModel<T>> func)
@@ -84,7 +97,6 @@ namespace Backend.Application.Controllers
             try
             {
                 var result = func();
-
                 if (result.Status == EStatusResponse.SUCCESS)
                 {
                     return Ok(result);
@@ -101,4 +113,3 @@ namespace Backend.Application.Controllers
         }
     }
 }
-
