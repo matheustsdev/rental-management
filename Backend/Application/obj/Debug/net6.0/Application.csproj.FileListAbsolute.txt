@@ -6,3 +6,4 @@ C:\Users\mathe\dev\rental-management\Backend\Application\obj\Debug\net6.0\Applic
 C:\Users\mathe\dev\rental-management\Backend\Application\obj\Debug\net6.0\Application.RazorAssemblyInfo.cache
 C:\Users\mathe\dev\rental-management\Backend\Application\obj\Debug\net6.0\Application.RazorAssemblyInfo.cs
 C:\Users\mathe\dev\rental-management\Backend\Application\obj\Debug\net6.0\Application.sourcelink.json
+C:\Users\mathe\dev\rental-management\Backend\Application\obj\Debug\net6.0\Application.csproj.AssemblyReference.cache
