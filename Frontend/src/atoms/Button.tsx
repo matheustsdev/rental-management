@@ -1,6 +1,6 @@
-import { EHierarchyStyle } from "../constants/EHierarchyStyle";
+import { EHierarchyStyle } from "../constants/enums/EHierarchyStyle";
 import { Button as ChakraButton, ButtonProps } from "@chakra-ui/react";
-import { TableTitleButtonsType } from "../types/TableTitleButtonType";
+import { TableTitleButtonsType } from "../types/tableTitleButtonType";
 
 interface IButtonProps extends Omit<ButtonProps, "onClick" | "title">, TableTitleButtonsType {} 
 

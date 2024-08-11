@@ -1,5 +1,5 @@
 import { Flex, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Checkbox, Text } from "@chakra-ui/react";
-import { EHierarchyStyle } from "../constants/EHierarchyStyle";
+import { EHierarchyStyle } from "../constants/enums/EHierarchyStyle";
 import { Button } from "../atoms/Button";
 import * as Yup from "yup";
 

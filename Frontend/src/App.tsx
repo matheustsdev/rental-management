@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 
-import { TableColumnType } from "./types/TableColumnType";
+import { TableColumnType } from "./types/tableColumnType";
 import { DataTable } from "./molecules/DataTable";
 import { Flex, useDisclosure } from "@chakra-ui/react";
 import { CirclePlusIcon } from "lucide-react";

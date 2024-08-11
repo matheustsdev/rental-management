@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { EHierarchyStyle } from "../constants/EHierarchyStyle";
+import { EHierarchyStyle } from "../constants/enums/EHierarchyStyle";
 
 export type TableTitleButtonsType = {
     title: string,

@@ -1,4 +1,4 @@
-import { TableColumnType } from "../types/TableColumnType"
+import { TableColumnType } from "../types/tableColumnType"
 import { Tr, Td, TableCellProps } from "@chakra-ui/react";
 
 interface ITableRowProps extends TableCellProps {

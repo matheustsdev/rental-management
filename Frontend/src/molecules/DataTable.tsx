@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 
-import { TableColumnType } from "../types/TableColumnType";
+import { TableColumnType } from "../types/tableColumnType";
 import { Table, Tbody, TableContainer, Flex, Text } from "@chakra-ui/react";
 import { TableRow } from "../atoms/TableRow";
 import { TableHeader } from "../atoms/TableHeader";
 import { TablePagination } from "../atoms/TablePagination";
 import { SearchField } from "../atoms/SearchField";
 import { Button } from "../atoms/Button";
-import { EHierarchyStyle } from "../constants/EHierarchyStyle";
-import { TableTitleButtonsType } from "../types/TableTitleButtonType";
+import { EHierarchyStyle } from "../constants/enums/EHierarchyStyle";
+import { TableTitleButtonsType } from "../types/tableTitleButtonType";
 
 interface IDataTableProps {
     title: string;

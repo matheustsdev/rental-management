@@ -1,5 +1,5 @@
 import { Th, Thead } from "@chakra-ui/react";
-import { TableColumnType } from "../types/TableColumnType";
+import { TableColumnType } from "../types/tableColumnType";
 
 interface ITableHeaderProps {
     columns: TableColumnType[];

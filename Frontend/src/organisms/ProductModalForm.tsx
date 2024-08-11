@@ -7,6 +7,8 @@ import { TextFieldController } from "../molecules/TextFieldController";
 import { FormModal } from "../molecules/Modal";
 import { AutocompleteField } from "../molecules/AutocompleteField";
 import { api } from "../hooks/api";
+import { EFormMode } from "../constants/enums/EFormMode";
+import { CreateProductDTO } from "../constants/DTOs";
 
 const schema = Yup.object().shape({
     reference: Yup.string().required("Campo obrigatório"),
@@ -26,9 +28,10 @@ type FormSchemaType = {
 
 interface IProductModalForm {
     disclosureHook: UseDisclosureReturn;
+    formMode: EFormMode
 }
 
-export function ProductModalForm({ disclosureHook }: IProductModalForm) {
+export function ProductModalForm({ disclosureHook, formMode }: IProductModalForm) {
     const { onClose, isOpen } = disclosureHook;
     const { control, formState: { errors }, handleSubmit, reset, setValue } = useForm<FormSchemaType>({
         resolver: yupResolver(schema),
@@ -58,8 +61,17 @@ export function ProductModalForm({ disclosureHook }: IProductModalForm) {
         }
     }, []);
 
-    const submitForm = useCallback((data: FormSchemaType) => {
+    const submitForm = useCallback(async (data: FormSchemaType) => {
         console.log(data);
+
+        if (formMode === EFormMode.CREATE) {
+        
+            const createRequest = await api.post<any, any, CreateProductDTO>("/product", {
+                data: {
+                    
+                }
+            });
+        }
         
         if (stillAdding) {
             reset({
