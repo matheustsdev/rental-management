@@ -6,9 +6,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { TextFieldController } from "../molecules/TextFieldController";
 import { FormModal } from "../molecules/Modal";
 import { AutocompleteField } from "../molecules/AutocompleteField";
-import { api } from "../hooks/api";
 import { EFormMode } from "../constants/enums/EFormMode";
-import { CreateProductDTO } from "../constants/DTOs";
+import { categoryApi } from "../services/api";
+import { productApi } from "../services/api/productApi";
+import { CategoryType } from "../types/entities/category";
+import { ProductType } from "../types/entities/product";
 
 const schema = Yup.object().shape({
     reference: Yup.string().required("Campo obrigatório"),
@@ -28,10 +30,11 @@ type FormSchemaType = {
 
 interface IProductModalForm {
     disclosureHook: UseDisclosureReturn;
-    formMode: EFormMode
+    formMode: EFormMode;
+    onSave?: (product: ProductType) => void;
 }
 
-export function ProductModalForm({ disclosureHook, formMode }: IProductModalForm) {
+export function ProductModalForm({ disclosureHook, formMode, onSave }: IProductModalForm) {
     const { onClose, isOpen } = disclosureHook;
     const { control, formState: { errors }, handleSubmit, reset, setValue } = useForm<FormSchemaType>({
         resolver: yupResolver(schema),
@@ -46,13 +49,11 @@ export function ProductModalForm({ disclosureHook, formMode }: IProductModalForm
     });
     
     const [stillAdding, setStillAdding] = useState(false);
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<CategoryType[]>([]);
 
     const getAllCategories = useCallback(async () => {
         try {
-            const response = await api.get("/Category");
-
-            console.log(response.data);
+            const response = await categoryApi.get();
             
             setCategories(response.data.result);
 
@@ -62,15 +63,17 @@ export function ProductModalForm({ disclosureHook, formMode }: IProductModalForm
     }, []);
 
     const submitForm = useCallback(async (data: FormSchemaType) => {
-        console.log(data);
-
         if (formMode === EFormMode.CREATE) {
         
-            const createRequest = await api.post<any, any, CreateProductDTO>("/product", {
-                data: {
-                    
-                }
+            const createRequest = await productApi.post({
+                categoryId: data.category.id,
+                description: data.description,
+                price: data.price,
+                receiptDescription: data.receiptDescription,
+                reference: data.reference
             });
+
+            onSave && onSave(createRequest.data.result);
         }
         
         if (stillAdding) {
@@ -85,8 +88,9 @@ export function ProductModalForm({ disclosureHook, formMode }: IProductModalForm
             return;
         }
 
+        
         onClose();
-    }, [onClose, reset, stillAdding]);
+    }, [formMode, onClose, onSave, reset, stillAdding]);
 
     const onSubmit = handleSubmit(submitForm);
 

@@ -6,118 +6,14 @@ import { Flex, useDisclosure } from "@chakra-ui/react";
 import { CirclePlusIcon } from "lucide-react";
 
 import { ProductModalForm } from "./organisms/ProductModalForm";
-import { api } from "./hooks/api";
-
-type TestType = {
-  id: string;
-  name: string;
-  age: number;
-  email: string;
-}
+import { productApi } from "./services/api/productApi";
+import { ProductType } from "./types/entities/product";
+import { EFormMode } from "./constants/enums/EFormMode";
 
 function App() {
   const disclosure = useDisclosure();
 
-  const [products, setProducts] = useState<any[]>([]);
-
-  const tableData: TestType[] = [
-    {
-      id: "1",
-      name: "Matheus",
-      age: 25,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "2",
-      name: "João",
-      age: 30,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "3",
-      name: "Maria",
-      age: 20,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "4",
-      name: "José",
-      age: 40,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "5",
-      name: "Ana",
-      age: 35,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "6",
-      name: "Matheus",
-      age: 25,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "7",
-      name: "João",
-      age: 30,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "8",
-      name: "Maria",
-      age: 20,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "9",
-      name: "José",
-      age: 40,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "10",
-      name: "Ana",
-      age: 35,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "11",
-      name: "Ana",
-      age: 35,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "12",
-      name: "Matheus",
-      age: 25,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "13",
-      name: "João",
-      age: 30,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "14",
-      name: "Maria",
-      age: 20,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "15",
-      name: "José",
-      age: 40,
-      email: "matheusts1902@gmail.com"
-    },
-    {
-      id: "16",
-      name: "Ana",
-      age: 35,
-      email: "matheusts1902@gmail.com"
-    }
-  ];
+  const [products, setProducts] = useState<ProductType[]>([]);
 
   const columns: TableColumnType<any>[] = [
     {
@@ -136,11 +32,13 @@ function App() {
 
   const getAllProducts = useCallback(async () => {
     try {
-      const request = await api.get("/Product");
+      const request = await productApi.get({
+        params: {
+          includes: "category"
+        }
+      });
 
       const response = request.data;
-
-      console.log(response);
 
       setProducts(response.result);
 
@@ -166,7 +64,7 @@ function App() {
       }]}
       paginate />
       {
-        disclosure.isOpen && <ProductModalForm disclosureHook={disclosure} />
+        disclosure.isOpen && <ProductModalForm disclosureHook={disclosure} formMode={EFormMode.CREATE} onSave={(product) => setProducts([product, ...products])} />
       }
     </Flex>
   )
