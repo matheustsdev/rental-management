@@ -18,8 +18,8 @@ export class BaseApi<TEntity, TCreateDTO, TUpdateDTO> {
         return this.api.post<TEntity, AxiosResponse<ResponseModel<TEntity>>, TCreateDTO>(this.entityName, data, config);
     }
 
-    patch(data: TUpdateDTO, config?: AxiosRequestConfig) {
-        return this.api.patch<TEntity, AxiosResponse<ResponseModel<TEntity>>, TUpdateDTO>(this.entityName, data, config);
+    put(data: TUpdateDTO, config?: AxiosRequestConfig) {
+        return this.api.put<TEntity, AxiosResponse<ResponseModel<TEntity>>, TUpdateDTO>(this.entityName, data, config);
     }
     
     delete(config?: AxiosRequestConfig) {

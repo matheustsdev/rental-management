@@ -32,9 +32,10 @@ interface IProductModalForm {
     disclosureHook: UseDisclosureReturn;
     formMode: EFormMode;
     onSave?: (product: ProductType) => void;
+    product?: ProductType | null;
 }
 
-export function ProductModalForm({ disclosureHook, formMode, onSave }: IProductModalForm) {
+export function ProductModalForm({ disclosureHook, formMode, onSave, product }: IProductModalForm) {
     const { onClose, isOpen } = disclosureHook;
     const { control, formState: { errors }, handleSubmit, reset, setValue } = useForm<FormSchemaType>({
         resolver: yupResolver(schema),
@@ -75,7 +76,20 @@ export function ProductModalForm({ disclosureHook, formMode, onSave }: IProductM
 
             onSave && onSave(createRequest.data.result);
         }
-        
+
+        if (formMode === EFormMode.UPDATE && product) {
+            const updatedProduct = await productApi.put({
+                id: product.id,
+                categoryId: data.category.id,
+                description: data.description,
+                price: data.price,
+                receiptDescription: data.receiptDescription,
+                reference: data.reference
+            });
+
+            onSave && onSave(updatedProduct.data.result);
+        }
+
         if (stillAdding) {
             reset({
                 reference: "",
@@ -98,14 +112,25 @@ export function ProductModalForm({ disclosureHook, formMode, onSave }: IProductM
         getAllCategories();
     }, []);
 
+    useEffect(() => {
+        if (product) {
+            setValue("reference", product.reference);
+            setValue("price", product.price);
+            setValue("description", product.description);
+            setValue("receiptDescription", product.receiptDescription);
+            setValue("category", product.category);
+        }
+    }, [product]);
+
     return (
         <FormModal
             title="Adicionar produto"
             isOpen={isOpen}
             onClose={onClose}
             onSubmit={onSubmit}
-            onChangeStillAdding={(value) => setStillAdding(value)}
+            onChangeStillAdding={formMode === EFormMode.CREATE ? (value) => setStillAdding(value) : undefined}
             stillAddingValue={stillAdding}
+            submitButtonTitle={formMode === EFormMode.CREATE ? "Adicionar" : "Atualizar"}
         >
             <Flex direction="column" gap="4">
                 <TextFieldController<FormSchemaType> 

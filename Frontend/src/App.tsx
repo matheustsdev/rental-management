@@ -14,6 +14,7 @@ function App() {
   const disclosure = useDisclosure();
 
   const [products, setProducts] = useState<ProductType[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
 
   const columns: TableColumnType<any>[] = [
     {
@@ -47,24 +48,51 @@ function App() {
     }
   }, []);
 
+  const onSaveProduct = useCallback((product: ProductType) => {
+    if (selectedProduct) {
+      const newProducts = products.map((p) => {
+        if (p.id === product.id) {
+          return product;
+        }
+
+        return p;
+      });
+
+      console.log("Products >> ", products);
+
+      setProducts(newProducts);
+    } else {
+      setProducts([product, ...products]);
+    }
+
+    setSelectedProduct(null);
+  }, [products, selectedProduct]);
+
   useEffect(() => {
     getAllProducts();
   }, []);
 
+  useEffect(() => {}, [selectedProduct]);
+
   return (
     <Flex padding="1rem 4rem" direction="column">
       <DataTable 
-      title="Produtos" 
-      items={products} 
-      columns={columns}
-      titleButtons={[{
-        title: "Adicionar",
-        leftIcon: <CirclePlusIcon />,
-        onClick: disclosure.onOpen
-      }]}
-      paginate />
+        title="Produtos" 
+        items={products} 
+        columns={columns}
+        titleButtons={[{
+          title: "Adicionar",
+          leftIcon: <CirclePlusIcon />,
+          onClick: disclosure.onOpen
+        }]}
+        paginate
+        onItemClick={(product) => {
+          setSelectedProduct(product);
+          disclosure.onOpen();
+         }}
+      />
       {
-        disclosure.isOpen && <ProductModalForm disclosureHook={disclosure} formMode={EFormMode.CREATE} onSave={(product) => setProducts([product, ...products])} />
+        disclosure.isOpen && <ProductModalForm disclosureHook={disclosure} formMode={selectedProduct ? EFormMode.UPDATE : EFormMode.CREATE} product={selectedProduct} onSave={onSaveProduct} />
       }
     </Flex>
   )

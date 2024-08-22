@@ -17,6 +17,7 @@ updater_topcon.log
 *.log
 *.log.*
 *.cache
+*.AssemblyInfo.cs
 
 appsettings.Development.json
 appsettings.Production.json

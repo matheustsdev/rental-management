@@ -20,9 +20,10 @@ interface IDataTableProps {
     titleButtons?: TableTitleButtonsType[];
     columns: TableColumnType[];
     paginate?: boolean;
+    onItemClick: (item: any) => void;
 }
 
-export function DataTable({ title, items, titleButtons, columns, paginate }: IDataTableProps) {
+export function DataTable({ title, items, titleButtons, columns, paginate, onItemClick }: IDataTableProps) {
     const [currentPage, setCurrentPage] = useState(1);  
     const [searchValue, setSearchValue] = useState("");
     const [filteredItems, setFilteredItems] = useState(items);
@@ -66,7 +67,7 @@ export function DataTable({ title, items, titleButtons, columns, paginate }: IDa
                     <Tbody>
                         {
                             filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).map((item, index) => (
-                                <TableRow key={item.id} rowData={item} columns={columns} bg={index % 2 ? "primary.100" : "primary.50"} borderBottomColor="primary.500" />
+                                <TableRow key={item.id} rowData={item} columns={columns} bg={index % 2 ? "primary.100" : "primary.50"} borderBottomColor="primary.500" onClick={() => onItemClick(item)}/>
                             ))
                         }
                     </Tbody>
