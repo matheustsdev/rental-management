@@ -28,13 +28,6 @@ namespace Backend.Application.Controllers
 
         private ResponseModel<TResponseModel> CreateResponseModel<TResponseModel>(string message, TResponseModel result, EStatusResponse status)
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            };
-
-            var test = JsonConvert.DeserializeObject<TResponseModel>(JsonConvert.SerializeObject(result, settings));
-
             return new ResponseModel<TResponseModel>(message, result, status);
         }
 
@@ -49,7 +42,7 @@ namespace Backend.Application.Controllers
             return Execute(() => CreateResponseModel<TEntity>("Criado com sucesso!", _baseService.Add<TCreateValidator>(entity), EStatusResponse.SUCCESS));
         }
 
-        [HttpPut]
+        [HttpPatch]
         public IActionResult Update([FromBody] TEntity entity)
         {
             if (entity == null)
