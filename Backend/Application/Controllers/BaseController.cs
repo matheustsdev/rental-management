@@ -7,6 +7,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Application.Controllers
 {
@@ -39,6 +40,8 @@ namespace Backend.Application.Controllers
                 return NotFound(CreateResponseModel<TEntity?>("Erro com os dados usados para a criação.", null, EStatusResponse.ERROR));
             }
 
+            Validate(entity, Activator.CreateInstance<TCreateValidator>());
+
             return Execute(() => CreateResponseModel<TEntity>("Criado com sucesso!", _baseService.Add<TCreateValidator>(entity), EStatusResponse.SUCCESS));
         }
 
@@ -47,6 +50,8 @@ namespace Backend.Application.Controllers
         {
             if (entity == null)
                 return NotFound(CreateResponseModel<TEntity?>("Erro com os dados usados para a criação.", null, EStatusResponse.ERROR));
+
+            Validate(entity, Activator.CreateInstance<TUpdateValidator>());
 
             return Execute(() => {
                 ResponseModel<TEntity> response = CreateResponseModel<TEntity>("Atualização realizada com sucesso!", _baseService.Update<TUpdateValidator>(entity), EStatusResponse.SUCCESS);
@@ -103,6 +108,14 @@ namespace Backend.Application.Controllers
             {
                 return BadRequest(new ResponseModel<T>("Ocorreu um erro ao processar a solicitação.", default(T), EStatusResponse.ERROR));
             }
+        }
+
+        private void Validate(TEntity obj, AbstractValidator<TEntity> validator)
+        {
+            if (obj == null)
+                throw new Exception("Registros não detectados!");
+
+            validator.ValidateAndThrow(obj);
         }
     }
 }
