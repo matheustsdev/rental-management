@@ -4,6 +4,7 @@ using Backend.Domain.Entities;
 using Backend.Domain.Helpers;
 using Backend.Domain.Interfaces;
 using FluentValidation;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace Backend.Application.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] TEntity entity)
+        public async Task<IActionResult> Create([FromBody] TEntity entity)
         {
             if (entity == null)
             {
@@ -42,21 +43,39 @@ namespace Backend.Application.Controllers
 
             Validate(entity, Activator.CreateInstance<TCreateValidator>());
 
-            return Execute(() => CreateResponseModel<TEntity>("Criado com sucesso!", _baseService.Add<TCreateValidator>(entity), EStatusResponse.SUCCESS));
+            var result = await _baseService.Add<TCreateValidator>(entity);
+
+            return Execute(() => CreateResponseModel<TEntity>("Criado com sucesso!", result, EStatusResponse.SUCCESS));
         }
 
-        [HttpPatch]
-        public IActionResult Update([FromBody] TEntity entity)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> Patch(Guid id, [FromBody] JsonPatchDocument<TEntity> patchDoc)
         {
+            if (patchDoc == null)
+            {
+                return BadRequest("Invalid patch document");
+            }
+
+            var entity = _baseService.GetById(id);
+
             if (entity == null)
-                return NotFound(CreateResponseModel<TEntity?>("Erro com os dados usados para a criação.", null, EStatusResponse.ERROR));
+            {
+                return NotFound();
+            }
 
-            Validate(entity, Activator.CreateInstance<TUpdateValidator>());
+            // Aplica o patch à entidade
+            patchDoc.ApplyTo(entity, ModelState);
 
-            return Execute(() => {
-                ResponseModel<TEntity> response = CreateResponseModel<TEntity>("Atualização realizada com sucesso!", _baseService.Update<TUpdateValidator>(entity), EStatusResponse.SUCCESS);
-                return response;
-            });
+            // Verifica se a ModelState é válida após aplicar o patch
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            // Atualiza a entidade no banco de dados
+            _baseService.Update<TUpdateValidator>(entity);
+
+            return Ok(entity);
         }
 
         [HttpDelete("{id}")]

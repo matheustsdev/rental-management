@@ -13,7 +13,7 @@ namespace Backend.Domain.Interfaces
         where TCreateValidator: AbstractValidator<TEntity>
         where TUpdateValidator: AbstractValidator<TEntity>
     {
-        TEntity Add<TValidator>(TEntity entity) where TValidator: TCreateValidator;
+        Task<TEntity> Add<TValidator>(TEntity entity) where TValidator: TCreateValidator;
 
         void Delete(Guid Id);
 

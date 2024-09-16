@@ -9,9 +9,8 @@ namespace Backend.Domain.Interfaces
 {
     public interface IBaseRepository<TEntity> where TEntity: BaseEntity
     {
-        Task Insert (TEntity entity);
-
-        void Update (TEntity entity);
+        Task<TEntity> InsertAsync(TEntity entity);
+        Task Update(TEntity entity);
 
         void Delete (Guid Id);
 

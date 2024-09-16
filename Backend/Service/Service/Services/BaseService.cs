@@ -17,11 +17,11 @@ namespace Backend.Service.Services
             _baseRepository = baseRepository;
         }
 
-        public TEntity Add<TValidator>(TEntity entity) where TValidator : TCreateValidator
+        public async Task<TEntity> Add<TValidator>(TEntity entity) where TValidator : TCreateValidator
         {
             Validate(entity, Activator.CreateInstance<TValidator>());
 
-            _baseRepository.Insert(entity);
+            await _baseRepository.InsertAsync(entity);
 
             return entity;
         }
@@ -38,7 +38,7 @@ namespace Backend.Service.Services
             return _baseRepository.Select(includes);
         }
 
-        public TEntity GetById(Guid id) => _baseRepository.Select(id);
+        public async Task<TEntity> GetById(Guid id) => await _baseRepository.Select(id);
 
         public TEntity Update<TValidator>(TEntity entity) where TValidator : TUpdateValidator
         {

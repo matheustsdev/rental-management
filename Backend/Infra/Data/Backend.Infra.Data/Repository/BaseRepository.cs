@@ -3,6 +3,7 @@ using Backend.Domain.Entities;
 using Backend.Domain.Interfaces;
 using Backend.Infra.Data.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using System.Linq;
 
 namespace Backend.Infra.Data.Repository
@@ -16,18 +17,43 @@ namespace Backend.Infra.Data.Repository
             _dataContext = dataContext;
         }
 
-        public Task Insert(TEntity entity)
+        public async Task<TEntity> InsertAsync(TEntity entity)
         {
-            Task addedEntity = _dataContext.Set<TEntity>().AddRangeAsync(entity);
-            _dataContext.SaveChanges();
+            using (IDbContextTransaction transaction = await _dataContext.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    await _dataContext.Set<TEntity>().AddAsync(entity);
+                    await _dataContext.SaveChangesAsync();
 
-            return addedEntity;
+                    await transaction.CommitAsync();
+                    return entity;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
 
-        public void Update(TEntity entity)
+        public async Task Update(TEntity entity)
         {
-            _dataContext.Entry(entity).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-            _dataContext.SaveChanges();
+            using (IDbContextTransaction transaction = await _dataContext.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    _dataContext.Entry(entity).State = EntityState.Modified;
+                    await _dataContext.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
         }
 
         public void Delete(Guid id)
