@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Backend.Domain.Interfaces;
 using Backend.Domain.Entities;
-using Backend.Domain.DTOs.Product;
 using Backend.Service.Validators;
 
 namespace Backend.Application.Controllers

@@ -38,7 +38,7 @@ namespace Backend.Service.Services
             return _baseRepository.Select(includes);
         }
 
-        public async Task<TEntity> GetById(Guid id) => await _baseRepository.Select(id);
+        public TEntity GetById(Guid id) => _baseRepository.Select(id);
 
         public TEntity Update<TValidator>(TEntity entity) where TValidator : TUpdateValidator
         {

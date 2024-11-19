@@ -8,8 +8,18 @@ namespace Backend.Domain.Helpers
 {
     public class WhereClause<TEntity>
     {
-        public TEntity.GetProperties() Property { get; set }
-        public string Comparator { get; set }
+        public string Property { get; set; }
+        public string Comparator { get; set; }
         public string Value { get; set; }
+
+        public void SetProperty(string propertyName)
+        {
+            var property = typeof(TEntity).GetProperty(propertyName);
+
+            if (property == null)
+                throw new ArgumentException($"A propriedade '{propertyName}' não existe no tipo '{typeof(TEntity).Name}'.");
+
+            Property = property.Name;
+        }
     }
 }

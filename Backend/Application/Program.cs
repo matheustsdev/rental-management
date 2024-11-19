@@ -9,7 +9,6 @@ using Backend.Service.Validators;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using Backend.Application.Mappings;
 
 namespace Application
 {
@@ -38,9 +37,6 @@ namespace Application
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                     options.SerializerSettings.Converters.Add(new StringEnumConverter());
                 });
-
-            // Configuração do AutoMapper
-            builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
             // Configure CORS
             builder.Services.AddCors(options =>

@@ -81,7 +81,7 @@
           }
         }
       },
-      "Microsoft.AspNetCore.JsonPatch/6.0.32": {
+      "Microsoft.AspNetCore.JsonPatch/6.0.33": {
         "type": "package",
         "dependencies": {
           "Microsoft.CSharp": "4.7.0",
@@ -582,6 +582,7 @@
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
           "Backend.Domain": "1.0.0",
+          "Microsoft.AspNetCore.JsonPatch": "6.0.33",
           "Microsoft.EntityFrameworkCore": "6.0.26",
           "Microsoft.EntityFrameworkCore.Abstractions": "6.0.26",
           "Microsoft.EntityFrameworkCore.Analyzers": "6.0.26",
@@ -718,10 +719,10 @@
         "logo.png"
       ]
     },
-    "Microsoft.AspNetCore.JsonPatch/6.0.32": {
-      "sha512": "ws85ncfMJYYe2MhiThXGqguu91u7N/qDUvJTVCD4nYxDXgtpE1xLt+yp9Qe5D5ayeExE4MLq3uMYX4ITbAjauQ==",
+    "Microsoft.AspNetCore.JsonPatch/6.0.33": {
+      "sha512": "13JOBUHo+ERlYrpO6TnTF8VRlaBynYS0NPSq5lgPVCxSMohj+ktR2veQiswkMqH7FvoJFSthA+E2Xo3vHSOioQ==",
       "type": "package",
-      "path": "microsoft.aspnetcore.jsonpatch/6.0.32",
+      "path": "microsoft.aspnetcore.jsonpatch/6.0.33",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -733,7 +734,7 @@
         "lib/net6.0/Microsoft.AspNetCore.JsonPatch.xml",
         "lib/netstandard2.0/Microsoft.AspNetCore.JsonPatch.dll",
         "lib/netstandard2.0/Microsoft.AspNetCore.JsonPatch.xml",
-        "microsoft.aspnetcore.jsonpatch.6.0.32.nupkg.sha512",
+        "microsoft.aspnetcore.jsonpatch.6.0.33.nupkg.sha512",
         "microsoft.aspnetcore.jsonpatch.nuspec"
       ]
     },

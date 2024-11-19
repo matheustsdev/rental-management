@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "pMdBwWth80H9xzpIVspOP+tNyB5JhR6zVZ/UsFMDXRzew4TEwlwlcx/nKd1r5XD8rn75AJyRq2ra9m6MekV15w==",
+  "dgSpecHash": "ccWOwkPz59qI/fYijHsV+qBZJgZoKGBC7B856U2HwtZKlUCVVS4wRbk3lWWR9GoSxsqSt0c3IKXwsvhXLjRMlw==",
   "success": true,
   "projectFilePath": "C:\\Users\\mathe\\dev\\rental-management\\Backend\\Application\\Backend.Application.csproj",
   "expectedPackageFiles": [
@@ -9,7 +9,7 @@
     "C:\\Users\\mathe\\.nuget\\packages\\fluentvalidation.aspnetcore\\11.3.0\\fluentvalidation.aspnetcore.11.3.0.nupkg.sha512",
     "C:\\Users\\mathe\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\11.5.1\\fluentvalidation.dependencyinjectionextensions.11.5.1.nupkg.sha512",
     "C:\\Users\\mathe\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
-    "C:\\Users\\mathe\\.nuget\\packages\\microsoft.aspnetcore.jsonpatch\\6.0.32\\microsoft.aspnetcore.jsonpatch.6.0.32.nupkg.sha512",
+    "C:\\Users\\mathe\\.nuget\\packages\\microsoft.aspnetcore.jsonpatch\\6.0.33\\microsoft.aspnetcore.jsonpatch.6.0.33.nupkg.sha512",
     "C:\\Users\\mathe\\.nuget\\packages\\microsoft.aspnetcore.mvc.newtonsoftjson\\6.0.32\\microsoft.aspnetcore.mvc.newtonsoftjson.6.0.32.nupkg.sha512",
     "C:\\Users\\mathe\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\mathe\\.nuget\\packages\\microsoft.entityframeworkcore\\6.0.26\\microsoft.entityframeworkcore.6.0.26.nupkg.sha512",
