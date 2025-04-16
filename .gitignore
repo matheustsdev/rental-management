@@ -1,29 +1,41 @@
-node_modules
-**/bin/
-**/obj/
-package-lock.json
-.vscode
-.vs
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
-Build
-ssh.env
-ssh.*.env
-updater_topcon.log
-.idea
-.vs
-.env
-*.dll
-*.pdb
-*.log
-*.log.*
-*.cache
+*.pem
 
-appsettings.Development.json
-appsettings.Production.json
-appsettings.Development.*.json
-appsettings.Production.*.json
-yarn-error.log
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-Backend/build
-Frontend/build
-Automator/history
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
