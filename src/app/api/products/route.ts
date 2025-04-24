@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ProductType } from "@/types/entities/ProductType";
-import { CrudService } from "@/services/crud/baseCrudService";
-import { supabase } from "@/services/supabase";
+import { IncludeConfigType } from "@/services/crud/baseCrudService";
 import { TableRow } from "@/types/EntityType";
 import { productService } from "@/services/crud/productService";
 
@@ -16,11 +14,38 @@ export async function GET(request: NextRequest) {
     const orderBy = searchParams.get("orderBy") as keyof TableRow<"products"> | undefined;
     const ascending = searchParams.get("ascending") !== "false";
 
+    let include;
+    const includeParam = searchParams.get("include");
+    if (includeParam) {
+      try {
+        // Parse include configuration from JSON string
+        const includeConfig: IncludeConfigType = JSON.parse(includeParam);
+        include = Object.entries(includeConfig).reduce((acc, [alias, config]) => {
+          return {
+            ...acc,
+            [alias]: {
+              table: config.table,
+              foreignKey: config.foreignKey,
+              fields: config.fields,
+            },
+          };
+        }, {});
+
+        console.log("Include data >> ", includeConfig, include);
+      } catch (parseError) {
+        return NextResponse.json(
+          { error: "Invalid include configuration", details: String(parseError) },
+          { status: 400 }
+        );
+      }
+    }
+
     const result = await productService.find(filters, {
       page,
       pageSize,
       orderBy,
       ascending,
+      include,
     });
 
     return NextResponse.json(result, { status: 200 });

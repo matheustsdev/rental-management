@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CategoryType } from "@/types/entities/CategoryType";
 import { categoryService } from "@/services/crud/categoryService";
+import { IncludeConfigType } from "@/services/crud/baseCrudService";
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,11 +14,36 @@ export async function GET(request: NextRequest) {
     const orderBy = searchParams.get("orderBy") as keyof CategoryType | undefined;
     const ascending = searchParams.get("ascending") !== "false";
 
+    let include;
+    const includeParam = searchParams.get("include");
+    if (includeParam) {
+      try {
+        // Parse include configuration from JSON string
+        const includeConfig: IncludeConfigType = JSON.parse(includeParam);
+        include = Object.entries(includeConfig).reduce((acc, [alias, config]) => {
+          return {
+            ...acc,
+            [alias]: {
+              table: config.table,
+              foreignKey: config.foreignKey,
+              fields: config.fields,
+            },
+          };
+        }, {});
+      } catch (parseError) {
+        return NextResponse.json(
+          { error: "Invalid include configuration", details: String(parseError) },
+          { status: 400 }
+        );
+      }
+    }
+
     const result = await categoryService.find(filters, {
       page,
       pageSize,
       orderBy,
       ascending,
+      include,
     });
 
     return NextResponse.json(result, { status: 200 });

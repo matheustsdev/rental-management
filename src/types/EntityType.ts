@@ -1,4 +1,4 @@
-import { Database, Tables } from "@/types/supabase.types";
+import { Database, Tables, TablesInsert, TablesUpdate } from "@/types/supabase.types";
 
 export type TableRow<T extends keyof Database["public"]["Tables"]> = Tables<T>;
 
@@ -15,3 +15,5 @@ type InjectRelations<T extends keyof Database["public"]["Tables"]> = {
 
 // Tipo final que inclui a entidade base e suas relações opcionais
 export type EntityType<T extends keyof Database["public"]["Tables"]> = TableRow<T> & InjectRelations<T>;
+export type EntityInsertDtoType<T extends keyof Database["public"]["Tables"]> = TablesInsert<T>;
+export type EntityUpdateDtoType<T extends keyof Database["public"]["Tables"]> = TablesUpdate<T>;

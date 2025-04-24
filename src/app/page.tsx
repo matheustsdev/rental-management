@@ -1,95 +1,109 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import { Button, Card, Flex, Heading, useDisclosure } from "@chakra-ui/react";
+import { DataTable, DataTableColumn } from "@/molecules/DataTable";
+import { useDevice } from "@/hooks/useDevice";
+import AddProductModal from "@/molecules/AddProductModal";
+import PageContainer from "@/atoms/PageContainer";
+import { useEffect, useState } from "react";
+import { ProductType } from "@/types/entities/ProductType";
+import { api } from "@/services/api";
+import { toaster } from "@/atoms/Toaster";
+import { IncludeConfigType } from "@/services/crud/baseCrudService";
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { isMobile } = useDevice();
+  const { open, onClose, onOpen } = useDisclosure();
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  const [products, setProducts] = useState<ProductType[]>([]);
+
+  const columns: DataTableColumn<ProductType>[] = [
+    {
+      header: "Referência",
+      key: "reference",
+    },
+    {
+      header: "Descrição",
+      key: "description",
+    },
+    {
+      header: "Categoria",
+      key: "categories",
+      cell: (row) => row.categories?.name,
+    },
+    {
+      header: "Valor",
+      key: "price",
+      cell: (row) => `R$ ${row.price}`,
+    },
+  ];
+
+  const loadProducts = async () => {
+    try {
+      const includeConfig: IncludeConfigType = {
+        categories: {
+          table: "categories",
+          foreignKey: "category_id",
+        },
+      };
+
+      const productsList: ProductType[] = (
+        await api.get("/products", {
+          params: {
+            include: JSON.stringify(includeConfig),
+          },
+        })
+      ).data.data;
+
+      setProducts(productsList);
+    } catch (e: unknown) {
+      toaster.create({
+        type: "error",
+        title: "Erro ao buscar categorias",
+        description: (e as Error).message,
+      });
+    }
+  };
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const MobileDataDisplay = (
+    <Flex gap={4}>
+      {products.map((product) => (
+        <Card.Root key={product.id}>
+          <Card.Header>{product.description}</Card.Header>
+          <Card.Body>{product.description}</Card.Body>
+          <Card.Footer>{product.categories?.name}</Card.Footer>
+        </Card.Root>
+      ))}
+    </Flex>
+  );
+
+  const DesktopDataDisplay = <DataTable columns={columns} data={products} />;
+
+  if (isMobile) {
+    return <PageContainer w="100vw" h="100vh" align="center" justify="center"></PageContainer>;
+  }
+
+  return (
+    <PageContainer flexDir="column" w="100vw" h="100vh" align="center" p="20" gap="8">
+      <Flex gap="4" align="flex-end" w="full">
+        <Heading>Lista de produtos</Heading>
+        <Button px="4" onClick={onOpen}>
+          Adicionar
+        </Button>
+      </Flex>
+
+      <Flex w="full" flexDir="column" align="center" justify="center">
+        {isMobile ? MobileDataDisplay : DesktopDataDisplay}
+      </Flex>
+      <AddProductModal
+        isOpen={open}
+        onClose={onClose}
+        onSave={(newProduct) => setProducts((prev) => [newProduct, ...prev])}
+      />
+    </PageContainer>
   );
 }

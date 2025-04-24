@@ -1,9 +1,20 @@
 import { RequestFilterType } from "@/types/RequestFilterType";
 import { supabase } from "@/services/supabase";
 import { Database } from "@/types/supabase.types";
+import { SupabaseClient } from "@supabase/supabase-js";
 
-// Tipo genérico para extrair o tipo de uma tabela
 type TableRowType<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"];
+
+// Tipos para configuração de include
+export type IncludeConfigType = {
+  [key: string]: {
+    table: keyof Database["public"]["Tables"];
+    foreignKey: string;
+    fields?: string[];
+  };
+};
+
+type SupabaseQuery = ReturnType<SupabaseClient<Database>["from"]>["select"];
 
 export class CrudService<K extends keyof Database["public"]["Tables"]> {
   private tableName: K;
@@ -12,15 +23,38 @@ export class CrudService<K extends keyof Database["public"]["Tables"]> {
     this.tableName = tableName;
   }
 
-  // Tipagem correta para criação
   async create(data: Omit<TableRowType<K>, "id">) {
-    const { data: result, error } = await supabase.from(this.tableName).insert(data).select().single();
+    const { data: result, error } = await supabase.from(this.tableName).insert(data).select("*").single();
 
     if (error) throw error;
     return result as TableRowType<K>;
   }
 
-  // Busca genérica com filtros
+  // Método para construir query com includes
+  private buildIncludeQuery(query: SupabaseQuery, includeConfig?: IncludeConfigType) {
+    if (!includeConfig) return query;
+
+    // Construir string de seleção para includes
+    const includeSelects = Object.values(includeConfig).map((config) => {
+      // Campos a serem selecionados (todos se não especificados)
+      const fields = config.fields ? config.fields.map((field) => `${field}`).join(", ") : "*";
+
+      return `${config.table} (${fields})`;
+    });
+
+    // Combinar seleção original com includes
+    const selectString = ["*", ...includeSelects].join(",");
+
+    // Atualizar query com nova seleção
+    query = query.select(selectString, {
+      count: "exact",
+      head: false,
+    });
+
+    return query;
+  }
+
+  // Método find atualizado com suporte a includes
   async find(
     filters?: RequestFilterType<TableRowType<K>>,
     options?: {
@@ -28,18 +62,24 @@ export class CrudService<K extends keyof Database["public"]["Tables"]> {
       pageSize?: number;
       orderBy?: keyof TableRowType<K>;
       ascending?: boolean;
+      include?: IncludeConfigType;
     }
   ) {
     // Configurações de paginação
-    const page = options?.page || 1;
-    const pageSize = options?.pageSize || 10;
+    const page = options?.page ?? 1;
+    const pageSize = options?.pageSize ?? 10;
     const start = (page - 1) * pageSize;
     const end = start + pageSize - 1;
 
-    // Construção da query
+    // Construção da query inicial
     let query = supabase.from(this.tableName).select("*");
 
-    // Aplicar filtros
+    // Aplicar includes se existirem
+    if (options?.include) {
+      query = this.buildIncludeQuery(query, options.include);
+    }
+
+    // Aplicar filtros (igual à implementação anterior)
     if (filters) {
       Object.entries(filters).forEach(([key, filter]) => {
         if (filter) {
@@ -95,13 +135,20 @@ export class CrudService<K extends keyof Database["public"]["Tables"]> {
       data: data as TableRowType<K>[],
       page,
       pageSize,
-      total: count || 0,
+      total: count ?? 0,
     };
   }
 
-  // Buscar por ID
-  async findById(id: string) {
-    const { data, error } = await supabase.from(this.tableName).select("*").eq("id", id).single();
+  // Exemplo de uso de método findById com include
+  async findById(id: string, include?: IncludeConfigType) {
+    let query = supabase.from(this.tableName).select("*").eq("id", id).single();
+
+    // Aplicar includes se existirem
+    if (include) {
+      query = this.buildIncludeQuery(query, include);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     return data as TableRowType<K>;
