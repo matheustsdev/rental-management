@@ -1,0 +1,9 @@
+import { Button, ButtonProps } from "@chakra-ui/react";
+
+type IPrimaryButtonProps = Omit<ButtonProps, "bg" | "px">;
+
+const PrimaryButton: React.FC<IPrimaryButtonProps> = ({ ...rest }) => {
+  return <Button px="4" bg="terracotta.500" color="black" {...rest} />;
+};
+
+export default PrimaryButton;

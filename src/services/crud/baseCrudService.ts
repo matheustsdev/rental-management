@@ -48,7 +48,6 @@ export class CrudService<K extends keyof Database["public"]["Tables"]> {
     // Atualizar query com nova seleção
     query = query.select(selectString, {
       count: "exact",
-      head: false,
     });
 
     return query;
@@ -72,7 +71,7 @@ export class CrudService<K extends keyof Database["public"]["Tables"]> {
     const end = start + pageSize - 1;
 
     // Construção da query inicial
-    let query = supabase.from(this.tableName).select("*");
+    let query = supabase.from(this.tableName).select("*", { count: "exact" });
 
     // Aplicar includes se existirem
     if (options?.include) {

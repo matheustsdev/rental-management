@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, CloseButton, Dialog, Portal, Input, Flex, Field, Spinner, Checkbox } from "@chakra-ui/react";
+import { CloseButton, Dialog, Portal, Input, Flex, Field, Spinner, Checkbox } from "@chakra-ui/react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from "react";
 import Select from "@/atoms/Select";
 import { CategoryType } from "@/types/entities/CategoryType";
 import { ProductInsertDtoType, ProductType } from "@/types/entities/ProductType";
+import PrimaryButton from "@/atoms/PrimaryButton";
+import SecondaryButton from "@/atoms/SecondaryButton";
 
 const productSchema = z.object({
   description: z.string().min(10, "Campo deve possuir, no mínimo, 10 caracteres"),
@@ -25,9 +27,10 @@ interface IAddProductModalProps {
   onClose: () => void;
   isOpen: boolean;
   onSave: (newProduct: ProductType) => void;
+  productOnEdit: ProductType | null;
 }
 
-const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onSave }) => {
+const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onSave, productOnEdit }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [isInfiniteAdd, setIsInfiniteAdd] = useState<boolean>(false);
@@ -102,6 +105,20 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
     loadCategories();
   }, []);
 
+  useEffect(() => {
+    if (!productOnEdit) {
+      reset();
+
+      return;
+    }
+
+    setValue("categoryId", productOnEdit.category_id ?? "");
+    setValue("description", productOnEdit.description ?? "");
+    setValue("price", productOnEdit.price);
+    setValue("receiptDescription", productOnEdit.receipt_description ?? "");
+    setValue("reference", productOnEdit.reference);
+  }, [productOnEdit]);
+
   return (
     <Dialog.Root lazyMount open={isOpen} onOpenChange={onClose} placement="center">
       <Portal>
@@ -122,7 +139,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
               <Flex flexDir="column" gap={4} align="center">
                 <Field.Root invalid={!!errors.description}>
                   <Field.Label>Nome</Field.Label>
-                  <Input px="2" placeholder="Ex: Laptop" {...register("description")} />
+                  <Input px="2" {...register("description")} />
                   <Field.ErrorText>{errors.description?.message}</Field.ErrorText>
                 </Field.Root>
                 <Field.Root invalid={!!errors.reference}>
@@ -153,21 +170,32 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
                 </Field.Root>
               </Flex>
             </Dialog.Body>
-            <Dialog.Footer display="flex" alignItems="center" justifyContent="space-between" pt="8">
-              <Checkbox.Root checked={isInfiniteAdd} onCheckedChange={(e) => setIsInfiniteAdd(!!e.checked)}>
-                <Checkbox.HiddenInput />
-                <Checkbox.Control />
-                <Checkbox.Label>Continuar adicionando</Checkbox.Label>
-              </Checkbox.Root>
+            <Dialog.Footer
+              display="flex"
+              alignItems="center"
+              justifyContent={productOnEdit ? "flex-end" : "space-between"}
+              pt="8"
+            >
+              {!productOnEdit && (
+                <Checkbox.Root
+                  checked={isInfiniteAdd}
+                  onCheckedChange={(e) => setIsInfiniteAdd(!!e.checked)}
+                  variant="outline"
+                >
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control />
+                  <Checkbox.Label>Continuar adicionando</Checkbox.Label>
+                </Checkbox.Root>
+              )}
               <Flex gap="4">
                 <Dialog.ActionTrigger asChild>
-                  <Button variant="outline" onClick={onClose} px="4">
+                  <SecondaryButton variant="outline" onClick={onClose}>
                     Cancelar
-                  </Button>
+                  </SecondaryButton>
                 </Dialog.ActionTrigger>
-                <Button w="20" type="submit" px="4" disabled={isLoading}>
+                <PrimaryButton w="24" type="submit" disabled={isLoading}>
                   {isLoading ? <Spinner /> : "Adicionar"}
-                </Button>
+                </PrimaryButton>
               </Flex>
             </Dialog.Footer>
             <Dialog.CloseTrigger asChild>

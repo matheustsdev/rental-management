@@ -30,8 +30,6 @@ export async function GET(request: NextRequest) {
             },
           };
         }, {});
-
-        console.log("Include data >> ", includeConfig, include);
       } catch (parseError) {
         return NextResponse.json(
           { error: "Invalid include configuration", details: String(parseError) },

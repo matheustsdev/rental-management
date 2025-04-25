@@ -55,9 +55,9 @@ export function DataTable<T extends { id: string }>({
 
   return (
     <Flex flexDir="column" w="full" align="flex-end" justify="center" h="full">
-      <Table.Root size="sm" variant="outline">
+      <Table.Root size="sm">
         <Table.Header>
-          <Table.Row>
+          <Table.Row bg="terracotta.500" py="4">
             {columns.map((column) => (
               <Table.ColumnHeader
                 key={String(column.key)}
@@ -97,8 +97,8 @@ export function DataTable<T extends { id: string }>({
               </Table.Cell>
             </Table.Row>
           ) : (
-            data.map((row) => (
-              <Table.Row key={row.id}>
+            data.map((row, i) => (
+              <Table.Row key={row.id} bg={i % 2 === 0 ? "terracotta.50" : "terracotta.100"}>
                 {columns.map((column) => (
                   <Table.Cell key={String(column.key)} textAlign={column.align || "start"}>
                     {column.cell ? column.cell(row) : String(row[column.key])}

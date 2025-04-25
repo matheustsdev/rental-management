@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Card, Flex, Heading, useDisclosure } from "@chakra-ui/react";
+import { Flex, Heading, useDisclosure } from "@chakra-ui/react";
 import { DataTable, DataTableColumn } from "@/molecules/DataTable";
 import { useDevice } from "@/hooks/useDevice";
 import AddProductModal from "@/molecules/AddProductModal";
@@ -10,12 +10,18 @@ import { ProductType } from "@/types/entities/ProductType";
 import { api } from "@/services/api";
 import { toaster } from "@/atoms/Toaster";
 import { IncludeConfigType } from "@/services/crud/baseCrudService";
+import PrimaryButton from "@/atoms/PrimaryButton";
+import ProductCard from "@/molecules/ProductCard";
+import { MdEdit } from "react-icons/md";
 
 export default function Home() {
   const { isMobile } = useDevice();
   const { open, onClose, onOpen } = useDisclosure();
 
   const [products, setProducts] = useState<ProductType[]>([]);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pagesTotal, setPagesTotal] = useState<number>(1);
+  const [selectedProductRow, setSelectedProductRow] = useState<ProductType | null>(null);
 
   const columns: DataTableColumn<ProductType>[] = [
     {
@@ -38,6 +44,45 @@ export default function Home() {
     },
   ];
 
+  const actions = (product: ProductType) => {
+    return (
+      <Flex gap="4">
+        <PrimaryButton onClick={() => openUpdateModal(product)}>
+          <MdEdit />
+        </PrimaryButton>
+      </Flex>
+    );
+  };
+
+  const handleOnCloseModal = () => {
+    setSelectedProductRow(null);
+    onClose();
+  };
+
+  const MobileDataDisplay = (
+    <Flex flexDir="column" w="full" gap="4">
+      {products.map((product) => (
+        <ProductCard product={product} key={product.id} />
+      ))}
+    </Flex>
+  );
+
+  const DesktopDataDisplay = (
+    <DataTable
+      columns={columns}
+      data={products}
+      currentPage={currentPage}
+      onPageChange={(page) => setCurrentPage(page)}
+      totalPages={pagesTotal}
+      actions={actions}
+    />
+  );
+
+  const openUpdateModal = (product: ProductType) => {
+    setSelectedProductRow(product);
+    onOpen();
+  };
+
   const loadProducts = async () => {
     try {
       const includeConfig: IncludeConfigType = {
@@ -47,15 +92,17 @@ export default function Home() {
         },
       };
 
-      const productsList: ProductType[] = (
+      const productsListRequest = (
         await api.get("/products", {
           params: {
             include: JSON.stringify(includeConfig),
+            page: currentPage,
           },
         })
-      ).data.data;
+      ).data;
 
-      setProducts(productsList);
+      setPagesTotal(Math.ceil(productsListRequest.total / 10));
+      setProducts(productsListRequest.data);
     } catch (e: unknown) {
       toaster.create({
         type: "error",
@@ -67,33 +114,13 @@ export default function Home() {
 
   useEffect(() => {
     loadProducts();
-  }, []);
-
-  const MobileDataDisplay = (
-    <Flex gap={4}>
-      {products.map((product) => (
-        <Card.Root key={product.id}>
-          <Card.Header>{product.description}</Card.Header>
-          <Card.Body>{product.description}</Card.Body>
-          <Card.Footer>{product.categories?.name}</Card.Footer>
-        </Card.Root>
-      ))}
-    </Flex>
-  );
-
-  const DesktopDataDisplay = <DataTable columns={columns} data={products} />;
-
-  if (isMobile) {
-    return <PageContainer w="100vw" h="100vh" align="center" justify="center"></PageContainer>;
-  }
+  }, [currentPage]);
 
   return (
-    <PageContainer flexDir="column" w="100vw" h="100vh" align="center" p="20" gap="8">
+    <PageContainer flexDir="column" w="100vw" h="100vh" align="center" p="20" gap="8" overflowY="auto">
       <Flex gap="4" align="flex-end" w="full">
         <Heading>Lista de produtos</Heading>
-        <Button px="4" onClick={onOpen}>
-          Adicionar
-        </Button>
+        <PrimaryButton onClick={onOpen}>Adicionar</PrimaryButton>
       </Flex>
 
       <Flex w="full" flexDir="column" align="center" justify="center">
@@ -101,8 +128,9 @@ export default function Home() {
       </Flex>
       <AddProductModal
         isOpen={open}
-        onClose={onClose}
+        onClose={handleOnCloseModal}
         onSave={(newProduct) => setProducts((prev) => [newProduct, ...prev])}
+        productOnEdit={selectedProductRow}
       />
     </PageContainer>
   );
