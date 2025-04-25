@@ -57,7 +57,7 @@ export function DataTable<T extends { id: string }>({
     <Flex flexDir="column" w="full" align="flex-end" justify="center" h="full">
       <Table.Root size="sm">
         <Table.Header>
-          <Table.Row bg="terracotta.500" py="4">
+          <Table.Row bg="terracotta.500" py="4" color="white">
             {columns.map((column) => (
               <Table.ColumnHeader
                 key={String(column.key)}
@@ -65,7 +65,7 @@ export function DataTable<T extends { id: string }>({
                 onClick={() => column.sortable && handleSort(column.key)}
                 cursor={column.sortable ? "pointer" : "default"}
               >
-                <Flex align="center" justify={column.align || "start"}>
+                <Flex align="center" justify={column.align || "start"} color="white">
                   {column.header}
                   {column.sortable && (
                     <>
@@ -84,7 +84,11 @@ export function DataTable<T extends { id: string }>({
                 </Flex>
               </Table.ColumnHeader>
             ))}
-            {actions && <Table.ColumnHeader>Ações</Table.ColumnHeader>}
+            {actions && (
+              <Table.ColumnHeader w="fit-content" color="white">
+                Ações
+              </Table.ColumnHeader>
+            )}
           </Table.Row>
         </Table.Header>
         <Table.Body>
@@ -98,15 +102,17 @@ export function DataTable<T extends { id: string }>({
             </Table.Row>
           ) : (
             data.map((row, i) => (
-              <Table.Row key={row.id} bg={i % 2 === 0 ? "terracotta.50" : "terracotta.100"}>
+              <Table.Row key={row.id} bg={i % 2 === 0 ? "terracotta.50" : "beige.50"}>
                 {columns.map((column) => (
                   <Table.Cell key={String(column.key)} textAlign={column.align || "start"}>
                     {column.cell ? column.cell(row) : String(row[column.key])}
                   </Table.Cell>
                 ))}
                 {actions && (
-                  <Table.Cell>
-                    <Flex>{actions(row)}</Flex>
+                  <Table.Cell maxW="fit-content" minW="fit-content">
+                    <Flex maxW="fit-content" minW="fit-content">
+                      {actions(row)}
+                    </Flex>
                   </Table.Cell>
                 )}
               </Table.Row>
