@@ -59,25 +59,6 @@ export default function Home() {
     onClose();
   };
 
-  const MobileDataDisplay = (
-    <Flex flexDir="column" w="full" gap="4">
-      {products.map((product) => (
-        <ProductCard product={product} key={product.id} />
-      ))}
-    </Flex>
-  );
-
-  const DesktopDataDisplay = (
-    <DataTable
-      columns={columns}
-      data={products}
-      currentPage={currentPage}
-      onPageChange={(page) => setCurrentPage(page)}
-      totalPages={pagesTotal}
-      actions={actions}
-    />
-  );
-
   const openUpdateModal = (product: ProductType) => {
     setSelectedProductRow(product);
     onOpen();
@@ -111,6 +92,25 @@ export default function Home() {
       });
     }
   };
+
+  const MobileDataDisplay = (
+    <Flex flexDir="column" w="full" gap="4">
+      {products.map((product) => (
+        <ProductCard product={product} key={product.id} onEdit={openUpdateModal} />
+      ))}
+    </Flex>
+  );
+
+  const DesktopDataDisplay = (
+    <DataTable
+      columns={columns}
+      data={products}
+      currentPage={currentPage}
+      onPageChange={(page) => setCurrentPage(page)}
+      totalPages={pagesTotal}
+      actions={actions}
+    />
+  );
 
   useEffect(() => {
     loadProducts();

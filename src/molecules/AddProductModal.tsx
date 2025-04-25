@@ -123,7 +123,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
     <Dialog.Root lazyMount open={isOpen} onOpenChange={onClose} placement="center">
       <Portal>
         <Dialog.Backdrop />
-        <Dialog.Positioner>
+        <Dialog.Positioner p="4">
           <Dialog.Content
             as="form"
             p="4"
