@@ -6,6 +6,6 @@ export function createSupabaseEnum<T extends keyof Database["public"]["Enums"]>(
     {},
     {
       get: (_, prop: string) => prop,
-    },
+    }
   ) as { [K in Database["public"]["Enums"][T]]: K };
 }

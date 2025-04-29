@@ -83,15 +83,140 @@ export type Database = {
           },
         ]
       }
+      rent_products: {
+        Row: {
+          created_at: string | null
+          id: string
+          product_description: string
+          product_id: string
+          product_price: number
+          rent_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          product_description: string
+          product_id: string
+          product_price: number
+          rent_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          product_description?: string
+          product_id?: string
+          product_price?: number
+          rent_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rent_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rent_products_rent_id_fkey"
+            columns: ["rent_id"]
+            isOneToOne: false
+            referencedRelation: "rents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rents: {
+        Row: {
+          address: string | null
+          client_name: string
+          created_at: string | null
+          deleted: boolean | null
+          deleted_at: string | null
+          discount_type:
+            | Database["public"]["Enums"]["discount_type_enum"]
+            | null
+          discount_value: number | null
+          id: string
+          internal_observations: string | null
+          phone: string | null
+          receipt_observations: string | null
+          remaining_value: number | null
+          rent_date: string
+          return_date: string | null
+          signal_value: number | null
+          total_value: number
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          client_name: string
+          created_at?: string | null
+          deleted?: boolean | null
+          deleted_at?: string | null
+          discount_type?:
+            | Database["public"]["Enums"]["discount_type_enum"]
+            | null
+          discount_value?: number | null
+          id?: string
+          internal_observations?: string | null
+          phone?: string | null
+          receipt_observations?: string | null
+          remaining_value?: number | null
+          rent_date: string
+          return_date?: string | null
+          signal_value?: number | null
+          total_value: number
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          client_name?: string
+          created_at?: string | null
+          deleted?: boolean | null
+          deleted_at?: string | null
+          discount_type?:
+            | Database["public"]["Enums"]["discount_type_enum"]
+            | null
+          discount_value?: number | null
+          id?: string
+          internal_observations?: string | null
+          phone?: string | null
+          receipt_observations?: string | null
+          remaining_value?: number | null
+          rent_date?: string
+          return_date?: string | null
+          signal_value?: number | null
+          total_value?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_rent_with_products: {
+        Args: {
+          p_client_name: string
+          p_rent_date: string
+          p_total_value: number
+          p_discount_value: number
+          p_discount_type: string
+          p_internal_observations: string
+          p_receipt_observations: string
+          p_remaining_value: number
+          p_return_date: string
+          p_signal_value: number
+          p_address: string
+          p_phone: string
+          p_product_ids: string[]
+        }
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      discount_type_enum: "PERCENTAGE" | "FIXED"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -206,6 +331,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      discount_type_enum: ["PERCENTAGE", "FIXED"],
+    },
   },
 } as const
