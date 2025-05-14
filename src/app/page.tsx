@@ -13,6 +13,7 @@ import { IncludeConfigType } from "@/services/crud/baseCrudService";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import ProductCard from "@/molecules/ProductCard";
 import { MdEdit } from "react-icons/md";
+import Link from "next/link";
 
 export default function Home() {
   const { isMobile } = useDevice();
@@ -22,6 +23,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pagesTotal, setPagesTotal] = useState<number>(1);
   const [selectedProductRow, setSelectedProductRow] = useState<ProductType | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const columns: DataTableColumn<ProductType>[] = [
     {
@@ -66,6 +68,8 @@ export default function Home() {
 
   const loadProducts = async () => {
     try {
+      setIsLoading(true);
+
       const includeConfig: IncludeConfigType = {
         categories: {
           table: "categories",
@@ -90,6 +94,8 @@ export default function Home() {
         title: "Erro ao buscar categorias",
         description: (e as Error).message,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -109,6 +115,7 @@ export default function Home() {
       onPageChange={(page) => setCurrentPage(page)}
       totalPages={pagesTotal}
       actions={actions}
+      isLoading={isLoading}
     />
   );
 
@@ -118,6 +125,9 @@ export default function Home() {
 
   return (
     <PageContainer flexDir="column" w="100vw" h="100vh" align="center" p="20" gap="8" overflowY="auto">
+      <Flex>
+        <Link href="rent">Alugueis</Link>
+      </Flex>
       <Flex gap="4" align="flex-end" w="full">
         <Heading>Lista de produtos</Heading>
         <PrimaryButton onClick={onOpen}>Adicionar</PrimaryButton>

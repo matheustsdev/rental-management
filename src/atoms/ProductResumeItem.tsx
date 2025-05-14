@@ -1,10 +1,11 @@
 "use client";
 
-import { Flex, Text } from "@chakra-ui/react";
-import { ProductType } from "@/types/entities/ProductType";
+import { Flex, Status, Text } from "@chakra-ui/react";
+import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
+import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 
 interface IProductResumeItemProps {
-  product: ProductType;
+  product: ProductAvailabilityType;
 }
 
 const ProductResumeItem: React.FC<IProductResumeItemProps> = ({ product }) => {
@@ -16,6 +17,10 @@ const ProductResumeItem: React.FC<IProductResumeItemProps> = ({ product }) => {
           Ref: {product.reference} | R$ {product.price.toFixed(2)}
         </Text>
       </Flex>
+      <Status.Root colorPalette={product.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}>
+        <Text fontSize="xs">{product.availability === EAvailabilityStatus.AVAILABLE ? "Disponível" : "Alugado"}</Text>
+        <Status.Indicator />
+      </Status.Root>
     </Flex>
   );
 };

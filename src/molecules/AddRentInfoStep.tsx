@@ -15,15 +15,6 @@ const AddRentInfoStep: React.FC = () => {
   return (
     <Flex flexDir="column" gap={4} align="center">
       <Flex w="full" align="center" justify="space-between" gap="12">
-        <InputField type="date" label="Data do aluguel" error={errors.rentDate} registerProps={register("rentDate")} />
-        <InputField
-          type="date"
-          label="Data do retorno"
-          error={errors.returnDate}
-          registerProps={register("returnDate")}
-        />
-      </Flex>
-      <Flex w="full" align="center" justify="space-between" gap="12">
         <InputField label="Cliente" error={errors.clientName} registerProps={register("clientName")} />
         <InputField label="Contato" error={errors.clientContact} registerProps={register("clientContact")} />
       </Flex>
@@ -32,7 +23,7 @@ const AddRentInfoStep: React.FC = () => {
       <Flex w="full" align="center" justify="space-between" gap="4">
         <InputField
           inputGroupProps={{ startAddon: <Text px="2">R$</Text> }}
-          label="Valor total"
+          label="Desconto"
           error={errors.totalValue}
           registerProps={register("totalValue")}
         />
@@ -42,12 +33,12 @@ const AddRentInfoStep: React.FC = () => {
           error={errors.signal}
           registerProps={register("signal")}
         />
-        <InputField
+        {/* <InputField
           inputGroupProps={{ startAddon: <Text px="2">R$</Text> }}
           label="Valor restante"
           error={errors.remainingValue}
           registerProps={register("remainingValue")}
-        />
+        /> */}
       </Flex>
       <InputAreaField
         label="Observação para recibo"

@@ -1,25 +1,27 @@
 "use client";
 
-import { CloseButton, Dialog, Portal, Flex, Spinner, Checkbox, Steps } from "@chakra-ui/react";
+import { CloseButton, Dialog, Portal, Flex, Spinner, Checkbox, Steps, useDisclosure } from "@chakra-ui/react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { toaster } from "@/atoms/Toaster";
 import { api } from "@/services/api";
-import { useEffect, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { ProductType } from "@/types/entities/ProductType";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import SecondaryButton from "@/atoms/SecondaryButton";
 import { RentInsertDtoWithProduct, RentType } from "@/types/entities/RentType";
 import { EDiscountTypes } from "@/constants/EDiscountType";
 import ProductSelector from "../molecules/ProductSelector";
-import { IncludeConfigType } from "@/services/crud/baseCrudService";
 import AddRentInfoStep from "@/molecules/AddRentInfoStep";
 import AddRentResume from "@/molecules/AddRentResume";
+import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
+import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
+import ConfirmationModal from "@/molecules/ConfirmationModal";
 
 const productSchema = z.object({
-  rentDate: z.date(),
-  returnDate: z.date(),
+  rentDate: z.string(),
+  returnDate: z.string(),
   clientName: z.string(),
   clientContact: z.string(),
   clientAddress: z.string(),
@@ -35,10 +37,15 @@ const productSchema = z.object({
 
 export type RentFormType = z.infer<typeof productSchema>;
 
+type StepsType = {
+  title: string;
+  description: ReactElement;
+};
+
 interface IAddRentModalProps {
   onClose: () => void;
   isOpen: boolean;
-  onSave: (newRent: RentType) => void;
+  onSave?: (newRent: RentType) => void;
   receiptOnEdit: ProductType | null;
 }
 
@@ -46,7 +53,21 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInfiniteAdd, setIsInfiniteAdd] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [products, setProducts] = useState<ProductType[]>([]);
+  const [products, setProducts] = useState<ProductAvailabilityType[]>([]);
+  const [steps, setSteps] = useState<StepsType[]>([
+    {
+      title: "Items",
+      description: <ProductSelector availableProducts={products} />,
+    },
+    {
+      title: "Dados",
+      description: <AddRentInfoStep />,
+    },
+    {
+      title: "Resumo",
+      description: <AddRentResume selectedProducts={[]} />,
+    },
+  ]);
 
   const methods = useForm<RentFormType>({
     resolver: zodResolver(productSchema),
@@ -58,24 +79,16 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       internalObservations: "",
     },
   });
-  const selectedProductIds = useWatch({ control: methods.control, name: "productsIds" });
 
-  const steps = [
-    {
-      title: "Dados",
-      description: <AddRentInfoStep />,
-    },
-    {
-      title: "Items",
-      description: <ProductSelector availableProducts={products} />,
-    },
-    {
-      title: "Step 3",
-      description: (
-        <AddRentResume selectedProducts={products.filter((product) => selectedProductIds.includes(product.id))} />
-      ),
-    },
-  ];
+  const selectedProductIds = useWatch({ control: methods.control, name: "productsIds" });
+  const rentDate = useWatch({ control: methods.control, name: "rentDate" });
+  const returnDate = useWatch({ control: methods.control, name: "returnDate" });
+
+  const {
+    open: isRentWithUnvailableModalOpen,
+    onClose: closeRentWithUnavailableProductModal,
+    onOpen: openRentWithUnavailableProductModal,
+  } = useDisclosure();
 
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -124,11 +137,13 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
         title: "Produto cadastrado!",
       });
 
-      onSave(newRentRequest.data);
-
       methods.reset();
-      setCurrentStep(0);
 
+      if (onSave) {
+        onSave(newRentRequest.data);
+      }
+
+      setCurrentStep(0);
       if (!isInfiniteAdd) onClose();
     } catch (e: unknown) {
       toaster.create({
@@ -157,6 +172,14 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     if (currentStep + 2 > steps.length) {
       const values = methods.getValues();
 
+      const selectedProducts = products.filter(({ product }) => selectedProductIds.includes(product.id));
+
+      if (selectedProducts.some((product) => product.availability !== EAvailabilityStatus.AVAILABLE)) {
+        openRentWithUnavailableProductModal();
+
+        return;
+      }
+
       onSubmit(values);
 
       return;
@@ -175,110 +198,138 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     setCurrentStep(currentStep - 1);
   };
 
+  const getUpdatedSteps = useCallback((): StepsType[] => {
+    return [
+      {
+        title: "Items",
+        description: <ProductSelector availableProducts={products} />,
+      },
+      {
+        title: "Dados",
+        description: <AddRentInfoStep />,
+      },
+      {
+        title: "Resumo",
+        description: (
+          <AddRentResume selectedProducts={products.filter(({ product }) => selectedProductIds.includes(product.id))} />
+        ),
+      },
+    ];
+  }, [products, selectedProductIds]);
+
   const loadProducts = async () => {
     try {
-      const includeConfig: IncludeConfigType = {
-        categories: {
-          table: "categories",
-          foreignKey: "category_id",
-        },
-      };
+      setIsLoading(true);
 
       const productsListRequest = (
-        await api.get("/products", {
+        await api.get("/products/availability", {
           params: {
-            include: JSON.stringify(includeConfig),
-            pageSize: 50,
+            startDate: rentDate,
+            endDate: returnDate,
           },
         })
       ).data;
 
-      setProducts(productsListRequest.data);
+      setProducts(productsListRequest);
     } catch (e: unknown) {
       toaster.create({
         type: "error",
         title: "Erro ao buscar produtos",
         description: (e as Error).message,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    loadProducts();
-  }, []);
+    if (rentDate && returnDate) loadProducts();
+  }, [rentDate, returnDate]);
+
+  useEffect(() => {
+    setSteps(getUpdatedSteps());
+  }, [products]);
 
   return (
-    <FormProvider {...methods}>
-      <Dialog.Root lazyMount open={isOpen} onOpenChange={onClose} placement="center">
-        <Portal>
-          <Dialog.Backdrop />
-          <Dialog.Positioner p="4">
-            <Dialog.Content
-              as="form"
-              p="4"
-              bg="body.400"
-              color="black"
-              onSubmit={methods.handleSubmit(onSubmit)}
-              ref={contentRef}
-              h="75vh"
-              overflowY="auto"
-            >
-              <Dialog.Header py="4">
-                <Dialog.Title>Adicionar aluguel</Dialog.Title>
-              </Dialog.Header>
-              <Dialog.Body>
-                <Steps.Root step={currentStep} onStepChange={(e) => setCurrentStep(e.step)} count={steps.length}>
-                  <Steps.List>
-                    {steps.map((step, index) => (
-                      <Steps.Item key={index} index={index} title={step.title}>
-                        <Steps.Trigger>
-                          <Steps.Indicator />
-                          <Steps.Title>{step.title}</Steps.Title>
-                        </Steps.Trigger>
-                        <Steps.Separator />
-                      </Steps.Item>
-                    ))}
-                  </Steps.List>
-
-                  {steps.map((step, index) => (
-                    <Steps.Content key={index} index={index}>
-                      {step.description}
-                    </Steps.Content>
-                  ))}
-                </Steps.Root>
-              </Dialog.Body>
-              <Dialog.Footer
-                display="flex"
-                alignItems="center"
-                justifyContent={receiptOnEdit ? "flex-end" : "space-between"}
-                pt="8"
+    <>
+      <FormProvider {...methods}>
+        <Dialog.Root lazyMount open={isOpen} onOpenChange={onClose} placement="center">
+          <Portal>
+            <Dialog.Backdrop />
+            <Dialog.Positioner p="4">
+              <Dialog.Content
+                as="form"
+                p="4"
+                bg="body.400"
+                color="black"
+                onSubmit={methods.handleSubmit(onSubmit)}
+                ref={contentRef}
+                h="75vh"
+                overflowY="auto"
               >
-                <Checkbox.Root
-                  checked={isInfiniteAdd}
-                  onCheckedChange={(e) => setIsInfiniteAdd(!!e.checked)}
-                  variant="outline"
+                <Dialog.Header py="4">
+                  <Dialog.Title>Adicionar aluguel</Dialog.Title>
+                </Dialog.Header>
+                <Dialog.Body>
+                  <Steps.Root step={currentStep} onStepChange={(e) => setCurrentStep(e.step)} count={steps.length}>
+                    <Steps.List>
+                      {steps.map((step, index) => (
+                        <Steps.Item key={index} index={index} title={step.title}>
+                          <Steps.Trigger>
+                            <Steps.Indicator />
+                            <Steps.Title>{step.title}</Steps.Title>
+                          </Steps.Trigger>
+                          <Steps.Separator />
+                        </Steps.Item>
+                      ))}
+                    </Steps.List>
+
+                    {steps.map((step, index) => (
+                      <Steps.Content key={index} index={index}>
+                        {step.description}
+                      </Steps.Content>
+                    ))}
+                  </Steps.Root>
+                </Dialog.Body>
+                <Dialog.Footer
+                  display="flex"
+                  alignItems="center"
+                  justifyContent={receiptOnEdit ? "flex-end" : "space-between"}
+                  pt="8"
                 >
-                  <Checkbox.HiddenInput />
-                  <Checkbox.Control />
-                  <Checkbox.Label>Continuar adicionando</Checkbox.Label>
-                </Checkbox.Root>
-                <Flex gap="4">
-                  <SecondaryButton variant="outline" minW="24" onClick={handlePreviousStep}>
-                    Voltar
-                  </SecondaryButton>
-                  <PrimaryButton w="24" type="submit" disabled={isLoading} onClick={handleNextStep}>
-                    {handleNextButtonText()}
-                  </PrimaryButton>
-                </Flex>
-              </Dialog.Footer>
-              <Dialog.CloseTrigger asChild>
-                <CloseButton size="sm" />
-              </Dialog.CloseTrigger>
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
-    </FormProvider>
+                  <Checkbox.Root
+                    checked={isInfiniteAdd}
+                    onCheckedChange={(e) => setIsInfiniteAdd(!!e.checked)}
+                    variant="outline"
+                  >
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control />
+                    <Checkbox.Label>Continuar adicionando</Checkbox.Label>
+                  </Checkbox.Root>
+                  <Flex gap="4">
+                    <SecondaryButton variant="outline" minW="24" onClick={handlePreviousStep}>
+                      Voltar
+                    </SecondaryButton>
+                    <PrimaryButton w="24" type="submit" disabled={isLoading} onClick={handleNextStep}>
+                      {handleNextButtonText()}
+                    </PrimaryButton>
+                  </Flex>
+                </Dialog.Footer>
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton size="sm" />
+                </Dialog.CloseTrigger>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
+        </Dialog.Root>
+      </FormProvider>
+      <ConfirmationModal
+        message="Existem produtos selecionados que não estão disponível nessa data. Deseja salvar o aluguel mesmo assim?"
+        isOpen={isRentWithUnvailableModalOpen}
+        onClose={closeRentWithUnavailableProductModal}
+        onSave={() => onSubmit(methods.getValues())}
+      />
+    </>
   );
 };
 

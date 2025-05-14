@@ -3,12 +3,12 @@
 import ProductResumeItem from "@/atoms/ProductResumeItem";
 import ResumeItem from "@/atoms/ResumeItem";
 import { RentFormType } from "@/organisms/AddRentModal";
-import { ProductType } from "@/types/entities/ProductType";
+import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { Flex } from "@chakra-ui/react";
 import { useFormContext } from "react-hook-form";
 
 interface IAddRentResumeProps {
-  selectedProducts: ProductType[];
+  selectedProducts: ProductAvailabilityType[];
 }
 
 const AddRentResume: React.FC<IAddRentResumeProps> = ({ selectedProducts }) => {

@@ -5,7 +5,7 @@ import PrimaryButton from "@/atoms/PrimaryButton";
 import AddRentModal from "@/organisms/AddRentModal";
 import { DataTable, DataTableColumn } from "@/molecules/DataTable";
 import { RentType } from "@/types/entities/RentType";
-import { Button, ButtonGroup, Steps, useDisclosure } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import { format } from "date-fns";
 import { useState } from "react";
 
@@ -23,10 +23,12 @@ const RentPage = () => {
   ];
 
   return (
-    <PageContainer>
+    <PageContainer flexDir="column" align="center">
       <DataTable columns={columns} data={rents} />
-      <PrimaryButton onClick={onOpen}>Abrir modal</PrimaryButton>
-      <AddRentModal isOpen={open} onClose={onClose} onSave={() => console.log("Save")} receiptOnEdit={null} />
+      <PrimaryButton maxW="120px" onClick={onOpen}>
+        Abrir modal
+      </PrimaryButton>
+      <AddRentModal isOpen={open} onClose={onClose} receiptOnEdit={null} />
     </PageContainer>
   );
 };
