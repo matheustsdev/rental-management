@@ -54,7 +54,7 @@ const ProductSelector: React.FC<IProductSelectorProps> = ({ availableProducts })
   }, [availableProducts, searchText]);
 
   useEffect(() => {
-    console.log("Filtered products >> ", filteredProducts);
+    console.log("Filtered products >> ", rentDate, returnDate);
   }, [filteredProducts]);
 
   return (
@@ -77,12 +77,12 @@ const ProductSelector: React.FC<IProductSelectorProps> = ({ availableProducts })
       />
 
       <Flex align="flex-start" gap="4" flexDir="column" overflowY="auto" w="full">
-        {rentDate === "" && returnDate === "" && (
+        {(!rentDate || !returnDate) && (
           <Flex align="center" justify="center" w="full">
             <Text>Informe a data do aluguel e do retorno</Text>
           </Flex>
         )}
-        {filteredProducts.length === 0 && (
+        {availableProducts.length > 0 && filteredProducts.length === 0 && (
           <Flex align="center" justify="center" w="full">
             <Text>Nenhum aluguel encontrado</Text>
           </Flex>
