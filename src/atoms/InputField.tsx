@@ -20,7 +20,7 @@ const InputField: React.FC<IInputFieldProps> = ({
   ...inputProps
 }) => {
   return (
-    <Field.Root invalid={!!error}>
+    <Field.Root invalid={!!error} gap="0">
       <Field.Label>{label}</Field.Label>
       <InputGroup {...inputGroupProps}>
         <Input px="2" placeholder={placeholder} {...registerProps} {...inputProps} />

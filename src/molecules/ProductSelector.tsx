@@ -7,6 +7,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import ProductSelectorItem from "@/atoms/ProductSelectorItem";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import InputField from "@/atoms/InputField";
+import { EMeasureType } from "@/constants/EMeasureType";
 
 interface IProductSelectorProps {
   availableProducts: ProductAvailabilityType[];
@@ -22,24 +23,30 @@ const ProductSelector: React.FC<IProductSelectorProps> = ({ availableProducts })
     control,
     formState: { errors },
   } = useFormContext<RentFormType>();
-  const productsIds = useWatch({ control, name: "productsIds" });
+  const products = useWatch({ control, name: "products" });
   const rentDate = useWatch({ control, name: "rentDate" });
   const returnDate = useWatch({ control, name: "returnDate" });
 
   const toggleProductSelection = (productAvailability: ProductAvailabilityType) => {
     const { product } = productAvailability;
 
-    if (!productsIds || productsIds.length === 0) {
-      setValue("productsIds", [product.id]);
+    const newFormProduct = {
+      id: product.id,
+      measure_type: product.categories?.measure_type ?? EMeasureType.DRESS,
+      waist: 0,
+    };
+
+    if (!products || products.length === 0) {
+      setValue("products", [newFormProduct]);
 
       return;
     }
 
     setValue(
-      "productsIds",
-      productsIds.some((id) => id === product.id)
-        ? productsIds.filter((id) => id !== product.id)
-        : [...productsIds, product.id]
+      "products",
+      products.some((item) => item.id === product.id)
+        ? products.filter((item) => item.id !== product.id)
+        : [...products, newFormProduct]
     );
   };
 
@@ -92,7 +99,7 @@ const ProductSelector: React.FC<IProductSelectorProps> = ({ availableProducts })
           <ProductSelectorItem
             key={productAvailability.product.id}
             productAvailability={productAvailability}
-            isSelected={productsIds.some((id) => id === productAvailability.product.id)}
+            isSelected={products.some((item) => item.id === productAvailability.product.id)}
             onChangeSelection={toggleProductSelection}
           />
         ))}

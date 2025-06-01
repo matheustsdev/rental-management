@@ -15,6 +15,7 @@ export type Database = {
           deleted: boolean | null
           deleted_at: string | null
           id: string
+          measure_type: Database["public"]["Enums"]["measures_type"] | null
           name: string
           post_return_buffer_days: number | null
           updated_at: string | null
@@ -24,6 +25,7 @@ export type Database = {
           deleted?: boolean | null
           deleted_at?: string | null
           id?: string
+          measure_type?: Database["public"]["Enums"]["measures_type"] | null
           name: string
           post_return_buffer_days?: number | null
           updated_at?: string | null
@@ -33,11 +35,59 @@ export type Database = {
           deleted?: boolean | null
           deleted_at?: string | null
           id?: string
+          measure_type?: Database["public"]["Enums"]["measures_type"] | null
           name?: string
           post_return_buffer_days?: number | null
           updated_at?: string | null
         }
         Relationships: []
+      }
+      product_measures: {
+        Row: {
+          back: number | null
+          bust: number | null
+          created_at: string
+          height: number | null
+          hip: number | null
+          id: string
+          rent_product_fk: string
+          shoulder: number | null
+          sleeve: number | null
+          waist: number | null
+        }
+        Insert: {
+          back?: number | null
+          bust?: number | null
+          created_at?: string
+          height?: number | null
+          hip?: number | null
+          id?: string
+          rent_product_fk: string
+          shoulder?: number | null
+          sleeve?: number | null
+          waist?: number | null
+        }
+        Update: {
+          back?: number | null
+          bust?: number | null
+          created_at?: string
+          height?: number | null
+          hip?: number | null
+          id?: string
+          rent_product_fk?: string
+          shoulder?: number | null
+          sleeve?: number | null
+          waist?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_measures_rent_product_fk_fkey"
+            columns: ["rent_product_fk"]
+            isOneToOne: false
+            referencedRelation: "rent_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       products: {
         Row: {
@@ -450,16 +500,7 @@ export type Database = {
       get_products_with_availability: {
         Args: { p_start_date: string; p_end_date: string }
         Returns: {
-          id: string
-          category_id: string
-          reference: string
-          price: number
-          description: string
-          receipt_description: string
-          created_at: string
-          updated_at: string
-          deleted: boolean
-          deleted_at: string
+          product: Json
           availability: Database["public"]["Enums"]["availability_status"]
           current_rent_id: string
           current_rent_return_date: string
@@ -471,6 +512,7 @@ export type Database = {
     Enums: {
       availability_status: "AVAILABLE" | "UNAVAILABLE" | "BUFFER_OCCUPIED"
       discount_type_enum: "PERCENTAGE" | "FIXED"
+      measures_type: "SUIT" | "DRESS"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -588,6 +630,7 @@ export const Constants = {
     Enums: {
       availability_status: ["AVAILABLE", "UNAVAILABLE", "BUFFER_OCCUPIED"],
       discount_type_enum: ["PERCENTAGE", "FIXED"],
+      measures_type: ["SUIT", "DRESS"],
     },
   },
 } as const

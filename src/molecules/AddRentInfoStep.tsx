@@ -33,12 +33,6 @@ const AddRentInfoStep: React.FC = () => {
           error={errors.signal}
           registerProps={register("signal")}
         />
-        {/* <InputField
-          inputGroupProps={{ startAddon: <Text px="2">R$</Text> }}
-          label="Valor restante"
-          error={errors.remainingValue}
-          registerProps={register("remainingValue")}
-        /> */}
       </Flex>
       <InputAreaField
         label="Observação para recibo"

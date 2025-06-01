@@ -5,10 +5,12 @@ import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 
 interface IProductResumeItemProps {
-  product: ProductAvailabilityType;
+  productAvailability: ProductAvailabilityType;
 }
 
-const ProductResumeItem: React.FC<IProductResumeItemProps> = ({ product }) => {
+const ProductResumeItem: React.FC<IProductResumeItemProps> = ({ productAvailability }) => {
+  const { product } = productAvailability;
+
   return (
     <Flex key={product.id} w="full" borderWidth={1} p={2} borderRadius="md" bg="green.50">
       <Flex flexDir="column" flex={1}>
@@ -17,8 +19,10 @@ const ProductResumeItem: React.FC<IProductResumeItemProps> = ({ product }) => {
           Ref: {product.reference} | R$ {product.price.toFixed(2)}
         </Text>
       </Flex>
-      <Status.Root colorPalette={product.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}>
-        <Text fontSize="xs">{product.availability === EAvailabilityStatus.AVAILABLE ? "Disponível" : "Alugado"}</Text>
+      <Status.Root colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}>
+        <Text fontSize="xs">
+          {productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "Disponível" : "Alugado"}
+        </Text>
         <Status.Indicator />
       </Status.Root>
     </Flex>

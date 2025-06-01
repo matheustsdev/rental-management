@@ -11,15 +11,17 @@ import { ProductType } from "@/types/entities/ProductType";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import SecondaryButton from "@/atoms/SecondaryButton";
 import { RentInsertDtoWithProduct, RentType } from "@/types/entities/RentType";
-import { EDiscountTypes } from "@/constants/EDiscountType";
 import ProductSelector from "../molecules/ProductSelector";
 import AddRentInfoStep from "@/molecules/AddRentInfoStep";
 import AddRentResume from "@/molecules/AddRentResume";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import ConfirmationModal from "@/molecules/ConfirmationModal";
+import ProductMeasures from "@/molecules/ProductMeasures";
+import { EDiscountTypes } from "@/constants/EDiscountType";
+import { EMeasureType } from "@/constants/EMeasureType";
 
-const productSchema = z.object({
+const schema = z.object({
   rentDate: z.string(),
   returnDate: z.string(),
   clientName: z.string(),
@@ -32,10 +34,44 @@ const productSchema = z.object({
   receiptObservations: z.string(),
   discountValue: z.number(),
   discountType: z.nativeEnum(EDiscountTypes),
-  productsIds: z.array(z.string()),
+  products: z.array(
+    z
+      .object({
+        id: z.string(),
+        measure_type: z.nativeEnum(EMeasureType),
+        waist: z.number(),
+        bust: z.number().optional(),
+        hip: z.number().optional(),
+        shoulder: z.number().optional(),
+        sleeve: z.number().optional(),
+        height: z.number().optional(),
+        back: z.number().optional(),
+      })
+      .superRefine((data, ctx) => {
+        const { measure_type, back, bust, height, hip, shoulder, sleeve } = data;
+
+        if (measure_type === EMeasureType.DRESS) {
+          if (!bust || !hip || !shoulder) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "As medidas são obrigatórias",
+              path: ["bust", "hip", "shoulder"],
+            });
+          }
+        } else if (measure_type === EMeasureType.SUIT) {
+          if (!sleeve || !height || !back) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "As medidas são obrigatórias",
+              path: ["sleeve", "height", "back"],
+            });
+          }
+        }
+      })
+  ),
 });
 
-export type RentFormType = z.infer<typeof productSchema>;
+export type RentFormType = z.infer<typeof schema>;
 
 type StepsType = {
   title: string;
@@ -54,6 +90,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   const [isInfiniteAdd, setIsInfiniteAdd] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [products, setProducts] = useState<ProductAvailabilityType[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<ProductAvailabilityType[]>([]);
   const [steps, setSteps] = useState<StepsType[]>([
     {
       title: "Items",
@@ -70,9 +107,9 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   ]);
 
   const methods = useForm<RentFormType>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(schema),
     defaultValues: {
-      productsIds: [],
+      products: [],
       discountType: "FIXED",
       discountValue: 0,
       receiptObservations: "",
@@ -80,7 +117,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     },
   });
 
-  const selectedProductIds = useWatch({ control: methods.control, name: "productsIds" });
+  const formSelectedProducts = useWatch({ control: methods.control, name: "products" });
   const rentDate = useWatch({ control: methods.control, name: "rentDate" });
   const returnDate = useWatch({ control: methods.control, name: "returnDate" });
 
@@ -101,7 +138,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
         internalObservations,
         discountType,
         discountValue,
-        productsIds,
+        products,
         receiptObservations,
         remainingValue,
         rentDate,
@@ -118,7 +155,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
         client_name: clientName,
         discount_type: discountType,
         discount_value: discountValue,
-        productIds: productsIds,
+        products,
         remaining_value: remainingValue,
         rent_date: new Date(rentDate).toISOString(),
         return_date: new Date(returnDate).toISOString(),
@@ -172,7 +209,9 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     if (currentStep + 2 > steps.length) {
       const values = methods.getValues();
 
-      const selectedProducts = products.filter(({ product }) => selectedProductIds.includes(product.id));
+      const selectedProducts = products.filter(({ product }) =>
+        formSelectedProducts.some((item) => item.id === product.id)
+      );
 
       if (selectedProducts.some((product) => product.availability !== EAvailabilityStatus.AVAILABLE)) {
         openRentWithUnavailableProductModal();
@@ -205,17 +244,19 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
         description: <ProductSelector availableProducts={products} />,
       },
       {
+        title: "Medidas",
+        description: <ProductMeasures selectedProducts={selectedProducts} />,
+      },
+      {
         title: "Dados",
         description: <AddRentInfoStep />,
       },
       {
         title: "Resumo",
-        description: (
-          <AddRentResume selectedProducts={products.filter(({ product }) => selectedProductIds.includes(product.id))} />
-        ),
+        description: <AddRentResume selectedProducts={selectedProducts} />,
       },
     ];
-  }, [products, selectedProductIds]);
+  }, [products, selectedProducts]);
 
   const loadProducts = async () => {
     try {
@@ -247,8 +288,14 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   }, [rentDate, returnDate]);
 
   useEffect(() => {
-    setSteps(getUpdatedSteps());
-  }, [products]);
+    setSelectedProducts(products.filter(({ product }) => formSelectedProducts.some((item) => item.id === product.id)));
+  }, [formSelectedProducts, products]);
+
+  useEffect(() => {
+    const newSteps = getUpdatedSteps();
+
+    setSteps(newSteps);
+  }, [products, selectedProducts]);
 
   return (
     <>

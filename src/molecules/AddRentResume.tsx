@@ -33,7 +33,7 @@ const AddRentResume: React.FC<IAddRentResumeProps> = ({ selectedProducts }) => {
       <ResumeItem prop="Observação interna" value={values?.internalObservations} />
       <Flex flexDir="column" align="flex-start" pt="4" gap="2">
         {selectedProducts.map((product) => (
-          <ProductResumeItem key={product.id} product={product} />
+          <ProductResumeItem key={product.product.id} productAvailability={product} />
         ))}
       </Flex>
     </Flex>
