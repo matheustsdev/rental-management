@@ -7,18 +7,17 @@ import { measureFieldsLabels } from "@/constants/MeasureFields";
 import InputField from "./InputField";
 import { Path, useFormContext, useWatch } from "react-hook-form";
 import { RentFormType } from "@/organisms/AddRentModal";
-import { useEffect } from "react";
 
 interface IProductMeasureItemProps {
   productAvailability: ProductAvailabilityType;
-  onChangeSelection?: (product: ProductAvailabilityType) => void;
 }
 
-const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailability, onChangeSelection }) => {
+const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailability }) => {
   const {
     control,
     register,
     formState: { errors },
+    getValues,
   } = useFormContext<RentFormType>();
 
   const { product } = productAvailability;
@@ -26,10 +25,6 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
   const labels = mType ? measureFieldsLabels[mType] : measureFieldsLabels.DRESS;
 
   const formProduct = useWatch({ control, name: "products" });
-
-  useEffect(() => {
-    console.log("Products >> ", formProduct);
-  }, [formProduct]);
 
   return (
     <Accordion.Item
@@ -67,6 +62,13 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
 
             const name = `products.${productIndex}.${field}` as Path<RentFormType>;
 
+            const fieldName = field as keyof typeof labels;
+
+            const inputError =
+              errors.products && errors.products[productIndex] ? errors.products[productIndex][fieldName] : undefined;
+
+            console.log("Data >> ", getValues(`products.${productIndex}`));
+
             return (
               <InputField
                 key={name}
@@ -74,6 +76,7 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
                 registerProps={register(name, { valueAsNumber: true })}
                 type="number"
                 step={0.1}
+                error={inputError}
               />
             );
           })}

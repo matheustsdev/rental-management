@@ -6,6 +6,8 @@ import { RentFormType } from "@/organisms/AddRentModal";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { Flex } from "@chakra-ui/react";
 import { useFormContext } from "react-hook-form";
+import { formatDate } from "@/utils/formatDate";
+import Currency from "@/models/Currency";
 
 interface IAddRentResumeProps {
   selectedProducts: ProductAvailabilityType[];
@@ -19,16 +21,19 @@ const AddRentResume: React.FC<IAddRentResumeProps> = ({ selectedProducts }) => {
   return (
     <Flex flexDir="column" overflowY="auto">
       <ResumeItem prop="Cliente" value={values.clientName ?? ""} />
-      <ResumeItem prop="Data do aluguel" value={values.rentDate ? new Date(values.rentDate).toDateString() : ""} />
+      <ResumeItem
+        prop="Data do aluguel"
+        value={values.rentDate ? formatDate(new Date(values.rentDate), "dd 'de' MMMM") : ""}
+      />
       <ResumeItem
         prop="Data da devolução"
-        value={values.returnDate ? new Date(values.returnDate).toDateString() : ""}
+        value={values.returnDate ? formatDate(new Date(values.returnDate), "dd 'de' MMMM") : ""}
       />
-      <ResumeItem prop="Valor total" value={values.totalValue?.toString()} />
-      <ResumeItem prop="Desconto" value={values.discountValue?.toString()} />
-      <ResumeItem prop="Valor a pagar" value={(values.totalValue - values.discountValue)?.toString()} />
-      <ResumeItem prop="Sinal" value={values.signal?.toString()} />
-      <ResumeItem prop="Restante" value={values.remainingValue?.toString()} />
+      <ResumeItem prop="Valor total" value={new Currency(values.totalValue).toString()} />
+      <ResumeItem prop="Desconto" value={new Currency(values.discountValue).toString()} />
+      <ResumeItem prop="Valor a pagar" value={new Currency(values.totalValue - values.discountValue).toString()} />
+      <ResumeItem prop="Sinal" value={new Currency(values.signal).toString()} />
+      <ResumeItem prop="Restante" value={new Currency(values.remainingValue).toString()} />
       <ResumeItem prop="Observação para recibo" value={values?.receiptObservations} />
       <ResumeItem prop="Observação interna" value={values?.internalObservations} />
       <Flex flexDir="column" align="flex-start" pt="4" gap="2">

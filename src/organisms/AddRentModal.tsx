@@ -39,7 +39,7 @@ const schema = z.object({
       .object({
         id: z.string(),
         measure_type: z.nativeEnum(EMeasureType),
-        waist: z.number(),
+        waist: z.number().optional(),
         bust: z.number().optional(),
         hip: z.number().optional(),
         shoulder: z.number().optional(),
@@ -55,7 +55,7 @@ const schema = z.object({
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: "As medidas são obrigatórias",
-              path: ["bust", "hip", "shoulder"],
+              path: ["waist", "bust", "hip", "shoulder"],
             });
           }
         } else if (measure_type === EMeasureType.SUIT) {
@@ -63,7 +63,7 @@ const schema = z.object({
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
               message: "As medidas são obrigatórias",
-              path: ["sleeve", "height", "back"],
+              path: ["waist", "sleeve", "height", "back"],
             });
           }
         }
@@ -115,7 +115,10 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       receiptObservations: "",
       internalObservations: "",
     },
+    mode: "onBlur",
   });
+
+  const form = useWatch({ control: methods.control });
 
   const formSelectedProducts = useWatch({ control: methods.control, name: "products" });
   const rentDate = useWatch({ control: methods.control, name: "rentDate" });
@@ -296,6 +299,10 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
 
     setSteps(newSteps);
   }, [products, selectedProducts]);
+
+  useEffect(() => {
+    console.log("Form >> ", form);
+  }, [form]);
 
   return (
     <>

@@ -7,16 +7,11 @@ export async function GET(request: NextRequest) {
     const startDate = params.get("startDate");
     const endDate = params.get("endDate");
 
-    console.log("Param >> ", startDate);
-
     const { data, error } = await supabase.rpc("get_products_with_availability", {
       p_start_date: startDate ? new Date(startDate) : new Date(),
       p_end_date: endDate ? new Date(endDate) : new Date(),
     });
 
-    console.log("Params >> ", startDate, endDate);
-    console.log("Error >> ", error);
-    console.log("Data >> ", data);
     if (error) throw error;
 
     return NextResponse.json(data, { status: 200 });

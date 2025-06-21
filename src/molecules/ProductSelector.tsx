@@ -34,6 +34,12 @@ const ProductSelector: React.FC<IProductSelectorProps> = ({ availableProducts })
       id: product.id,
       measure_type: product.categories?.measure_type ?? EMeasureType.DRESS,
       waist: 0,
+      bust: 0,
+      hip: 0,
+      shoulder: 0,
+      sleeve: 0,
+      height: 0,
+      back: 0,
     };
 
     if (!products || products.length === 0) {
@@ -59,10 +65,6 @@ const ProductSelector: React.FC<IProductSelectorProps> = ({ availableProducts })
 
     setFilteredProducts(searchText ? products : availableProducts);
   }, [availableProducts, searchText]);
-
-  useEffect(() => {
-    console.log("Filtered products >> ", rentDate, returnDate);
-  }, [filteredProducts]);
 
   return (
     <Flex flexDir="column" gap={4} align="center" w="full">
