@@ -1,7 +1,7 @@
 "use client";
 
 import { CloseButton, Dialog, Portal, Flex, Spinner, Checkbox, Steps, useDisclosure } from "@chakra-ui/react";
-import { z } from "zod";
+import { z, ZodRawShape } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { toaster } from "@/atoms/Toaster";
@@ -10,7 +10,7 @@ import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import { ProductType } from "@/types/entities/ProductType";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import SecondaryButton from "@/atoms/SecondaryButton";
-import { RentInsertDtoWithProduct, RentType } from "@/types/entities/RentType";
+import { ProductWithMeasureRentDtoType, RentInsertDtoWithProduct, RentType } from "@/types/entities/RentType";
 import ProductSelector from "../molecules/ProductSelector";
 import AddRentInfoStep from "@/molecules/AddRentInfoStep";
 import AddRentResume from "@/molecules/AddRentResume";
@@ -21,62 +21,81 @@ import ProductMeasures from "@/molecules/ProductMeasures";
 import { EDiscountTypes } from "@/constants/EDiscountType";
 import { EMeasureType } from "@/constants/EMeasureType";
 
-const schema = z.object({
-  rentDate: z.string(),
-  returnDate: z.string(),
+const productSelectorSchema = z.object({
+  rentDate: z.string().nonempty("Informe a data de saída"),
+  returnDate: z.string().nonempty("Informe a data de devolução"),
+  productIds: z
+    .array(z.string(), { required_error: "Selecione pelo menos um produto" })
+    .min(1, "Selecione pelo menos um produto"),
+  allAvailableProducts: z.array(z.any()),
+});
+
+const productMeasuresSchema = z.object({
+  products: z
+    .array(
+      z
+        .object({
+          id: z.string(),
+          measure_type: z.enum([EMeasureType.DRESS, EMeasureType.SUIT]),
+          waist: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
+          bust: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
+          hip: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
+          shoulder: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
+          sleeve: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
+          height: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
+          back: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
+        })
+        .superRefine((data, ctx) => {
+          const { measure_type, back, bust, height, hip, shoulder, sleeve } = data;
+
+          if (measure_type === EMeasureType.DRESS) {
+            if (!bust || !hip || !shoulder) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "As medidas são obrigatórias",
+                path: ["waist", "bust", "hip", "shoulder"],
+              });
+            }
+          } else if (measure_type === EMeasureType.SUIT) {
+            if (!sleeve || !height || !back) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "As medidas são obrigatórias",
+                path: ["waist", "sleeve", "height", "back"],
+              });
+            }
+          }
+        })
+    )
+    .min(1, "Selecione pelo menos um produto"),
+});
+
+const addRentInfoSchema = z.object({
   clientName: z.string(),
   clientContact: z.string(),
   clientAddress: z.string(),
   totalValue: z.number(),
-  signal: z.number(),
+  signal: z.number({ invalid_type_error: "Informe um número válido" }),
   remainingValue: z.number(),
   internalObservations: z.string(),
   receiptObservations: z.string(),
   discountValue: z.number(),
-  discountType: z.nativeEnum(EDiscountTypes),
-  products: z.array(
-    z
-      .object({
-        id: z.string(),
-        measure_type: z.nativeEnum(EMeasureType),
-        waist: z.number().optional(),
-        bust: z.number().optional(),
-        hip: z.number().optional(),
-        shoulder: z.number().optional(),
-        sleeve: z.number().optional(),
-        height: z.number().optional(),
-        back: z.number().optional(),
-      })
-      .superRefine((data, ctx) => {
-        const { measure_type, back, bust, height, hip, shoulder, sleeve } = data;
-
-        if (measure_type === EMeasureType.DRESS) {
-          if (!bust || !hip || !shoulder) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "As medidas são obrigatórias",
-              path: ["waist", "bust", "hip", "shoulder"],
-            });
-          }
-        } else if (measure_type === EMeasureType.SUIT) {
-          if (!sleeve || !height || !back) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "As medidas são obrigatórias",
-              path: ["waist", "sleeve", "height", "back"],
-            });
-          }
-        }
-      })
-  ),
+  discountType: z.enum([EDiscountTypes.FIXED, EDiscountTypes.PERCENTAGE]),
 });
+
+// Combine all schemas
+const schema = productSelectorSchema.merge(addRentInfoSchema).merge(productMeasuresSchema);
 
 export type RentFormType = z.infer<typeof schema>;
 
 type StepsType = {
   title: string;
   description: ReactElement;
+  schema?: z.ZodObject<ZodRawShape>;
+  isValid: boolean;
 };
+
+type SchemaKeys = keyof RentFormType;
 
 interface IAddRentModalProps {
   onClose: () => void;
@@ -89,20 +108,29 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInfiniteAdd, setIsInfiniteAdd] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [products, setProducts] = useState<ProductAvailabilityType[]>([]);
-  const [selectedProducts, setSelectedProducts] = useState<ProductAvailabilityType[]>([]);
   const [steps, setSteps] = useState<StepsType[]>([
     {
       title: "Items",
-      description: <ProductSelector availableProducts={products} />,
+      description: <ProductSelector />,
+      schema: productSelectorSchema,
+      isValid: true,
+    },
+    {
+      title: "Medidas",
+      description: <ProductMeasures />,
+      schema: productMeasuresSchema,
+      isValid: false,
     },
     {
       title: "Dados",
       description: <AddRentInfoStep />,
+      schema: addRentInfoSchema,
+      isValid: false,
     },
     {
       title: "Resumo",
       description: <AddRentResume selectedProducts={[]} />,
+      isValid: false,
     },
   ]);
 
@@ -110,17 +138,17 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     resolver: zodResolver(schema),
     defaultValues: {
       products: [],
-      discountType: "FIXED",
-      discountValue: 0,
-      receiptObservations: "",
+      productIds: [],
+      discountType: EDiscountTypes.FIXED,
       internalObservations: "",
+      receiptObservations: "",
+      allAvailableProducts: [],
+      remainingValue: 0,
     },
-    mode: "onBlur",
   });
 
-  const form = useWatch({ control: methods.control });
-
   const formSelectedProducts = useWatch({ control: methods.control, name: "products" });
+  const availableProducts = useWatch({ control: methods.control, name: "allAvailableProducts" });
   const rentDate = useWatch({ control: methods.control, name: "rentDate" });
   const returnDate = useWatch({ control: methods.control, name: "returnDate" });
 
@@ -131,6 +159,25 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   } = useDisclosure();
 
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const validateCurrentStep = async (): Promise<boolean> => {
+    const step = steps[currentStep];
+    if (!step.schema) return true; // Se não houver schema, pule a validação
+
+    try {
+      // Extrai os campos do schema do passo atual
+      const fieldNames = Object.keys(step.schema.shape) as SchemaKeys[];
+
+      // Valida apenas os campos do schema atual
+      const isValid = await methods.trigger(fieldNames);
+
+      console.log("Is valid >> ", isValid);
+      return isValid;
+    } catch (error) {
+      console.error("Erro ao validar o formulário:", error);
+      return false;
+    }
+  };
 
   const onSubmit = async (data: RentFormType) => {
     try {
@@ -208,11 +255,24 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     return "Próximo";
   };
 
-  const handleNextStep = () => {
+  const handleNextStep = async () => {
+    const isValidStep = await validateCurrentStep();
+
+    if (!isValidStep) {
+      // Se a validação falhar, não avance para o próximo passo
+      toaster.create({
+        type: "error",
+        title: "Erro de validação",
+        description: "Por favor, corrija os erros no formulário.",
+      });
+
+      return;
+    }
+
     if (currentStep + 2 > steps.length) {
       const values = methods.getValues();
 
-      const selectedProducts = products.filter(({ product }) =>
+      const selectedProducts = availableProducts.filter(({ product }) =>
         formSelectedProducts.some((item) => item.id === product.id)
       );
 
@@ -230,14 +290,20 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     setCurrentStep(currentStep + 1);
   };
 
-  const handlePreviousStep = () => {
+  const handlePreviousStep = (stepIndex: number) => {
     if (currentStep === 0) {
       onClose();
 
       return;
     }
 
-    setCurrentStep(currentStep - 1);
+    setCurrentStep(stepIndex);
+  };
+
+  const handleUpdateStep = async (stepIndex: number) => {
+    if (stepIndex > currentStep) return await handleNextStep();
+
+    return handlePreviousStep(stepIndex);
   };
 
   const getUpdatedSteps = useCallback((): StepsType[] => {
@@ -245,26 +311,31 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       {
         title: "Items",
         description: <ProductSelector availableProducts={products} />,
+        schema: productSelectorSchema,
+        isValid: true,
       },
       {
         title: "Medidas",
         description: <ProductMeasures selectedProducts={selectedProducts} />,
+        schema: productMeasuresSchema,
+        isValid: false,
       },
       {
         title: "Dados",
         description: <AddRentInfoStep />,
+        schema: addRentInfoSchema,
+        isValid: false,
       },
       {
         title: "Resumo",
-        description: <AddRentResume selectedProducts={selectedProducts} />,
+        description: <AddRentResume selectedProducts={[]} />,
+        isValid: false,
       },
     ];
-  }, [products, selectedProducts]);
+  }, []);
 
   const loadProducts = async () => {
     try {
-      setIsLoading(true);
-
       const productsListRequest = (
         await api.get("/products/availability", {
           params: {
@@ -274,15 +345,13 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
         })
       ).data;
 
-      setProducts(productsListRequest);
+      methods.setValue("allAvailableProducts", productsListRequest);
     } catch (e: unknown) {
       toaster.create({
         type: "error",
         title: "Erro ao buscar produtos",
         description: (e as Error).message,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -290,19 +359,22 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     if (rentDate && returnDate) loadProducts();
   }, [rentDate, returnDate]);
 
-  useEffect(() => {
-    setSelectedProducts(products.filter(({ product }) => formSelectedProducts.some((item) => item.id === product.id)));
-  }, [formSelectedProducts, products]);
+  // useEffect(() => {
+  //   const newSteps = getUpdatedSteps();
+
+  //   setSteps(newSteps);
+  // }, [products, selectedProducts]);
 
   useEffect(() => {
-    const newSteps = getUpdatedSteps();
+    const productValue = formSelectedProducts.reduce(
+      (acc, product) => acc + (availableProducts.find((item) => item.product.id === product.id)?.price ?? 0),
+      0
+    );
 
-    setSteps(newSteps);
-  }, [products, selectedProducts]);
+    methods.setValue("totalValue", productValue);
 
-  useEffect(() => {
-    console.log("Form >> ", form);
-  }, [form]);
+    console.log("Erros >> ", methods.formState.errors);
+  }, [methods, formSelectedProducts]);
 
   return (
     <>
@@ -321,15 +393,16 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
                 h="75vh"
                 overflowY="auto"
               >
+                p
                 <Dialog.Header py="4">
                   <Dialog.Title>Adicionar aluguel</Dialog.Title>
                 </Dialog.Header>
                 <Dialog.Body>
-                  <Steps.Root step={currentStep} onStepChange={(e) => setCurrentStep(e.step)} count={steps.length}>
+                  <Steps.Root step={currentStep} onStepChange={(e) => handleUpdateStep(e.step)} count={steps.length}>
                     <Steps.List>
                       {steps.map((step, index) => (
                         <Steps.Item key={index} index={index} title={step.title}>
-                          <Steps.Trigger>
+                          <Steps.Trigger type="button">
                             <Steps.Indicator />
                             <Steps.Title>{step.title}</Steps.Title>
                           </Steps.Trigger>
@@ -361,10 +434,15 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
                     <Checkbox.Label>Continuar adicionando</Checkbox.Label>
                   </Checkbox.Root>
                   <Flex gap="4">
-                    <SecondaryButton variant="outline" minW="24" onClick={handlePreviousStep}>
+                    <SecondaryButton
+                      variant="outline"
+                      type="button"
+                      minW="24"
+                      onClick={() => handlePreviousStep(currentStep - 1)}
+                    >
                       Voltar
                     </SecondaryButton>
-                    <PrimaryButton w="24" type="submit" disabled={isLoading} onClick={handleNextStep}>
+                    <PrimaryButton w="24" type="button" disabled={isLoading} onClick={handleNextStep}>
                       {handleNextButtonText()}
                     </PrimaryButton>
                   </Flex>
@@ -381,7 +459,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
         message="Existem produtos selecionados que não estão disponível nessa data. Deseja salvar o aluguel mesmo assim?"
         isOpen={isRentWithUnvailableModalOpen}
         onClose={closeRentWithUnavailableProductModal}
-        onSave={() => onSubmit(methods.getValues())}
+        onSave={() => console.log("sdsdsd")}
       />
     </>
   );

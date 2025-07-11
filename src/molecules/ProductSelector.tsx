@@ -1,6 +1,6 @@
 "use client";
 
-import { Flex, Input, Text } from "@chakra-ui/react";
+import { Field, Flex, Input, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { RentFormType } from "@/organisms/AddRentModal";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -8,14 +8,11 @@ import ProductSelectorItem from "@/atoms/ProductSelectorItem";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import InputField from "@/atoms/InputField";
 import { EMeasureType } from "@/constants/EMeasureType";
+import { ProductWithMeasureRentDtoType } from "@/types/entities/RentType";
 
-interface IProductSelectorProps {
-  availableProducts: ProductAvailabilityType[];
-}
-
-const ProductSelector: React.FC<IProductSelectorProps> = ({ availableProducts }) => {
+const ProductSelector: React.FC = () => {
   const [searchText, setSearchText] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState<ProductAvailabilityType[]>(availableProducts);
+  const [filteredProducts, setFilteredProducts] = useState<ProductAvailabilityType[]>([]);
 
   const {
     setValue,
@@ -24,35 +21,41 @@ const ProductSelector: React.FC<IProductSelectorProps> = ({ availableProducts })
     formState: { errors },
   } = useFormContext<RentFormType>();
   const products = useWatch({ control, name: "products" });
+  const productsIds = useWatch({ control, name: "productIds" });
   const rentDate = useWatch({ control, name: "rentDate" });
   const returnDate = useWatch({ control, name: "returnDate" });
+  const availableProducts = useWatch({ control, name: "allAvailableProducts" });
 
   const toggleProductSelection = (productAvailability: ProductAvailabilityType) => {
     const { product } = productAvailability;
 
-    const newFormProduct = {
+    const newFormProduct: ProductWithMeasureRentDtoType = {
       id: product.id,
       measure_type: product.categories?.measure_type ?? EMeasureType.DRESS,
-      waist: 0,
-      bust: 0,
-      hip: 0,
-      shoulder: 0,
-      sleeve: 0,
-      height: 0,
-      back: 0,
+      waist: undefined,
+      bust: undefined,
+      hip: undefined,
+      shoulder: undefined,
+      sleeve: undefined,
+      height: undefined,
+      back: undefined,
     };
 
     if (!products || products.length === 0) {
       setValue("products", [newFormProduct]);
+      setValue("productIds", [newFormProduct.id]);
 
       return;
     }
 
+    const newProductList: ProductWithMeasureRentDtoType[] = products.some((item) => item.id === product.id)
+      ? products.filter((item) => item.id !== product.id)
+      : [...products, newFormProduct];
+
+    setValue("products", newProductList);
     setValue(
-      "products",
-      products.some((item) => item.id === product.id)
-        ? products.filter((item) => item.id !== product.id)
-        : [...products, newFormProduct]
+      "productIds",
+      newProductList.map((product) => product.id)
     );
   };
 
@@ -72,18 +75,20 @@ const ProductSelector: React.FC<IProductSelectorProps> = ({ availableProducts })
         <InputField type="date" label="Data de saída" error={errors.rentDate} registerProps={register("rentDate")} />
         <InputField
           type="date"
-          label="Data do retorno"
+          label="Data de devolução"
           error={errors.returnDate}
           registerProps={register("returnDate")}
         />
       </Flex>
-      <Input
-        placeholder="Buscar produto..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        mb={4}
-        px="4"
-      />
+      <Field.Root invalid={!!errors.productIds?.message} mb={4}>
+        <Input
+          placeholder="Buscar produto..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          px="4"
+        />
+        <Field.ErrorText>{errors.productIds?.message}</Field.ErrorText>
+      </Field.Root>
 
       <Flex align="flex-start" gap="4" flexDir="column" overflowY="auto" w="full">
         {(!rentDate || !returnDate) && (

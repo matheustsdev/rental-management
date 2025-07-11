@@ -1,5 +1,4 @@
 "use client";
-
 import { Input, InputProps, Field, InputGroup, InputGroupProps } from "@chakra-ui/react";
 import { UseFormRegisterReturn, FieldError } from "react-hook-form";
 
@@ -19,11 +18,47 @@ const InputField: React.FC<IInputFieldProps> = ({
   inputGroupProps,
   ...inputProps
 }) => {
+  // separa o onChange original do RHF
+  const { onChange: registerOnChange, ...restRegister } = registerProps || {};
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (registerOnChange) {
+      if (inputProps.type === "number") {
+        const rawValue = e.target.value;
+        const numeric = rawValue === "" ? undefined : parseFloat(rawValue);
+
+        // Clone event changing the target value
+        const syntheticEvent = {
+          ...e,
+          target: { ...e.target, value: numeric },
+        } as unknown as React.ChangeEvent<HTMLInputElement>;
+
+        console.log("enter >> ", inputProps.type, syntheticEvent);
+        registerOnChange(syntheticEvent);
+
+        return;
+      }
+
+      if (inputProps.type === "date") {
+        const rawValue = e.target.value;
+        const dateValue = rawValue ? new Date(rawValue) : undefined;
+        const syntheticEvent = {
+          ...e,
+          target: { ...e.target, value: dateValue },
+        } as unknown as React.ChangeEvent<HTMLInputElement>;
+
+        registerOnChange(syntheticEvent);
+      }
+
+      registerOnChange(e);
+    }
+  };
+
   return (
-    <Field.Root invalid={!!error} gap="0">
+    <Field.Root invalid={!!error} gap="0" minH="20">
       <Field.Label>{label}</Field.Label>
       <InputGroup {...inputGroupProps}>
-        <Input px="2" placeholder={placeholder} {...registerProps} {...inputProps} />
+        <Input px="2" placeholder={placeholder} {...inputProps} {...restRegister} onChange={handleChange} />
       </InputGroup>
       <Field.ErrorText>{error?.message}</Field.ErrorText>
     </Field.Root>

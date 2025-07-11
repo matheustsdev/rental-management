@@ -4,16 +4,18 @@ import { EntityInsertDtoType, EntityType, EntityUpdateDtoType } from "../EntityT
 export type RentType = EntityType<"rents">;
 export type RentInsertDtoType = EntityInsertDtoType<"rents">;
 export type RentUpdateDtoType = EntityUpdateDtoType<"rents">;
-export type RentInsertDtoWithProduct = RentInsertDtoType & {
-  products: {
+export type ProductWithMeasureRentDtoType = {
     id: string,
     measure_type: keyof typeof EMeasureType,
-    waist: number,
+    waist?: number,
     bust?: number,
     hip?: number,
     shoulder?: number,
     sleeve?: number,
     height?: number,
     back?: number,
-  }[];
+};
+
+export type RentInsertDtoWithProduct = RentInsertDtoType & {
+  products: ProductWithMeasureRentDtoType[]
 };

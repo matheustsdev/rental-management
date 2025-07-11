@@ -17,7 +17,6 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
     control,
     register,
     formState: { errors },
-    getValues,
   } = useFormContext<RentFormType>();
 
   const { product } = productAvailability;
@@ -66,8 +65,6 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
 
             const inputError =
               errors.products && errors.products[productIndex] ? errors.products[productIndex][fieldName] : undefined;
-
-            console.log("Data >> ", getValues(`products.${productIndex}`));
 
             return (
               <InputField

@@ -22,16 +22,18 @@ const AddRentInfoStep: React.FC = () => {
 
       <Flex w="full" align="center" justify="space-between" gap="4">
         <InputField
+          type="number"
           inputGroupProps={{ startAddon: <Text px="2">R$</Text> }}
           label="Desconto"
-          error={errors.totalValue}
-          registerProps={register("totalValue")}
+          error={errors.discountValue}
+          registerProps={register("discountValue", { valueAsNumber: true })}
         />
         <InputField
+          type="number"
           inputGroupProps={{ startAddon: <Text px="2">R$</Text> }}
           label="Sinal"
           error={errors.signal}
-          registerProps={register("signal")}
+          registerProps={register("signal", { valueAsNumber: true })}
         />
       </Flex>
       <InputAreaField
