@@ -1,16 +1,39 @@
 "use client";
 
 import { Flex, Text } from "@chakra-ui/react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import InputField from "@/atoms/InputField";
 import InputAreaField from "@/atoms/InputAreaField";
 import { RentFormType } from "@/organisms/AddRentModal";
+import { useEffect } from "react";
+import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 
 const AddRentInfoStep: React.FC = () => {
   const {
     register,
+    control,
+    setValue,
     formState: { errors },
   } = useFormContext<RentFormType>();
+
+  const formSelectedProducts = useWatch({ control, name: "products" });
+  const availableProducts = useWatch({ control, name: "allAvailableProducts" });
+  const discountValue = useWatch({ control, name: "discountValue" });
+  const signal = useWatch({ control, name: "signal" });
+
+  useEffect(() => {
+    const productsWithAvailabilitySelected: ProductAvailabilityType[] = availableProducts.filter((availableProduct) =>
+      formSelectedProducts.some((product) => product.id === availableProduct.product.id)
+    );
+
+    const productValue = productsWithAvailabilitySelected.reduce((acc, item) => acc + item.product.price, 0);
+
+    console.log("Data >> ", productValue, signal, discountValue);
+
+    setValue("totalValue", productValue);
+    setValue("finalTotalValue", productValue - (discountValue ?? 0));
+    setValue("remainingValue", productValue - (discountValue ?? 0) - (signal ?? 0));
+  }, [formSelectedProducts, signal, discountValue, availableProducts, setValue]);
 
   return (
     <Flex flexDir="column" gap={4} align="center">

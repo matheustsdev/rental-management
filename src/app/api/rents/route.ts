@@ -5,6 +5,7 @@ import { rentService } from "@/services/crud/rentService";
 import { supabase } from "@/services/supabase";
 import { RentInsertDtoWithProduct } from "@/types/entities/RentType";
 import { EDiscountTypes } from "@/constants/EDiscountType";
+import { Database } from "@/types/supabase.types";
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,20 +66,17 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as RentInsertDtoWithProduct;
 
-    const getDiscountTypeEnum = () => {
-      if (!body.discount_type) return null;
-
-      if (body.discount_type === EDiscountTypes.FIXED) return EDiscountTypes.FIXED;
-
-      return EDiscountTypes.PERCENTAGE;
-    };
+    // Conversão direta usando a tipagem do Supabase
+    const discountType = body.discount_type 
+      ? body.discount_type as Database['public']['Enums']['discount_type_enum'] 
+      : null;
 
     const { data: rentId, error } = await supabase.rpc("create_rent_with_products", {
       p_client_name: body.client_name,
       p_rent_date: body.rent_date,
       p_total_value: body.total_value,
       p_discount_value: body.discount_value,
-      p_discount_type: getDiscountTypeEnum(),
+      p_discount_type: discountType, 
       p_internal_observations: body.internal_observations,
       p_receipt_observations: body.receipt_observations,
       p_remaining_value: body.remaining_value,
@@ -86,8 +84,12 @@ export async function POST(request: NextRequest) {
       p_signal_value: body.signal_value,
       p_address: body.address,
       p_phone: body.phone,
-      p_product_ids: body.productIds,
+      p_product_ids: body.products.map((item) => item.id),
     });
+
+    console.log("Error >> ", error);
+    console.log('Discount Type:', body.discount_type);
+    console.log('Discount Type Type:', typeof body.discount_type);
 
     if (error) throw error;
 
@@ -109,3 +111,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

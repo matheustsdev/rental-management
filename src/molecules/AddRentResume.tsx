@@ -5,37 +5,44 @@ import ResumeItem from "@/atoms/ResumeItem";
 import { RentFormType } from "@/organisms/AddRentModal";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { Flex } from "@chakra-ui/react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { formatDate } from "@/utils/formatDate";
 import Currency from "@/models/Currency";
+import { useEffect, useState } from "react";
 
-interface IAddRentResumeProps {
-  selectedProducts: ProductAvailabilityType[];
-}
+const AddRentResume: React.FC = () => {
+  const [selectedProducts, setSelectedProducts] = useState<ProductAvailabilityType[]>([]);
+  const { control } = useFormContext<RentFormType>();
+  const formValues = useWatch({ control });
+  const productsIds = useWatch({ control, name: "productIds" });
+  const allAvailableProducts: ProductAvailabilityType[] = useWatch({ control, name: "allAvailableProducts" });
 
-const AddRentResume: React.FC<IAddRentResumeProps> = ({ selectedProducts }) => {
-  const { getValues } = useFormContext<RentFormType>();
+  useEffect(() => {
+    const newListOfProducts = allAvailableProducts.filter((availableProduct) =>
+      productsIds.some((productId) => productId === availableProduct.product.id)
+    );
 
-  const values = getValues();
+    setSelectedProducts(newListOfProducts);
+  }, [productsIds, allAvailableProducts]);
 
   return (
     <Flex flexDir="column" overflowY="auto">
-      <ResumeItem prop="Cliente" value={values.clientName ?? ""} />
+      <ResumeItem prop="Cliente" value={formValues.clientName ?? ""} />
       <ResumeItem
         prop="Data do aluguel"
-        value={values.rentDate ? formatDate(new Date(values.rentDate), "dd 'de' MMMM") : ""}
+        value={formValues.rentDate ? formatDate(new Date(formValues.rentDate), "dd 'de' MMMM") : ""}
       />
       <ResumeItem
         prop="Data da devolução"
-        value={values.returnDate ? formatDate(new Date(values.returnDate), "dd 'de' MMMM") : ""}
+        value={formValues.returnDate ? formatDate(new Date(formValues.returnDate), "dd 'de' MMMM") : ""}
       />
-      <ResumeItem prop="Valor total" value={new Currency(values.totalValue).toString()} />
-      <ResumeItem prop="Desconto" value={new Currency(values.discountValue).toString()} />
-      <ResumeItem prop="Valor a pagar" value={new Currency(values.totalValue - values.discountValue).toString()} />
-      <ResumeItem prop="Sinal" value={new Currency(values.signal).toString()} />
-      <ResumeItem prop="Restante" value={new Currency(values.remainingValue).toString()} />
-      <ResumeItem prop="Observação para recibo" value={values?.receiptObservations} />
-      <ResumeItem prop="Observação interna" value={values?.internalObservations} />
+      <ResumeItem prop="Valor total" value={new Currency(formValues.totalValue).toString()} />
+      <ResumeItem prop="Desconto" value={new Currency(formValues.discountValue).toString()} />
+      <ResumeItem prop="Valor a pagar" value={new Currency(formValues.finalTotalValue).toString()} />
+      <ResumeItem prop="Sinal" value={new Currency(formValues.signal).toString()} />
+      <ResumeItem prop="Restante" value={new Currency(formValues.remainingValue).toString()} />
+      <ResumeItem prop="Observação para recibo" value={formValues?.receiptObservations ?? ""} />
+      <ResumeItem prop="Observação interna" value={formValues?.internalObservations ?? ""} />
       <Flex flexDir="column" align="flex-start" pt="4" gap="2">
         {selectedProducts.map((product) => (
           <ProductResumeItem key={product.product.id} productAvailability={product} />

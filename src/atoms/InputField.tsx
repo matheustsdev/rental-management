@@ -33,8 +33,7 @@ const InputField: React.FC<IInputFieldProps> = ({
           target: { ...e.target, value: numeric },
         } as unknown as React.ChangeEvent<HTMLInputElement>;
 
-        console.log("enter >> ", inputProps.type, syntheticEvent);
-        registerOnChange(syntheticEvent);
+        registerOnChange(e);
 
         return;
       }
@@ -47,7 +46,9 @@ const InputField: React.FC<IInputFieldProps> = ({
           target: { ...e.target, value: dateValue },
         } as unknown as React.ChangeEvent<HTMLInputElement>;
 
-        registerOnChange(syntheticEvent);
+        registerOnChange(e);
+
+        return;
       }
 
       registerOnChange(e);

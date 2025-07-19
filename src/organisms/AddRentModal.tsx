@@ -75,6 +75,7 @@ const addRentInfoSchema = z.object({
   clientContact: z.string(),
   clientAddress: z.string(),
   totalValue: z.number(),
+  finalTotalValue: z.number(),
   signal: z.number({ invalid_type_error: "Informe um número válido" }),
   remainingValue: z.number(),
   internalObservations: z.string(),
@@ -92,7 +93,6 @@ type StepsType = {
   title: string;
   description: ReactElement;
   schema?: z.ZodObject<ZodRawShape>;
-  isValid: boolean;
 };
 
 type SchemaKeys = keyof RentFormType;
@@ -108,31 +108,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInfiniteAdd, setIsInfiniteAdd] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [steps, setSteps] = useState<StepsType[]>([
-    {
-      title: "Items",
-      description: <ProductSelector />,
-      schema: productSelectorSchema,
-      isValid: true,
-    },
-    {
-      title: "Medidas",
-      description: <ProductMeasures />,
-      schema: productMeasuresSchema,
-      isValid: false,
-    },
-    {
-      title: "Dados",
-      description: <AddRentInfoStep />,
-      schema: addRentInfoSchema,
-      isValid: false,
-    },
-    {
-      title: "Resumo",
-      description: <AddRentResume selectedProducts={[]} />,
-      isValid: false,
-    },
-  ]);
 
   const methods = useForm<RentFormType>({
     resolver: zodResolver(schema),
@@ -144,7 +119,10 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       receiptObservations: "",
       allAvailableProducts: [],
       remainingValue: 0,
+      finalTotalValue: 0,
+      totalValue: 0,
     },
+    reValidateMode: "onBlur",
   });
 
   const formSelectedProducts = useWatch({ control: methods.control, name: "products" });
@@ -157,6 +135,28 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     onClose: closeRentWithUnavailableProductModal,
     onOpen: openRentWithUnavailableProductModal,
   } = useDisclosure();
+
+  const steps: StepsType[] = [
+    {
+      title: "Items",
+      description: <ProductSelector />,
+      schema: productSelectorSchema,
+    },
+    {
+      title: "Medidas",
+      description: <ProductMeasures />,
+      schema: productMeasuresSchema,
+    },
+    {
+      title: "Dados",
+      description: <AddRentInfoStep />,
+      schema: addRentInfoSchema,
+    },
+    {
+      title: "Resumo",
+      description: <AddRentResume />,
+    },
+  ];
 
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -171,7 +171,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       // Valida apenas os campos do schema atual
       const isValid = await methods.trigger(fieldNames);
 
-      console.log("Is valid >> ", isValid);
       return isValid;
     } catch (error) {
       console.error("Erro ao validar o formulário:", error);
@@ -306,34 +305,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     return handlePreviousStep(stepIndex);
   };
 
-  const getUpdatedSteps = useCallback((): StepsType[] => {
-    return [
-      {
-        title: "Items",
-        description: <ProductSelector availableProducts={products} />,
-        schema: productSelectorSchema,
-        isValid: true,
-      },
-      {
-        title: "Medidas",
-        description: <ProductMeasures selectedProducts={selectedProducts} />,
-        schema: productMeasuresSchema,
-        isValid: false,
-      },
-      {
-        title: "Dados",
-        description: <AddRentInfoStep />,
-        schema: addRentInfoSchema,
-        isValid: false,
-      },
-      {
-        title: "Resumo",
-        description: <AddRentResume selectedProducts={[]} />,
-        isValid: false,
-      },
-    ];
-  }, []);
-
   const loadProducts = async () => {
     try {
       const productsListRequest = (
@@ -359,23 +330,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     if (rentDate && returnDate) loadProducts();
   }, [rentDate, returnDate]);
 
-  // useEffect(() => {
-  //   const newSteps = getUpdatedSteps();
-
-  //   setSteps(newSteps);
-  // }, [products, selectedProducts]);
-
-  useEffect(() => {
-    const productValue = formSelectedProducts.reduce(
-      (acc, product) => acc + (availableProducts.find((item) => item.product.id === product.id)?.price ?? 0),
-      0
-    );
-
-    methods.setValue("totalValue", productValue);
-
-    console.log("Erros >> ", methods.formState.errors);
-  }, [methods, formSelectedProducts]);
-
   return (
     <>
       <FormProvider {...methods}>
@@ -393,7 +347,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
                 h="75vh"
                 overflowY="auto"
               >
-                p
                 <Dialog.Header py="4">
                   <Dialog.Title>Adicionar aluguel</Dialog.Title>
                 </Dialog.Header>

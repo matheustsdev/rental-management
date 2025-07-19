@@ -21,7 +21,6 @@ const ProductSelector: React.FC = () => {
     formState: { errors },
   } = useFormContext<RentFormType>();
   const products = useWatch({ control, name: "products" });
-  const productsIds = useWatch({ control, name: "productIds" });
   const rentDate = useWatch({ control, name: "rentDate" });
   const returnDate = useWatch({ control, name: "returnDate" });
   const availableProducts = useWatch({ control, name: "allAvailableProducts" });
@@ -91,6 +90,12 @@ const ProductSelector: React.FC = () => {
       </Field.Root>
 
       <Flex align="flex-start" gap="4" flexDir="column" overflowY="auto" w="full">
+        {rentDate && returnDate && availableProducts.length === 0 && (
+          <Flex align="center" justify="center" w="full">
+            <Text>Buscando...</Text>
+          </Flex>
+        )}
+
         {(!rentDate || !returnDate) && (
           <Flex align="center" justify="center" w="full">
             <Text>Informe a data do aluguel e do retorno</Text>
