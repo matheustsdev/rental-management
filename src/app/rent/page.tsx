@@ -1,6 +1,6 @@
 "use client";
 
-import PageContainer from "@/atoms/PageContainer";
+import PageContainer from "@/molecules/PageContainer";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import AddRentModal from "@/organisms/AddRentModal";
 import { DataTable, DataTableColumn } from "@/molecules/DataTable";

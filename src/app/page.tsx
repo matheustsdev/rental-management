@@ -1,10 +1,10 @@
 "use client";
 
-import { Flex, Heading, useDisclosure } from "@chakra-ui/react";
+import { Flex, Heading, Icon, useDisclosure } from "@chakra-ui/react";
 import { DataTable, DataTableColumn } from "@/molecules/DataTable";
 import { useDevice } from "@/hooks/useDevice";
 import AddProductModal from "@/molecules/AddProductModal";
-import PageContainer from "@/atoms/PageContainer";
+import PageContainer from "@/molecules/PageContainer";
 import { useEffect, useState } from "react";
 import { ProductType } from "@/types/entities/ProductType";
 import { api } from "@/services/api";
@@ -13,7 +13,8 @@ import { IncludeConfigType } from "@/services/crud/baseCrudService";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import ProductCard from "@/molecules/ProductCard";
 import { MdEdit } from "react-icons/md";
-import Link from "next/link";
+import { AiOutlinePlus } from "react-icons/ai";
+import Fab from "@/atoms/Fab";
 
 export default function Home() {
   const { isMobile } = useDevice();
@@ -124,15 +125,12 @@ export default function Home() {
   }, [currentPage]);
 
   return (
-    <PageContainer flexDir="column" w="100vw" h="100vh" align="center" p="20" gap="8" overflowY="auto">
-      <Flex>
-        <Link href="rent">Alugueis</Link>
-      </Flex>
-      <Flex gap="4" align="flex-end" w="full">
-        <Heading>Lista de produtos</Heading>
-        <PrimaryButton onClick={onOpen}>Adicionar</PrimaryButton>
-      </Flex>
-
+    <PageContainer title="Lista de produtos" flexDir="column" align="center" gap="8" overflowY="hidden">
+      <Fab onClick={onOpen} fontSize="2xl">
+        <Icon boxSize="8">
+          <AiOutlinePlus />
+        </Icon>
+      </Fab>
       <Flex w="full" flexDir="column" align="center" justify="center">
         {isMobile ? MobileDataDisplay : DesktopDataDisplay}
       </Flex>
