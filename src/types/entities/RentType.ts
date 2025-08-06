@@ -1,7 +1,11 @@
 import { EMeasureType } from "@/constants/EMeasureType";
 import { EntityInsertDtoType, EntityType, EntityUpdateDtoType } from "../EntityType";
+import { RentProductType } from "./RentProductType";
 
-export type RentType = EntityType<"rents">;
+export type RentType = EntityType<"rents"> & {
+  rent_products: RentProductType[],
+  
+}
 export type RentInsertDtoType = EntityInsertDtoType<"rents">;
 export type RentUpdateDtoType = EntityUpdateDtoType<"rents">;
 export type ProductWithMeasureRentDtoType = {

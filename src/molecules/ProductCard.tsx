@@ -25,6 +25,7 @@ const ProductCard: React.FC<IProductCardProps> = ({ product, onEdit }) => {
           <PrimaryButton onClick={() => onEdit(product)}>Editar</PrimaryButton>
         </Flex>
       </Card.Footer>
+      p
     </Card.Root>
   );
 };

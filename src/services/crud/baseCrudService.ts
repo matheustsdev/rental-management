@@ -11,6 +11,7 @@ export type IncludeConfigType = {
     table: keyof Database["public"]["Tables"];
     foreignKey: string;
     fields?: string[];
+    includes?: IncludeConfigType;
   };
 };
 
@@ -31,27 +32,39 @@ export class CrudService<K extends keyof Database["public"]["Tables"]> {
   }
 
   // Método para construir query com includes
-  private buildIncludeQuery(query: SupabaseQuery, includeConfig?: IncludeConfigType) {
-    if (!includeConfig) return query;
+private buildIncludeQuery(query: SupabaseQuery, includeConfig?: IncludeConfigType) {
+  if (!includeConfig) return query;
 
-    // Construir string de seleção para includes
-    const includeSelects = Object.values(includeConfig).map((config) => {
-      // Campos a serem selecionados (todos se não especificados)
-      const fields = config.fields ? config.fields.map((field) => `${field}`).join(", ") : "*";
+  const buildSelectString = (config: IncludeConfigType): string => {
+    return Object.entries(config)
+      .map(([alias, subConfig]) => {
+        const fields = subConfig.fields ? subConfig.fields.join(", ") : "*";
+      
+      // Se houver includes, chama recursivamente para montar a string aninhada
+      const nestedSelect = subConfig.includes ? buildSelectString(subConfig.includes) : "";
 
-      return `${config.table} (${fields})`;
-    });
+      // Se existir nestedSelect, adiciona uma vírgula antes dele
+      const combined = `${fields}${nestedSelect ? `,${nestedSelect}` : ""}`;
 
-    // Combinar seleção original com includes
-    const selectString = ["*", ...includeSelects].join(",");
+      // Retorna a string formatada para este nível
+      return `${subConfig.table}(${combined})`;
+    })
+    .join(",");
+  };
 
-    // Atualizar query com nova seleção
-    query = query.select(selectString, {
-      count: "exact",
-    });
+  // Combinar seleção original com includes
+  const includeSelects = buildSelectString(includeConfig);
+  const selectString = ["*", includeSelects].join(",");
 
-    return query;
-  }
+  // Atualizar query com nova seleção
+  query = query.select(selectString, {
+    count: "exact",
+  });
+
+  console.log("Select string >> ", selectString);
+
+  return query;
+}
 
   // Método find atualizado com suporte a includes
   async find(
@@ -77,6 +90,7 @@ export class CrudService<K extends keyof Database["public"]["Tables"]> {
     if (options?.include) {
       query = this.buildIncludeQuery(query, options.include);
     }
+
 
     // Aplicar filtros (igual à implementação anterior)
     if (filters) {

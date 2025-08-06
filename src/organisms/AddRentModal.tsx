@@ -98,10 +98,10 @@ type StepsType = {
 type SchemaKeys = keyof RentFormType;
 
 interface IAddRentModalProps {
-  onClose: () => void;
+  onClose: (rent?: RentType) => void;
   isOpen: boolean;
   onSave?: (newRent: RentType) => void;
-  receiptOnEdit: ProductType | null;
+  receiptOnEdit: RentType | null;
 }
 
 const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, receiptOnEdit }) => {
@@ -329,6 +329,46 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   useEffect(() => {
     if (rentDate && returnDate) loadProducts();
   }, [rentDate, returnDate]);
+
+  useEffect(() => {
+    const { setValue } = methods;
+
+    if (!receiptOnEdit) {
+      setValue("products", [] as ProductWithMeasureRentDtoType[]);
+
+      return;
+    }
+
+    setValue("clientAddress", receiptOnEdit.address ?? "");
+    setValue("clientContact", receiptOnEdit.phone ?? "");
+    setValue("clientName", receiptOnEdit.client_name ?? "");
+    setValue("discountType", receiptOnEdit.discount_type ?? EDiscountTypes.FIXED);
+    setValue("discountValue", receiptOnEdit.discount_value ?? 0);
+    setValue("finalTotalValue", receiptOnEdit.total_value - (receiptOnEdit.discount_value ?? 0));
+    setValue("internalObservations", receiptOnEdit.internal_observations ?? "");
+    setValue("receiptObservations", receiptOnEdit.receipt_observations ?? "");
+    setValue("signal", receiptOnEdit.signal_value ?? 0);
+    setValue("remainingValue", receiptOnEdit.remaining_value ?? 0);
+    setValue("rentDate", receiptOnEdit.rent_date);
+    setValue("returnDate", receiptOnEdit.return_date ?? "");
+
+    const selectedRentProductIds = receiptOnEdit.rent_products.map((rentProduct) => rentProduct.product_id);
+    setValue("productIds", selectedRentProductIds);
+
+    const selectedRentProducts: ProductWithMeasureRentDtoType[] = receiptOnEdit.rent_products.map((rentProduct) => ({
+      id: rentProduct.product_id,
+      measure_type: rentProduct.products.categories?.measure_type ?? EMeasureType.DRESS,
+      back: rentProduct.product_measures[0]?.back ?? undefined,
+      bust: rentProduct.product_measures[0]?.bust ?? undefined,
+      height: rentProduct.product_measures[0]?.height ?? undefined,
+      hip: rentProduct.product_measures[0]?.hip ?? undefined,
+      shoulder: rentProduct.product_measures[0]?.shoulder ?? undefined,
+      sleeve: rentProduct.product_measures[0]?.sleeve ?? undefined,
+      waist: rentProduct.product_measures[0]?.waist ?? undefined,
+    }));
+
+    setValue("products", selectedRentProducts);
+  }, [receiptOnEdit]);
 
   return (
     <>
