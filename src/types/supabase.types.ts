@@ -1,3 +1,6 @@
+Need to install the following packages:
+supabase@2.39.2
+Ok to proceed? (y) 
 export type Json =
   | string
   | number
@@ -7,7 +10,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -55,6 +58,7 @@ export type Database = {
           height: number | null
           hip: number | null
           id: string
+          measure_type: Database["public"]["Enums"]["measures_type"]
           rent_product_fk: string
           shoulder: number | null
           sleeve: number | null
@@ -67,6 +71,7 @@ export type Database = {
           height?: number | null
           hip?: number | null
           id?: string
+          measure_type: Database["public"]["Enums"]["measures_type"]
           rent_product_fk: string
           shoulder?: number | null
           sleeve?: number | null
@@ -79,6 +84,7 @@ export type Database = {
           height?: number | null
           hip?: number | null
           id?: string
+          measure_type?: Database["public"]["Enums"]["measures_type"]
           rent_product_fk?: string
           shoulder?: number | null
           sleeve?: number | null
@@ -260,40 +266,57 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_full_rent: {
+        Args: {
+          p_address: string
+          p_client_name: string
+          p_discount_type?: Database["public"]["Enums"]["discount_type_enum"]
+          p_discount_value?: number
+          p_internal_observations?: string
+          p_products: Json
+          p_receipt_observations?: string
+          p_remaining_value?: number
+          p_rent_date: string
+          p_return_date?: string
+          p_signal_value?: number
+          p_total_value?: number
+        }
+        Returns: string
+      }
       create_rent: {
         Args: {
-          p_client_name: string
-          p_rent_date: string
-          p_total_value: number
-          p_discount_value: number
-          p_discount_type: string
-          p_internal_observations: string
-          p_receipt_observations: string
-          p_remaining_value: number
-          p_return_date: string
-          p_signal_value: number
           p_address: string
+          p_client_name: string
+          p_discount_type: string
+          p_discount_value: number
+          p_internal_observations: string
           p_phone: string
           p_product_ids: string[]
           p_product_measures: Json[]
+          p_receipt_observations: string
+          p_remaining_value: number
+          p_rent_date: string
+          p_return_date: string
+          p_signal_value: number
+          p_total_value: number
         }
         Returns: string
       }
       create_rent_with_products: {
         Args: {
-          p_client_name: string
-          p_rent_date: string
-          p_total_value: number
-          p_discount_value: number
-          p_discount_type: string
-          p_internal_observations: string
-          p_receipt_observations: string
-          p_remaining_value: number
-          p_return_date: string
-          p_signal_value: number
           p_address: string
+          p_client_name: string
+          p_discount_type: string
+          p_discount_value: number
+          p_internal_observations: string
           p_phone: string
           p_product_ids: string[]
+          p_receipt_observations: string
+          p_remaining_value: number
+          p_rent_date: string
+          p_return_date: string
+          p_signal_value: number
+          p_total_value: number
         }
         Returns: string
       }
@@ -522,15 +545,54 @@ export type Database = {
         Returns: unknown
       }
       get_products_with_availability: {
-        Args: { p_start_date: string; p_end_date: string }
+        Args: { p_end_date: string; p_start_date: string }
         Returns: {
-          product: Json
+          actual_return_date: string
           availability: Database["public"]["Enums"]["availability_status"]
+          buffer_end_date: string
           current_rent_id: string
           current_rent_return_date: string
-          actual_return_date: string
-          buffer_end_date: string
+          product: Json
         }[]
+      }
+      update_full_rent: {
+        Args: {
+          p_address: string
+          p_client_name: string
+          p_discount_type?: Database["public"]["Enums"]["discount_type_enum"]
+          p_discount_value?: number
+          p_internal_observations?: string
+          p_products: Json
+          p_receipt_observations?: string
+          p_remaining_value?: number
+          p_rent_date: string
+          p_rent_id: string
+          p_return_date?: string
+          p_signal_value?: number
+          p_total_value?: number
+        }
+        Returns: string
+      }
+      update_rent: {
+        Args: {
+          p_address: string
+          p_client_name: string
+          p_discount_type: string
+          p_discount_value: number
+          p_internal_observations: string
+          p_phone: string
+          p_product_ids: string[]
+          p_product_measures: Json[]
+          p_receipt_observations: string
+          p_remaining_value: number
+          p_rent_date: string
+          p_rent_id: string
+          p_rent_product_ids: string[]
+          p_return_date: string
+          p_signal_value: number
+          p_total_value: number
+        }
+        Returns: undefined
       }
     }
     Enums: {

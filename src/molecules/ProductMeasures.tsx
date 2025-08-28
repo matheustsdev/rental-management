@@ -9,7 +9,7 @@ import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 const ProductMeasures: React.FC = () => {
   const { control } = useFormContext<RentFormType>();
 
-  const selectedProducts = useWatch({ control, name: "products" });
+  const selectedProducts = useWatch({ control, name: "rentProducts" });
   const allAvailableProducts = useWatch({ control, name: "allAvailableProducts" });
 
   return (

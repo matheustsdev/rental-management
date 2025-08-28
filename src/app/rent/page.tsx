@@ -1,12 +1,9 @@
 "use client";
 
 import PageContainer from "@/molecules/PageContainer";
-import PrimaryButton from "@/atoms/PrimaryButton";
 import AddRentModal from "@/organisms/AddRentModal";
-import { DataTable, DataTableColumn } from "@/molecules/DataTable";
 import { RentType } from "@/types/entities/RentType";
 import { Grid, GridItem, Icon, useDisclosure } from "@chakra-ui/react";
-import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import RentCard from "@/molecules/RentCard";
 import { toaster } from "@/atoms/Toaster";
@@ -20,11 +17,11 @@ const RentPage = () => {
 
   const [rents, setRents] = useState<RentType[]>([]);
   const [selectedRent, setSelectedRent] = useState<RentType | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  //const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const loadRents = async () => {
     try {
-      setIsLoading(true);
+      //setIsLoading(true);
 
       const includeConfig: IncludeConfigType = {
         rent_products: {
@@ -67,7 +64,7 @@ const RentPage = () => {
         description: (e as Error).message,
       });
     } finally {
-      setIsLoading(false);
+      //setIsLoading(false);
     }
   };
 

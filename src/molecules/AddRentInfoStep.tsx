@@ -16,7 +16,7 @@ const AddRentInfoStep: React.FC = () => {
     formState: { errors },
   } = useFormContext<RentFormType>();
 
-  const formSelectedProducts = useWatch({ control, name: "products" });
+  const formSelectedProducts = useWatch({ control, name: "rentProducts" });
   const availableProducts = useWatch({ control, name: "allAvailableProducts" });
   const discountValue = useWatch({ control, name: "discountValue" });
   const signal = useWatch({ control, name: "signal" });

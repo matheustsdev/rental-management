@@ -6,20 +6,20 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { toaster } from "@/atoms/Toaster";
 import { api } from "@/services/api";
-import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
-import { ProductType } from "@/types/entities/ProductType";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import SecondaryButton from "@/atoms/SecondaryButton";
-import { ProductWithMeasureRentDtoType, RentInsertDtoWithProduct, RentType } from "@/types/entities/RentType";
+import { RentInsertDtoWithProduct, RentType } from "@/types/entities/RentType";
 import ProductSelector from "../molecules/ProductSelector";
 import AddRentInfoStep from "@/molecules/AddRentInfoStep";
 import AddRentResume from "@/molecules/AddRentResume";
-import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import ConfirmationModal from "@/molecules/ConfirmationModal";
 import ProductMeasures from "@/molecules/ProductMeasures";
 import { EDiscountTypes } from "@/constants/EDiscountType";
 import { EMeasureType } from "@/constants/EMeasureType";
+import { RentProductSchema } from "@/constants/schemas/RentProductSchema";
+import { RentProductInsertDtoType } from "@/types/entities/RentProductType";
 
 const productSelectorSchema = z.object({
   rentDate: z.string().nonempty("Informe a data de saída"),
@@ -31,41 +31,30 @@ const productSelectorSchema = z.object({
 });
 
 const productMeasuresSchema = z.object({
-  products: z
+  rentProducts: z
     .array(
-      z
-        .object({
-          id: z.string(),
-          measure_type: z.enum([EMeasureType.DRESS, EMeasureType.SUIT]),
-          waist: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
-          bust: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
-          hip: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
-          shoulder: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
-          sleeve: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
-          height: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
-          back: z.number({ invalid_type_error: "Informe um número válido" }).optional(),
-        })
-        .superRefine((data, ctx) => {
-          const { measure_type, back, bust, height, hip, shoulder, sleeve } = data;
+      RentProductSchema.superRefine((data, ctx) => {
+        const { product_measures } = data;
+        const { measure_type, back, bust, height, hip, shoulder, sleeve } = product_measures;
 
-          if (measure_type === EMeasureType.DRESS) {
-            if (!bust || !hip || !shoulder) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "As medidas são obrigatórias",
-                path: ["waist", "bust", "hip", "shoulder"],
-              });
-            }
-          } else if (measure_type === EMeasureType.SUIT) {
-            if (!sleeve || !height || !back) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "As medidas são obrigatórias",
-                path: ["waist", "sleeve", "height", "back"],
-              });
-            }
+        if (measure_type === EMeasureType.DRESS) {
+          if (!bust || !hip || !shoulder) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "As medidas são obrigatórias",
+              path: ["waist", "bust", "hip", "shoulder"],
+            });
           }
-        })
+        } else if (measure_type === EMeasureType.SUIT) {
+          if (!sleeve || !height || !back) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "As medidas são obrigatórias",
+              path: ["waist", "sleeve", "height", "back"],
+            });
+          }
+        }
+      })
     )
     .min(1, "Selecione pelo menos um produto"),
 });
@@ -112,7 +101,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   const methods = useForm<RentFormType>({
     resolver: zodResolver(schema),
     defaultValues: {
-      products: [],
+      rentProducts: [],
       productIds: [],
       discountType: EDiscountTypes.FIXED,
       internalObservations: "",
@@ -125,7 +114,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     reValidateMode: "onBlur",
   });
 
-  const formSelectedProducts = useWatch({ control: methods.control, name: "products" });
+  const formSelectedProducts = useWatch({ control: methods.control, name: "rentProducts" });
   const availableProducts = useWatch({ control: methods.control, name: "allAvailableProducts" });
   const rentDate = useWatch({ control: methods.control, name: "rentDate" });
   const returnDate = useWatch({ control: methods.control, name: "returnDate" });
@@ -178,45 +167,92 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     }
   };
 
+  const createRent = async (data: RentFormType) => {
+    const {
+      clientName,
+      internalObservations,
+      discountType,
+      discountValue,
+      rentProducts,
+      receiptObservations,
+      remainingValue,
+      rentDate,
+      returnDate,
+      signal,
+      totalValue,
+      clientAddress,
+      clientContact,
+    } = data;
+
+    const rentInsertData: RentInsertDtoWithProduct = {
+      address: clientAddress,
+      phone: clientContact,
+      client_name: clientName,
+      discount_type: discountType,
+      discount_value: discountValue,
+      rent_products: rentProducts,
+      remaining_value: remainingValue,
+      rent_date: new Date(rentDate).toISOString(),
+      return_date: new Date(returnDate).toISOString(),
+      signal_value: signal,
+      total_value: totalValue,
+      internal_observations: internalObservations,
+      receipt_observations: receiptObservations,
+    };
+
+    return await api.post("rents", rentInsertData);
+  };
+
+  // const updateRent = async (data: RentFormType) => {
+  //   // const {
+  //   //   clientName,
+  //   //   internalObservations,
+  //   //   discountType,
+  //   //   discountValue,
+  //   //   rentProducts,
+  //   //   receiptObservations,
+  //   //   remainingValue,
+  //   //   rentDate,
+  //   //   returnDate,
+  //   //   signal,
+  //   //   totalValue,
+  //   //   clientAddress,
+  //   //   clientContact,
+  //   // } = data;
+  //   // const updateRentProducts: RentProductUpdateDtoType[] = products.map((product) => {
+  //   //   const fullProduct = availableProducts.find((item) => item.id === product.id)
+  //   //   return {
+  //   //   }
+  //   // })
+  //   // const rentInsertData: RentUpdateDtoWithProduct = {
+  //   //   address: clientAddress,
+  //   //   phone: clientContact,
+  //   //   client_name: clientName,
+  //   //   discount_type: discountType,
+  //   //   discount_value: discountValue,
+  //   //   rent_products: products.map((product) => product.),
+  //   //   remaining_value: remainingValue,
+  //   //   rent_date: new Date(rentDate).toISOString(),
+  //   //   return_date: new Date(returnDate).toISOString(),
+  //   //   signal_value: signal,
+  //   //   total_value: totalValue,
+  //   //   internal_observations: internalObservations,
+  //   //   receipt_observations: receiptObservations,
+  //   // };
+  //   // return await api.post("rents", rentInsertData);
+  // };
+
   const onSubmit = async (data: RentFormType) => {
     try {
       setIsLoading(true);
 
-      const {
-        clientName,
-        internalObservations,
-        discountType,
-        discountValue,
-        products,
-        receiptObservations,
-        remainingValue,
-        rentDate,
-        returnDate,
-        signal,
-        totalValue,
-        clientAddress,
-        clientContact,
-      } = data;
+      let rentRequest = null;
 
-      const rentInsertData: RentInsertDtoWithProduct = {
-        address: clientAddress,
-        phone: clientContact,
-        client_name: clientName,
-        discount_type: discountType,
-        discount_value: discountValue,
-        products,
-        remaining_value: remainingValue,
-        rent_date: new Date(rentDate).toISOString(),
-        return_date: new Date(returnDate).toISOString(),
-        signal_value: signal,
-        total_value: totalValue,
-        internal_observations: internalObservations,
-        receipt_observations: receiptObservations,
-      };
+      //if (receiptOnEdit) rentRequest = await updateRent(data);
 
-      const newRentRequest = await api.post("rents", rentInsertData);
+      rentRequest = await createRent(data);
 
-      if (newRentRequest.status !== 201) throw new Error(newRentRequest.statusText);
+      if (rentRequest.status !== 201) throw new Error(rentRequest.statusText);
 
       toaster.create({
         type: "success",
@@ -226,7 +262,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       methods.reset();
 
       if (onSave) {
-        onSave(newRentRequest.data);
+        onSave(rentRequest.data);
       }
 
       setCurrentStep(0);
@@ -334,7 +370,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     const { setValue } = methods;
 
     if (!receiptOnEdit) {
-      setValue("products", [] as ProductWithMeasureRentDtoType[]);
+      setValue("rentProducts", [] as RentProductInsertDtoType[]);
 
       return;
     }
@@ -355,25 +391,25 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     const selectedRentProductIds = receiptOnEdit.rent_products.map((rentProduct) => rentProduct.product_id);
     setValue("productIds", selectedRentProductIds);
 
-    const selectedRentProducts: ProductWithMeasureRentDtoType[] = receiptOnEdit.rent_products.map((rentProduct) => ({
-      id: rentProduct.product_id,
-      measure_type: rentProduct.products.categories?.measure_type ?? EMeasureType.DRESS,
-      back: rentProduct.product_measures[0]?.back ?? undefined,
-      bust: rentProduct.product_measures[0]?.bust ?? undefined,
-      height: rentProduct.product_measures[0]?.height ?? undefined,
-      hip: rentProduct.product_measures[0]?.hip ?? undefined,
-      shoulder: rentProduct.product_measures[0]?.shoulder ?? undefined,
-      sleeve: rentProduct.product_measures[0]?.sleeve ?? undefined,
-      waist: rentProduct.product_measures[0]?.waist ?? undefined,
-    }));
+    // const selectedRentProducts: ProductWithMeasureRentDtoType[] = receiptOnEdit.rent_products.map((rentProduct) => ({
+    //   id: rentProduct.product_id,
+    //   measure_type: rentProduct.products.categories?.measure_type ?? EMeasureType.DRESS,
+    //   back: rentProduct.product_measures[0]?.back ?? undefined,
+    //   bust: rentProduct.product_measures[0]?.bust ?? undefined,
+    //   height: rentProduct.product_measures[0]?.height ?? undefined,
+    //   hip: rentProduct.product_measures[0]?.hip ?? undefined,
+    //   shoulder: rentProduct.product_measures[0]?.shoulder ?? undefined,
+    //   sleeve: rentProduct.product_measures[0]?.sleeve ?? undefined,
+    //   waist: rentProduct.product_measures[0]?.waist ?? undefined,
+    // }));
 
-    setValue("products", selectedRentProducts);
+    //setValue("products", selectedRentProducts);
   }, [receiptOnEdit]);
 
   return (
     <>
       <FormProvider {...methods}>
-        <Dialog.Root lazyMount open={isOpen} onOpenChange={onClose} placement="center">
+        <Dialog.Root lazyMount open={isOpen} onOpenChange={() => onClose()} placement="center">
           <Portal>
             <Dialog.Backdrop />
             <Dialog.Positioner p="4">

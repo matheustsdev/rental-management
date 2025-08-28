@@ -8,7 +8,8 @@ import ProductSelectorItem from "@/atoms/ProductSelectorItem";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import InputField from "@/atoms/InputField";
 import { EMeasureType } from "@/constants/EMeasureType";
-import { ProductWithMeasureRentDtoType } from "@/types/entities/RentType";
+import { RentProductInsertDtoType } from "@/types/entities/RentProductType";
+import { v4 as getUuid } from "uuid";
 
 const ProductSelector: React.FC = () => {
   const [searchText, setSearchText] = useState("");
@@ -20,7 +21,7 @@ const ProductSelector: React.FC = () => {
     control,
     formState: { errors },
   } = useFormContext<RentFormType>();
-  const products = useWatch({ control, name: "products" });
+  const products = useWatch({ control, name: "rentProducts" });
   const rentDate = useWatch({ control, name: "rentDate" });
   const returnDate = useWatch({ control, name: "returnDate" });
   const availableProducts = useWatch({ control, name: "allAvailableProducts" });
@@ -28,33 +29,40 @@ const ProductSelector: React.FC = () => {
   const toggleProductSelection = (productAvailability: ProductAvailabilityType) => {
     const { product } = productAvailability;
 
-    const newFormProduct: ProductWithMeasureRentDtoType = {
+    const newFormProduct: RentProductInsertDtoType = {
       id: product.id,
-      measure_type: product.categories?.measure_type ?? EMeasureType.DRESS,
-      waist: undefined,
-      bust: undefined,
-      hip: undefined,
-      shoulder: undefined,
-      sleeve: undefined,
-      height: undefined,
-      back: undefined,
+      product_description: product.description ?? "",
+      product_price: product.price,
+      rent_id: getUuid(),
+      product_id: product.id,
+      product_measures: {
+        rent_product_fk: getUuid(),
+        measure_type: product.categories?.measure_type ?? EMeasureType.DRESS,
+        waist: undefined,
+        bust: undefined,
+        hip: undefined,
+        shoulder: undefined,
+        sleeve: undefined,
+        height: undefined,
+        back: undefined,
+      },
     };
 
     if (!products || products.length === 0) {
-      setValue("products", [newFormProduct]);
-      setValue("productIds", [newFormProduct.id]);
+      setValue("rentProducts", [newFormProduct]);
+      setValue("productIds", [newFormProduct.product_id]);
 
       return;
     }
 
-    const newProductList: ProductWithMeasureRentDtoType[] = products.some((item) => item.id === product.id)
+    const newProductList: RentProductInsertDtoType[] = products.some((item) => item.id === product.id)
       ? products.filter((item) => item.id !== product.id)
       : [...products, newFormProduct];
 
-    setValue("products", newProductList);
+    setValue("rentProducts", newProductList);
     setValue(
       "productIds",
-      newProductList.map((product) => product.id)
+      newProductList.map((product) => product.product_id)
     );
   };
 
