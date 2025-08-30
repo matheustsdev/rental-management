@@ -9,7 +9,7 @@ import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 const ProductMeasures: React.FC = () => {
   const { control } = useFormContext<RentFormType>();
 
-  const selectedProducts = useWatch({ control, name: "rentProducts" });
+  const rentProducts = useWatch({ control, name: "rentProducts" });
   const allAvailableProducts = useWatch({ control, name: "allAvailableProducts" });
 
   return (
@@ -18,10 +18,10 @@ const ProductMeasures: React.FC = () => {
         <Accordion.Root display="flex" flexDirection="column" gap="4">
           {allAvailableProducts
             .filter((availableProduct: ProductAvailabilityType) =>
-              selectedProducts.some((selectedProduct) => selectedProduct.id === availableProduct.product.id)
+              rentProducts.some((rentProduct) => rentProduct.product_id === availableProduct.product.id)
             )
-            .map((selectedProduct) => (
-              <ProductMeasureItem key={selectedProduct.product.id} productAvailability={selectedProduct} />
+            .map((rentProduct) => (
+              <ProductMeasureItem key={rentProduct.product.id} productAvailability={rentProduct} />
             ))}
         </Accordion.Root>
       </Flex>

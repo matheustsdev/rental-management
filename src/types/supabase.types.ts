@@ -1,6 +1,3 @@
-Need to install the following packages:
-supabase@2.39.2
-Ok to proceed? (y) 
 export type Json =
   | string
   | number
@@ -49,56 +46,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
-      }
-      product_measures: {
-        Row: {
-          back: number | null
-          bust: number | null
-          created_at: string
-          height: number | null
-          hip: number | null
-          id: string
-          measure_type: Database["public"]["Enums"]["measures_type"]
-          rent_product_fk: string
-          shoulder: number | null
-          sleeve: number | null
-          waist: number | null
-        }
-        Insert: {
-          back?: number | null
-          bust?: number | null
-          created_at?: string
-          height?: number | null
-          hip?: number | null
-          id?: string
-          measure_type: Database["public"]["Enums"]["measures_type"]
-          rent_product_fk: string
-          shoulder?: number | null
-          sleeve?: number | null
-          waist?: number | null
-        }
-        Update: {
-          back?: number | null
-          bust?: number | null
-          created_at?: string
-          height?: number | null
-          hip?: number | null
-          id?: string
-          measure_type?: Database["public"]["Enums"]["measures_type"]
-          rent_product_fk?: string
-          shoulder?: number | null
-          sleeve?: number | null
-          waist?: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "product_measures_rent_product_fk_fkey"
-            columns: ["rent_product_fk"]
-            isOneToOne: false
-            referencedRelation: "rent_products"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       products: {
         Row: {
@@ -151,32 +98,56 @@ export type Database = {
         Row: {
           actual_return_buffer_days: number | null
           actual_return_date: string | null
+          back: number | null
+          bust: number | null
           created_at: string | null
+          height: number | null
+          hip: number | null
           id: string
+          measure_type: Database["public"]["Enums"]["measures_type"]
           product_description: string
           product_id: string
           product_price: number
           rent_id: string
+          shoulder: number | null
+          sleeve: number | null
+          waist: number | null
         }
         Insert: {
           actual_return_buffer_days?: number | null
           actual_return_date?: string | null
+          back?: number | null
+          bust?: number | null
           created_at?: string | null
+          height?: number | null
+          hip?: number | null
           id?: string
+          measure_type: Database["public"]["Enums"]["measures_type"]
           product_description: string
           product_id: string
           product_price: number
           rent_id: string
+          shoulder?: number | null
+          sleeve?: number | null
+          waist?: number | null
         }
         Update: {
           actual_return_buffer_days?: number | null
           actual_return_date?: string | null
+          back?: number | null
+          bust?: number | null
           created_at?: string | null
+          height?: number | null
+          hip?: number | null
           id?: string
+          measure_type?: Database["public"]["Enums"]["measures_type"]
           product_description?: string
           product_id?: string
           product_price?: number
           rent_id?: string
+          shoulder?: number | null
+          sleeve?: number | null
+          waist?: number | null
         }
         Relationships: [
           {

@@ -6,9 +6,7 @@ export type RentProductType = EntityType<"rent_products"> & {
     products: ProductType;
     product_measures: RentProductMeasuresTypes
 };
-export type RentProductInsertDtoType = EntityInsertDtoType<"rent_products"> & {
-    product_measures: RentProductMeasuresInsertDtoType
-};
+export type RentProductInsertDtoType = EntityInsertDtoType<"rent_products">;
 
 export type RentProductUpdateDtoType = EntityUpdateDtoType<"rent_products"> & {
     product_measures: RentProductMeasuresUpdateDtoType

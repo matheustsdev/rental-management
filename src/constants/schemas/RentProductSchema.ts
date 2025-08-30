@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ProductMeasuresSchema } from "./ProductMeasuresSchema";
+import { EMeasureType } from "../EMeasureType";
 
 export const RentProductSchema = z.object({
   id: z.string().optional(),
@@ -24,9 +24,43 @@ export const RentProductSchema = z.object({
     })
     .optional()
     .nullable(),
+    waist: z
+    .number({ invalid_type_error: "Informe um número válido" })
+    .optional()
+    .nullable(),
+  bust: z
+    .number({ invalid_type_error: "Informe um número válido" })
+    .optional()
+    .nullable(),
+  hip: z
+    .number({ invalid_type_error: "Informe um número válido" })
+    .optional()
+    .nullable(),
+  shoulder: z
+    .number({ invalid_type_error: "Informe um número válido" })
+    .optional()
+    .nullable(),
+  sleeve: z
+    .number({ invalid_type_error: "Informe um número válido" })
+    .optional()
+    .nullable(),
+  height: z
+    .number({ invalid_type_error: "Informe um número válido" })
+    .optional()
+    .nullable(),
+  back: z
+    .number({ invalid_type_error: "Informe um número válido" })
+    .optional()
+    .nullable(),
+  measure_type: z.enum(
+    [EMeasureType.DRESS, EMeasureType.SUIT],
+    { 
+      errorMap: () => ({ message: "Tipo de medida inválido" })
+    }
+  ),
   created_at: z
     .string({ invalid_type_error: "created_at deve ser uma string" })
     .optional()
     .nullable(),
-  product_measures: ProductMeasuresSchema,
+  // product_measures: z.array(ProductMeasuresSchema),
 });

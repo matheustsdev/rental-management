@@ -34,8 +34,7 @@ const productMeasuresSchema = z.object({
   rentProducts: z
     .array(
       RentProductSchema.superRefine((data, ctx) => {
-        const { product_measures } = data;
-        const { measure_type, back, bust, height, hip, shoulder, sleeve } = product_measures;
+        const { measure_type, back, bust, height, hip, shoulder, sleeve } = data;
 
         if (measure_type === EMeasureType.DRESS) {
           if (!bust || !hip || !shoulder) {
@@ -90,10 +89,10 @@ interface IAddRentModalProps {
   onClose: (rent?: RentType) => void;
   isOpen: boolean;
   onSave?: (newRent: RentType) => void;
-  receiptOnEdit: RentType | null;
+  rentOnEdit: RentType | null;
 }
 
-const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, receiptOnEdit }) => {
+const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, rentOnEdit }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInfiniteAdd, setIsInfiniteAdd] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -293,6 +292,8 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   const handleNextStep = async () => {
     const isValidStep = await validateCurrentStep();
 
+    console.log("Errors >> ", methods.formState.errors);
+
     if (!isValidStep) {
       // Se a validação falhar, não avance para o próximo passo
       toaster.create({
@@ -369,27 +370,30 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   useEffect(() => {
     const { setValue } = methods;
 
-    if (!receiptOnEdit) {
-      setValue("rentProducts", [] as RentProductInsertDtoType[]);
+    if (!rentOnEdit) {
+      setValue("rentProducts", []);
 
       return;
     }
 
-    setValue("clientAddress", receiptOnEdit.address ?? "");
-    setValue("clientContact", receiptOnEdit.phone ?? "");
-    setValue("clientName", receiptOnEdit.client_name ?? "");
-    setValue("discountType", receiptOnEdit.discount_type ?? EDiscountTypes.FIXED);
-    setValue("discountValue", receiptOnEdit.discount_value ?? 0);
-    setValue("finalTotalValue", receiptOnEdit.total_value - (receiptOnEdit.discount_value ?? 0));
-    setValue("internalObservations", receiptOnEdit.internal_observations ?? "");
-    setValue("receiptObservations", receiptOnEdit.receipt_observations ?? "");
-    setValue("signal", receiptOnEdit.signal_value ?? 0);
-    setValue("remainingValue", receiptOnEdit.remaining_value ?? 0);
-    setValue("rentDate", receiptOnEdit.rent_date);
-    setValue("returnDate", receiptOnEdit.return_date ?? "");
+    setValue("clientAddress", rentOnEdit.address ?? "");
+    setValue("clientContact", rentOnEdit.phone ?? "");
+    setValue("clientName", rentOnEdit.client_name ?? "");
+    setValue("discountType", rentOnEdit.discount_type ?? EDiscountTypes.FIXED);
+    setValue("discountValue", rentOnEdit.discount_value ?? 0);
+    setValue("finalTotalValue", rentOnEdit.total_value - (rentOnEdit.discount_value ?? 0));
+    setValue("internalObservations", rentOnEdit.internal_observations ?? "");
+    setValue("receiptObservations", rentOnEdit.receipt_observations ?? "");
+    setValue("signal", rentOnEdit.signal_value ?? 0);
+    setValue("remainingValue", rentOnEdit.remaining_value ?? 0);
+    setValue("rentDate", rentOnEdit.rent_date);
+    setValue("returnDate", rentOnEdit.return_date ?? "");
+    setValue("rentProducts", rentOnEdit.rent_products);
 
-    const selectedRentProductIds = receiptOnEdit.rent_products.map((rentProduct) => rentProduct.product_id);
+    const selectedRentProductIds = rentOnEdit.rent_products.map((rentProduct) => rentProduct.product_id);
     setValue("productIds", selectedRentProductIds);
+
+    console.log("DAta >> ", rentOnEdit);
 
     // const selectedRentProducts: ProductWithMeasureRentDtoType[] = receiptOnEdit.rent_products.map((rentProduct) => ({
     //   id: rentProduct.product_id,
@@ -404,7 +408,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     // }));
 
     //setValue("products", selectedRentProducts);
-  }, [receiptOnEdit]);
+  }, [rentOnEdit]);
 
   return (
     <>
@@ -450,7 +454,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
                 <Dialog.Footer
                   display="flex"
                   alignItems="center"
-                  justifyContent={receiptOnEdit ? "flex-end" : "space-between"}
+                  justifyContent={rentOnEdit ? "flex-end" : "space-between"}
                   pt="8"
                 >
                   <Checkbox.Root

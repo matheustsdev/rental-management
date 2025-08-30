@@ -35,17 +35,14 @@ const ProductSelector: React.FC = () => {
       product_price: product.price,
       rent_id: getUuid(),
       product_id: product.id,
-      product_measures: {
-        rent_product_fk: getUuid(),
-        measure_type: product.categories?.measure_type ?? EMeasureType.DRESS,
-        waist: undefined,
-        bust: undefined,
-        hip: undefined,
-        shoulder: undefined,
-        sleeve: undefined,
-        height: undefined,
-        back: undefined,
-      },
+      measure_type: product.categories?.measure_type ?? EMeasureType.DRESS,
+      waist: undefined,
+      bust: undefined,
+      hip: undefined,
+      shoulder: undefined,
+      sleeve: undefined,
+      height: undefined,
+      back: undefined,
     };
 
     if (!products || products.length === 0) {
@@ -119,7 +116,7 @@ const ProductSelector: React.FC = () => {
           <ProductSelectorItem
             key={productAvailability.product.id}
             productAvailability={productAvailability}
-            isSelected={products.some((item) => item.id === productAvailability.product.id)}
+            isSelected={products.some((item) => item.product_id === productAvailability.product.id)}
             onChangeSelection={toggleProductSelection}
           />
         ))}

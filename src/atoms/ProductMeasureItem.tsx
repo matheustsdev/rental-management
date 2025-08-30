@@ -7,7 +7,6 @@ import { measureFieldsLabels } from "@/constants/MeasureFields";
 import InputField from "./InputField";
 import { Path, useFormContext, useWatch } from "react-hook-form";
 import { RentFormType } from "@/organisms/AddRentModal";
-import { useEffect } from "react";
 
 interface IProductMeasureItemProps {
   productAvailability: ProductAvailabilityType;
@@ -15,6 +14,7 @@ interface IProductMeasureItemProps {
 
 const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailability }) => {
   const {
+    getValues,
     control,
     register,
     formState: { errors },
@@ -25,10 +25,6 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
   const labels = mType ? measureFieldsLabels[mType] : measureFieldsLabels.DRESS;
 
   const rentProducts = useWatch({ control, name: "rentProducts" });
-
-  useEffect(() => {
-    console.log("Erros >> ", rentProducts);
-  }, [rentProducts]);
 
   return (
     <Accordion.Item
@@ -64,14 +60,14 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
           {Object.entries(labels).map(([field, label]) => {
             const productIndex = rentProducts.findIndex((item) => product.id === item.product_id);
 
-            const name = `rentProducts.${productIndex}.product_measures.${field}` as Path<RentFormType>;
+            const name = `rentProducts.${productIndex}.${field}` as Path<RentFormType>;
 
             const fieldName = field as keyof typeof labels;
-            console.log("Test >> ", name);
+            console.log("Test >> ", name, getValues(name));
 
             const inputError =
-              errors.rentProducts && errors.rentProducts[productIndex]?.product_measures
-                ? errors.rentProducts[productIndex].product_measures[fieldName]
+              errors.rentProducts && errors.rentProducts[productIndex]
+                ? errors.rentProducts[productIndex][fieldName]
                 : undefined;
 
             return (

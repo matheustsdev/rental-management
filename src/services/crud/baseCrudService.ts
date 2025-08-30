@@ -61,8 +61,6 @@ private buildIncludeQuery(query: SupabaseQuery, includeConfig?: IncludeConfigTyp
     count: "exact",
   });
 
-  console.log("Select string >> ", selectString);
-
   return query;
 }
 

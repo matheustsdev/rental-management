@@ -38,10 +38,6 @@ const RentPage = () => {
                 },
               },
             },
-            product_measures: {
-              table: "product_measures",
-              foreignKey: "rent_product_fk",
-            },
           },
         },
       };
@@ -53,8 +49,6 @@ const RentPage = () => {
           },
         })
       ).data;
-
-      console.log("Rents >> ", rentsListRequest.data);
 
       setRents(rentsListRequest.data);
     } catch (e: unknown) {
@@ -102,7 +96,7 @@ const RentPage = () => {
           <AiOutlinePlus />
         </Icon>
       </Fab>
-      <AddRentModal isOpen={open} onClose={handleCloseModal} receiptOnEdit={selectedRent} />
+      <AddRentModal isOpen={open} onClose={handleCloseModal} rentOnEdit={selectedRent} />
     </PageContainer>
   );
 };
