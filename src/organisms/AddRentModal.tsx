@@ -1,6 +1,6 @@
 "use client";
 
-import { CloseButton, Dialog, Portal, Flex, Spinner, Checkbox, Steps, useDisclosure } from "@chakra-ui/react";
+import { CloseButton, Dialog, Portal, Flex, Spinner, Checkbox, Steps } from "@chakra-ui/react";
 import { z, ZodRawShape } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
@@ -9,17 +9,16 @@ import { api } from "@/services/api";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import SecondaryButton from "@/atoms/SecondaryButton";
-import { RentInsertDtoWithProduct, RentType } from "@/types/entities/RentType";
+import { RentInsertDtoWithProduct, RentType, RentUpdateDtoWithProduct } from "@/types/entities/RentType";
 import ProductSelector from "../molecules/ProductSelector";
 import AddRentInfoStep from "@/molecules/AddRentInfoStep";
 import AddRentResume from "@/molecules/AddRentResume";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
-import ConfirmationModal from "@/molecules/ConfirmationModal";
 import ProductMeasures from "@/molecules/ProductMeasures";
 import { EDiscountTypes } from "@/constants/EDiscountType";
 import { EMeasureType } from "@/constants/EMeasureType";
 import { RentProductSchema } from "@/constants/schemas/RentProductSchema";
-import { RentProductInsertDtoType } from "@/types/entities/RentProductType";
+import { RentProductUpdateDtoType } from "@/types/entities/RentProductType";
 
 const productSelectorSchema = z.object({
   rentDate: z.string().nonempty("Informe a data de saída"),
@@ -118,12 +117,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   const rentDate = useWatch({ control: methods.control, name: "rentDate" });
   const returnDate = useWatch({ control: methods.control, name: "returnDate" });
 
-  const {
-    open: isRentWithUnvailableModalOpen,
-    onClose: closeRentWithUnavailableProductModal,
-    onOpen: openRentWithUnavailableProductModal,
-  } = useDisclosure();
-
   const steps: StepsType[] = [
     {
       title: "Items",
@@ -202,44 +195,42 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     return await api.post("rents", rentInsertData);
   };
 
-  // const updateRent = async (data: RentFormType) => {
-  //   // const {
-  //   //   clientName,
-  //   //   internalObservations,
-  //   //   discountType,
-  //   //   discountValue,
-  //   //   rentProducts,
-  //   //   receiptObservations,
-  //   //   remainingValue,
-  //   //   rentDate,
-  //   //   returnDate,
-  //   //   signal,
-  //   //   totalValue,
-  //   //   clientAddress,
-  //   //   clientContact,
-  //   // } = data;
-  //   // const updateRentProducts: RentProductUpdateDtoType[] = products.map((product) => {
-  //   //   const fullProduct = availableProducts.find((item) => item.id === product.id)
-  //   //   return {
-  //   //   }
-  //   // })
-  //   // const rentInsertData: RentUpdateDtoWithProduct = {
-  //   //   address: clientAddress,
-  //   //   phone: clientContact,
-  //   //   client_name: clientName,
-  //   //   discount_type: discountType,
-  //   //   discount_value: discountValue,
-  //   //   rent_products: products.map((product) => product.),
-  //   //   remaining_value: remainingValue,
-  //   //   rent_date: new Date(rentDate).toISOString(),
-  //   //   return_date: new Date(returnDate).toISOString(),
-  //   //   signal_value: signal,
-  //   //   total_value: totalValue,
-  //   //   internal_observations: internalObservations,
-  //   //   receipt_observations: receiptObservations,
-  //   // };
-  //   // return await api.post("rents", rentInsertData);
-  // };
+  const updateRent = async (data: RentFormType) => {
+    const {
+      clientName,
+      internalObservations,
+      discountType,
+      discountValue,
+      rentProducts,
+      receiptObservations,
+      remainingValue,
+      rentDate,
+      returnDate,
+      signal,
+      totalValue,
+      clientAddress,
+      clientContact,
+    } = data;
+
+    const rentUpdateData: RentUpdateDtoWithProduct = {
+      id: rentOnEdit?.id,
+      address: clientAddress,
+      phone: clientContact,
+      client_name: clientName,
+      discount_type: discountType,
+      discount_value: discountValue,
+      rent_products: rentProducts as RentProductUpdateDtoType[],
+      remaining_value: remainingValue,
+      rent_date: new Date(rentDate).toISOString(),
+      return_date: new Date(returnDate).toISOString(),
+      signal_value: signal,
+      total_value: totalValue,
+      internal_observations: internalObservations,
+      receipt_observations: receiptObservations,
+    };
+
+    return await api.patch("rents", rentUpdateData);
+  };
 
   const onSubmit = async (data: RentFormType) => {
     try {
@@ -247,9 +238,8 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
 
       let rentRequest = null;
 
-      //if (receiptOnEdit) rentRequest = await updateRent(data);
-
-      rentRequest = await createRent(data);
+      if (rentOnEdit) rentRequest = await updateRent(data);
+      else rentRequest = await createRent(data);
 
       if (rentRequest.status !== 201) throw new Error(rentRequest.statusText);
 
@@ -258,14 +248,12 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
         title: "Produto cadastrado!",
       });
 
-      methods.reset();
-
       if (onSave) {
         onSave(rentRequest.data);
       }
 
       setCurrentStep(0);
-      if (!isInfiniteAdd) onClose();
+      if (!isInfiniteAdd) handleOnClose();
     } catch (e: unknown) {
       toaster.create({
         type: "error",
@@ -292,10 +280,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   const handleNextStep = async () => {
     const isValidStep = await validateCurrentStep();
 
-    console.log("Errors >> ", methods.formState.errors);
-
     if (!isValidStep) {
-      // Se a validação falhar, não avance para o próximo passo
       toaster.create({
         type: "error",
         title: "Erro de validação",
@@ -313,8 +298,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       );
 
       if (selectedProducts.some((product) => product.availability !== EAvailabilityStatus.AVAILABLE)) {
-        openRentWithUnavailableProductModal();
-
         return;
       }
 
@@ -328,7 +311,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
 
   const handlePreviousStep = (stepIndex: number) => {
     if (currentStep === 0) {
-      onClose();
+      handleOnClose();
 
       return;
     }
@@ -363,6 +346,12 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     }
   };
 
+  const handleOnClose = () => {
+    methods.reset();
+
+    onClose();
+  };
+
   useEffect(() => {
     if (rentDate && returnDate) loadProducts();
   }, [rentDate, returnDate]);
@@ -392,28 +381,12 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
 
     const selectedRentProductIds = rentOnEdit.rent_products.map((rentProduct) => rentProduct.product_id);
     setValue("productIds", selectedRentProductIds);
-
-    console.log("DAta >> ", rentOnEdit);
-
-    // const selectedRentProducts: ProductWithMeasureRentDtoType[] = receiptOnEdit.rent_products.map((rentProduct) => ({
-    //   id: rentProduct.product_id,
-    //   measure_type: rentProduct.products.categories?.measure_type ?? EMeasureType.DRESS,
-    //   back: rentProduct.product_measures[0]?.back ?? undefined,
-    //   bust: rentProduct.product_measures[0]?.bust ?? undefined,
-    //   height: rentProduct.product_measures[0]?.height ?? undefined,
-    //   hip: rentProduct.product_measures[0]?.hip ?? undefined,
-    //   shoulder: rentProduct.product_measures[0]?.shoulder ?? undefined,
-    //   sleeve: rentProduct.product_measures[0]?.sleeve ?? undefined,
-    //   waist: rentProduct.product_measures[0]?.waist ?? undefined,
-    // }));
-
-    //setValue("products", selectedRentProducts);
   }, [rentOnEdit]);
 
   return (
     <>
       <FormProvider {...methods}>
-        <Dialog.Root lazyMount open={isOpen} onOpenChange={() => onClose()} placement="center">
+        <Dialog.Root lazyMount open={isOpen} onOpenChange={() => handleOnClose()} placement="center">
           <Portal>
             <Dialog.Backdrop />
             <Dialog.Positioner p="4">
@@ -488,12 +461,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
           </Portal>
         </Dialog.Root>
       </FormProvider>
-      <ConfirmationModal
-        message="Existem produtos selecionados que não estão disponível nessa data. Deseja salvar o aluguel mesmo assim?"
-        isOpen={isRentWithUnvailableModalOpen}
-        onClose={closeRentWithUnavailableProductModal}
-        onSave={() => console.log("sdsdsd")}
-      />
     </>
   );
 };

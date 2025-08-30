@@ -244,6 +244,7 @@ export type Database = {
           p_discount_type?: Database["public"]["Enums"]["discount_type_enum"]
           p_discount_value?: number
           p_internal_observations?: string
+          p_phone: string
           p_products: Json
           p_receipt_observations?: string
           p_remaining_value?: number
@@ -251,43 +252,6 @@ export type Database = {
           p_return_date?: string
           p_signal_value?: number
           p_total_value?: number
-        }
-        Returns: string
-      }
-      create_rent: {
-        Args: {
-          p_address: string
-          p_client_name: string
-          p_discount_type: string
-          p_discount_value: number
-          p_internal_observations: string
-          p_phone: string
-          p_product_ids: string[]
-          p_product_measures: Json[]
-          p_receipt_observations: string
-          p_remaining_value: number
-          p_rent_date: string
-          p_return_date: string
-          p_signal_value: number
-          p_total_value: number
-        }
-        Returns: string
-      }
-      create_rent_with_products: {
-        Args: {
-          p_address: string
-          p_client_name: string
-          p_discount_type: string
-          p_discount_value: number
-          p_internal_observations: string
-          p_phone: string
-          p_product_ids: string[]
-          p_receipt_observations: string
-          p_remaining_value: number
-          p_rent_date: string
-          p_return_date: string
-          p_signal_value: number
-          p_total_value: number
         }
         Returns: string
       }
@@ -533,6 +497,7 @@ export type Database = {
           p_discount_type?: Database["public"]["Enums"]["discount_type_enum"]
           p_discount_value?: number
           p_internal_observations?: string
+          p_phone?: string
           p_products: Json
           p_receipt_observations?: string
           p_remaining_value?: number
@@ -543,27 +508,6 @@ export type Database = {
           p_total_value?: number
         }
         Returns: string
-      }
-      update_rent: {
-        Args: {
-          p_address: string
-          p_client_name: string
-          p_discount_type: string
-          p_discount_value: number
-          p_internal_observations: string
-          p_phone: string
-          p_product_ids: string[]
-          p_product_measures: Json[]
-          p_receipt_observations: string
-          p_remaining_value: number
-          p_rent_date: string
-          p_rent_id: string
-          p_rent_product_ids: string[]
-          p_return_date: string
-          p_signal_value: number
-          p_total_value: number
-        }
-        Returns: undefined
       }
     }
     Enums: {

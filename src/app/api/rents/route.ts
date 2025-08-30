@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
 
     const createRentDTO: CreateRentArgs = {
       p_address: body.address ?? "",
+      p_phone: body.phone ?? "",
       p_client_name: body.client_name ?? "",
       p_discount_value: body.discount_value ?? 0,
       p_discount_type: discountType ?? "FIXED", 
@@ -83,8 +84,6 @@ export async function POST(request: NextRequest) {
       p_signal_value: body.signal_value ?? 0,
       p_total_value: body.total_value ?? "",
     };
-
-    console.log("DTO >> ", createRentDTO);
 
     const { data: rentId, error } = await createRent(createRentDTO);
 
@@ -121,21 +120,19 @@ export async function PATCH(request: NextRequest) {
 
     const updateRentDTO: UpdateRentArgs = {
       p_client_name: body.client_name ?? "",
+      p_phone: body.phone ?? "",
       p_rent_date: body.rent_date ?? "",
       p_total_value: body.total_value ?? 0,
       p_discount_value: body.discount_value ?? 0,
-      p_discount_type: discountType ?? "", 
+      p_discount_type: discountType ?? undefined, 
       p_internal_observations: body.internal_observations ?? "",
       p_receipt_observations: body.receipt_observations ?? "",
       p_remaining_value: body.remaining_value ?? 0,
       p_return_date: body.return_date ?? "",
       p_signal_value: body.signal_value ?? 0,
       p_address: body.address ?? "",
-      p_phone: body.phone ?? "",
-      p_product_ids: body.rent_products.map((item) => item.product_id ?? ""),
-      p_product_measures: rentProducts,
+      p_products: rentProducts,
       p_rent_id: body.id ?? "",
-      p_rent_product_ids: body.rent_products.map((item) => item.id ?? ""),
     };
 
     const { error } = await updateRent(updateRentDTO);
