@@ -1,7 +1,7 @@
 class Currency {
     private _value: number;
 
-    constructor(value?: number) {
+    constructor(value?: number | null) {
         this._value = value ?? 0;
     }
 

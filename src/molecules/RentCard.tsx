@@ -1,7 +1,9 @@
 "use client";
 
 import PrimaryButton from "@/atoms/PrimaryButton";
+import Currency from "@/models/Currency";
 import { RentType } from "@/types/entities/RentType";
+import { formatDate } from "@/utils/formatDate";
 import { Card, Flex, Text } from "@chakra-ui/react";
 import { MdEdit, MdOutlineRemoveRedEye } from "react-icons/md";
 
@@ -14,15 +16,16 @@ const RentCard: React.FC<IRentCardProps> = ({ rent, onEdit }) => {
   return (
     <Card.Root p="4" boxShadow="8px 8px 6px -4px rgba(0,0,0,0.20)" bg="terracotta.50">
       <Card.Header pb="2" fontWeight="bold">
-        {rent.client_name}
+        {rent.code} - {rent.client_name}
       </Card.Header>
       <Card.Body>
         <Flex flexDir="column">
           <Text>
-            {rent.rent_date} - {rent.return_date}
+            {formatDate(new Date(rent.rent_date), "dd 'de' MMMM")} -{" "}
+            {rent.return_date ? formatDate(new Date(rent.return_date), "dd 'de' MMMM") : ""}
           </Text>
           <Text>
-            R$ {rent.signal_value}/{rent.total_value}
+            {new Currency(rent.signal_value).toString()} / {new Currency(rent.total_value).toString()}
           </Text>
           <Text>{rent.phone}</Text>
         </Flex>
