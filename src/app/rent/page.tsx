@@ -11,13 +11,18 @@ import { api } from "@/services/api";
 import Fab from "@/atoms/Fab";
 import { AiOutlinePlus } from "react-icons/ai";
 import { IncludeConfigType } from "@/services/crud/baseCrudService";
+import ReceiptView from "@/molecules/ReceiptView";
+import { usePDF } from "@react-pdf/renderer";
 
 const RentPage = () => {
   const { onClose, onOpen, open } = useDisclosure();
 
   const [rents, setRents] = useState<RentType[]>([]);
   const [selectedRent, setSelectedRent] = useState<RentType | null>(null);
-  //const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [instance, updateInstance] = usePDF({ document: <></> });
+  const [downloadRequested, setDownloadRequested] = useState(false);
+
+  const { loading: pdfLoading, url: pdfUrl } = instance;
 
   const loadRents = async () => {
     try {
@@ -78,16 +83,37 @@ const RentPage = () => {
     onClose();
   };
 
+  const handleGerarRecibo = (rent: RentType) => {
+    setSelectedRent(rent);
+    updateInstance(<ReceiptView rent={rent} />);
+    setDownloadRequested(true);
+  };
+
   useEffect(() => {
     loadRents().then();
   }, []);
+
+  useEffect(() => {
+    if (downloadRequested && !pdfLoading && pdfUrl) {
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = `Recibo ${selectedRent?.code} - ${selectedRent?.client_name}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setDownloadRequested(false);
+      setSelectedRent(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfLoading, pdfUrl, downloadRequested]);
 
   return (
     <PageContainer title="Alugueis" flexDir="column" align="center">
       <Grid w="full" templateColumns="repeat(auto-fill, 320px)" gap="8">
         {rents.map((rent) => (
           <GridItem key={rent.id}>
-            <RentCard rent={rent} onEdit={handleOpenEditRent} />
+            <RentCard rent={rent} onEdit={handleOpenEditRent} onClickPreview={handleGerarRecibo} />
           </GridItem>
         ))}
       </Grid>
