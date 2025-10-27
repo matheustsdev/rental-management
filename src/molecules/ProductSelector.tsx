@@ -8,8 +8,7 @@ import ProductSelectorItem from "@/atoms/ProductSelectorItem";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import InputField from "@/atoms/InputField";
 import { EMeasureType } from "@/constants/EMeasureType";
-import { RentProductInsertDtoType } from "@/types/entities/RentProductType";
-import { v4 as getUuid } from "uuid";
+import { RentProductInsertDtoType, RentProductInsertWithProductDtoType } from "@/types/entities/RentProductType";
 
 const ProductSelector: React.FC = () => {
   const [searchText, setSearchText] = useState("");
@@ -29,11 +28,10 @@ const ProductSelector: React.FC = () => {
   const toggleProductSelection = (productAvailability: ProductAvailabilityType) => {
     const { product } = productAvailability;
 
-    const newFormProduct: RentProductInsertDtoType = {
+    const newFormProduct: RentProductInsertWithProductDtoType = {
       id: product.id,
       product_description: product.description ?? "",
       product_price: product.price,
-      rent_id: getUuid(),
       product_id: product.id,
       measure_type: product.categories?.measure_type ?? EMeasureType.DRESS,
       waist: undefined,

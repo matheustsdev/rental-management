@@ -3,7 +3,6 @@ import { EMeasureType } from "../EMeasureType";
 
 export const RentProductSchema = z.object({
   id: z.string().optional(),
-  rent_id: z.string(),
   product_id: z.string(),
   product_description: z.string({
     invalid_type_error: "Descrição do produto é obrigatória",
@@ -62,5 +61,4 @@ export const RentProductSchema = z.object({
     .string({ invalid_type_error: "created_at deve ser uma string" })
     .optional()
     .nullable(),
-  // product_measures: z.array(ProductMeasuresSchema),
 });

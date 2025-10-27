@@ -29,8 +29,6 @@ const RentPage = () => {
 
       const rentsListRequest = (await api.get("/rents")).data;
 
-      console.log("rentsList >> ", rentsListRequest);
-
       setRents(rentsListRequest.data);
     } catch (e: unknown) {
       toaster.create({
