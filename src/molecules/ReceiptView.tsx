@@ -160,16 +160,8 @@ interface IReceiptViewProps {
 }
 
 const ReceiptView: React.FC<IReceiptViewProps> = ({ rent }) => {
-  const {
-    address,
-    client_name,
-    rent_date,
-    return_date,
-    rent_products,
-    total_value,
-    discount_value,
-    receipt_observations,
-  } = rent;
+  const { client_name, rent_date, return_date, rent_products, total_value, discount_value, receipt_observations } =
+    rent;
 
   return (
     <Document>

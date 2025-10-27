@@ -1,6 +1,6 @@
 "use client";
 
-import { Flex, Heading, Icon, useDisclosure } from "@chakra-ui/react";
+import { Flex, Icon, useDisclosure } from "@chakra-ui/react";
 import { DataTable, DataTableColumn } from "@/molecules/DataTable";
 import { useDevice } from "@/hooks/useDevice";
 import AddProductModal from "@/molecules/AddProductModal";
@@ -9,12 +9,12 @@ import { useEffect, useState } from "react";
 import { ProductType } from "@/types/entities/ProductType";
 import { api } from "@/services/api";
 import { toaster } from "@/atoms/Toaster";
-import { IncludeConfigType } from "@/services/crud/baseCrudService";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import ProductCard from "@/molecules/ProductCard";
 import { MdEdit } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
 import Fab from "@/atoms/Fab";
+import { InjectRelations } from "@/types/EntityType";
 
 export default function Home() {
   const { isMobile } = useDevice();
@@ -71,17 +71,12 @@ export default function Home() {
     try {
       setIsLoading(true);
 
-      const includeConfig: IncludeConfigType = {
-        categories: {
-          table: "categories",
-          foreignKey: "category_id",
-        },
-      };
+      const includes: (keyof InjectRelations<"products">)[] = ["categories"];
 
       const productsListRequest = (
         await api.get("/products", {
           params: {
-            include: JSON.stringify(includeConfig),
+            include: includes,
             page: currentPage,
           },
         })

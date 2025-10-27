@@ -3,7 +3,7 @@ import { Database, Tables, TablesInsert, TablesUpdate } from "@/types/supabase.t
 export type TableRow<T extends keyof Database["public"]["Tables"]> = Tables<T>;
 
 // Ajuste para garantir que `referencedRelation` sempre seja um nome de tabela válido
-type InjectRelations<T extends keyof Database["public"]["Tables"]> = {
+export type InjectRelations<T extends keyof Database["public"]["Tables"]> = {
   [K in Database["public"]["Tables"][T]["Relationships"][number] as K extends {
     referencedRelation: keyof Database["public"]["Tables"];
   }

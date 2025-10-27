@@ -26,7 +26,7 @@ const AddRentInfoStep: React.FC = () => {
       formSelectedProducts.some((product) => product.id === availableProduct.product.id)
     );
 
-    const productValue = productsWithAvailabilitySelected.reduce((acc, item) => acc + item.product.price, 0);
+    const productValue = productsWithAvailabilitySelected.reduce((acc, item) => acc + Number(item.product.price), 0);
 
     setValue("totalValue", productValue);
     setValue("finalTotalValue", productValue - (discountValue ?? 0));

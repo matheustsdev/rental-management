@@ -17,7 +17,7 @@ const RentCard: React.FC<IRentCardProps> = ({ rent, onEdit, onClickPreview }) =>
   return (
     <Card.Root p="4" boxShadow="8px 8px 6px -4px rgba(0,0,0,0.20)" bg="terracotta.50">
       <Card.Header pb="2" fontWeight="bold">
-        {rent.code} - {rent.client_name}
+        {Number(rent.code)} - {rent.client_name}
       </Card.Header>
       <Card.Body>
         <Flex flexDir="column">
@@ -28,7 +28,7 @@ const RentCard: React.FC<IRentCardProps> = ({ rent, onEdit, onClickPreview }) =>
           <Text>
             {new Currency(rent.signal_value).toString()} / {new Currency(rent.total_value).toString()}
           </Text>
-          <Text>{rent.phone}</Text>
+          <Text>{rent?.phone}</Text>
         </Flex>
       </Card.Body>
       <Card.Footer w="full">

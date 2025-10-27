@@ -3,6 +3,7 @@
 import { Flex, Status, Text } from "@chakra-ui/react";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
+import Currency from "@/models/Currency";
 
 interface IProductResumeItemProps {
   productAvailability: ProductAvailabilityType;
@@ -16,7 +17,7 @@ const ProductResumeItem: React.FC<IProductResumeItemProps> = ({ productAvailabil
       <Flex flexDir="column" flex={1}>
         <Text fontWeight="bold">{product.description}</Text>
         <Text fontSize="sm" color="gray.500">
-          Ref: {product.reference} | R$ {product.price.toFixed(2)}
+          Ref: {product.reference} | {new Currency(product.price).toString()}
         </Text>
       </Flex>
       <Status.Root colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}>

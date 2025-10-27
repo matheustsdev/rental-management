@@ -7,6 +7,7 @@ import { measureFieldsLabels } from "@/constants/MeasureFields";
 import InputField from "./InputField";
 import { Path, useFormContext, useWatch } from "react-hook-form";
 import { RentFormType } from "@/organisms/AddRentModal";
+import Currency from "@/models/Currency";
 
 interface IProductMeasureItemProps {
   productAvailability: ProductAvailabilityType;
@@ -42,7 +43,7 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
           <Flex flexDir="column">
             <Text fontWeight="bold">{product.description}</Text>
             <Text fontSize="sm" color="gray.500">
-              Ref: {product.reference} | R$ {product.price.toFixed(2)}
+              Ref: {product.reference} | {new Currency(product.price).toString()}
             </Text>
           </Flex>
           <Status.Root
@@ -63,7 +64,8 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
             const name = `rentProducts.${productIndex}.${field}` as Path<RentFormType>;
 
             const fieldName = field as keyof typeof labels;
-            console.log("Test >> ", name, getValues(name));
+
+            console.log("Errors >> ", errors);
 
             const inputError =
               errors.rentProducts && errors.rentProducts[productIndex]

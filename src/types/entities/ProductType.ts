@@ -1,5 +1,5 @@
-import { EntityInsertDtoType, EntityType, EntityUpdateDtoType } from "../EntityType";
+import { products, Prisma } from "@prisma/client"
 
-export type ProductType = EntityType<"products">;
-export type ProductInsertDtoType = EntityInsertDtoType<"products">;
-export type ProductUpdateDtoType = EntityUpdateDtoType<"products">;
+export type ProductType = products;
+export type ProductInsertDtoType = Prisma.productsCreateArgs;
+export type ProductUpdateDtoType = Prisma.productsUpdateArgs;

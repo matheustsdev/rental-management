@@ -1,59 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { CategoryType } from "@/types/entities/CategoryType";
-import { categoryService } from "@/services/crud/categoryService";
-import { IncludeConfigType } from "@/services/crud/baseCrudService";
+import { DefaultResponse } from "@/models/DefaultResponse";
+import { prisma } from "@/services/prisma";
+import { TableRow } from "@/types/EntityType";
+import { ErrorResponse } from "@/models/ErrorResponse";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
 
-    const filters = searchParams.get("filters") ? JSON.parse(searchParams.get("filters")!) : undefined;
+    const where = searchParams.get("where") ? JSON.parse(searchParams.get("where")!) : undefined;
 
     const page = Number(searchParams.get("page") || 1);
     const pageSize = Number(searchParams.get("pageSize") || 10);
-    const orderBy = searchParams.get("orderBy") as keyof CategoryType | undefined;
+    const orderBy = searchParams.get("orderBy") as keyof TableRow<"categories"> | undefined;
     const ascending = searchParams.get("ascending") !== "false";
 
-    let include;
-    const includeParam = searchParams.get("include");
-    if (includeParam) {
-      try {
-        // Parse include configuration from JSON string
-        const includeConfig: IncludeConfigType = JSON.parse(includeParam);
-        include = Object.entries(includeConfig).reduce((acc, [alias, config]) => {
-          return {
-            ...acc,
-            [alias]: {
-              table: config.table,
-              foreignKey: config.foreignKey,
-              fields: config.fields,
-            },
-          };
-        }, {});
-      } catch (parseError) {
-        return NextResponse.json(
-          { error: "Invalid include configuration", details: String(parseError) },
-          { status: 400 }
-        );
-      }
-    }
+    const start = (page - 1) * pageSize;
 
-    const result = await categoryService.find(filters, {
-      page,
-      pageSize,
-      orderBy,
-      ascending,
-      include,
+    const count = await prisma.categories.count();
+
+    const paginatedCategories = await prisma.categories.findMany({
+        skip: start,
+        take: pageSize,
+        orderBy: {
+          [orderBy ?? "updated_at"]: ascending ? "asc" : "desc"
+        },
+        where,
+        include: {
+          _count: true
+        }
     });
+      
+    const response = new DefaultResponse(paginatedCategories, "Busca de categorias concluída.", page, pageSize, count);
 
-    return NextResponse.json(result, { status: 200 });
+    return NextResponse.json(response, { status: 200 })
   } catch (error) {
+    const errorResponse = new ErrorResponse("Erro ao buscar categorias", 500, (error as Error).message);
+
     return NextResponse.json(
-      {
-        error: "Erro ao buscar categorias",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
+      errorResponse,
+      { status: errorResponse.errorCode }
     );
   }
 }
@@ -62,16 +48,19 @@ export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
 
-    const newCategory = await categoryService.create(data);
+    const newCategory = await prisma.categories.create({
+      data
+    })
 
-    return NextResponse.json(newCategory, { status: 201 });
+    const response = new DefaultResponse(newCategory, "Categoria criada com suvesso", null, null, null);
+
+    return NextResponse.json(response, { status: 201 });
   } catch (error) {
+    const errorResponse = new ErrorResponse("Erro ao criar categoria", 500, (error as Error).message)
+
     return NextResponse.json(
-      {
-        error: "Erro ao criar categoria",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 400 }
+      errorResponse,
+      { status: errorResponse.errorCode }
     );
   }
 }

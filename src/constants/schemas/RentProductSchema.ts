@@ -8,7 +8,7 @@ export const RentProductSchema = z.object({
   product_description: z.string({
     invalid_type_error: "Descrição do produto é obrigatória",
   }),
-  product_price: z.number({
+  product_price: z.string({
     invalid_type_error: "Informe um número válido para product_price",
   }),
   actual_return_buffer_days: z

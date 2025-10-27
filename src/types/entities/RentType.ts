@@ -1,16 +1,11 @@
-import { EntityInsertDtoType, EntityType, EntityUpdateDtoType } from "../EntityType";
-import { RentProductInsertDtoType, RentProductType, RentProductUpdateDtoType } from "./RentProductType";
+import { RentProductUpdateDtoType } from "./RentProductType";
+import { rents, Prisma } from "@prisma/client"
 
-export type RentType = EntityType<"rents"> & {
-  rent_products: RentProductType[],
-  
-}
-export type RentInsertDtoType = EntityInsertDtoType<"rents">;
-export type RentUpdateDtoType = EntityUpdateDtoType<"rents">;
+export type RentType = rents;
+export type RentInsertDtoType = Prisma.rentsCreateInput;
+export type RentUpdateDtoType = Prisma.rentsUpdateInput;
 
-export type RentInsertDtoWithProduct = RentInsertDtoType & {
-  rent_products: RentProductInsertDtoType[]
-};
+export type RentInsertDtoWithProduct = RentInsertDtoType;
 
 export type RentUpdateDtoWithProduct = RentUpdateDtoType & {
   rent_products: RentProductUpdateDtoType[],

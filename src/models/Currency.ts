@@ -1,8 +1,10 @@
+import { Decimal } from "@prisma/client/runtime/library";
+
 class Currency {
     private _value: number;
 
-    constructor(value?: number | null) {
-        this._value = value ?? 0;
+    constructor(value?: number | Decimal | null) {
+        this._value = value ? Number(value) : 0;
     }
 
     getValue() {

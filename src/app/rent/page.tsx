@@ -10,7 +10,6 @@ import { toaster } from "@/atoms/Toaster";
 import { api } from "@/services/api";
 import Fab from "@/atoms/Fab";
 import { AiOutlinePlus } from "react-icons/ai";
-import { IncludeConfigType } from "@/services/crud/baseCrudService";
 import ReceiptView from "@/molecules/ReceiptView";
 import { usePDF } from "@react-pdf/renderer";
 
@@ -28,32 +27,9 @@ const RentPage = () => {
     try {
       //setIsLoading(true);
 
-      const includeConfig: IncludeConfigType = {
-        rent_products: {
-          table: "rent_products",
-          foreignKey: "rent_id",
-          includes: {
-            products: {
-              table: "products",
-              foreignKey: "product_id",
-              includes: {
-                category: {
-                  table: "categories",
-                  foreignKey: "category_id",
-                },
-              },
-            },
-          },
-        },
-      };
+      const rentsListRequest = (await api.get("/rents")).data;
 
-      const rentsListRequest = (
-        await api.get("/rents", {
-          params: {
-            include: JSON.stringify(includeConfig),
-          },
-        })
-      ).data;
+      console.log("rentsList >> ", rentsListRequest);
 
       setRents(rentsListRequest.data);
     } catch (e: unknown) {

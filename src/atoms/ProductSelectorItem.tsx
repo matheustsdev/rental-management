@@ -3,6 +3,7 @@
 import { Flex, Text, Checkbox, Status } from "@chakra-ui/react";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
+import Currency from "@/models/Currency";
 
 interface IProductSelectorItemProps {
   productAvailability: ProductAvailabilityType;
@@ -33,7 +34,7 @@ const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
             <Flex flexDir="column">
               <Text fontWeight="bold">{product.description}</Text>
               <Text fontSize="sm" color="gray.500">
-                Ref: {product.reference} | R$ {product.price.toFixed(2)}
+                Ref: {product.reference} | {new Currency(product.price).toString()}
               </Text>
             </Flex>
             <Status.Root
