@@ -8,7 +8,7 @@ import ProductSelectorItem from "@/atoms/ProductSelectorItem";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import InputField from "@/atoms/InputField";
 import { EMeasureType } from "@/constants/EMeasureType";
-import { RentProductInsertDtoType, RentProductInsertWithProductDtoType } from "@/types/entities/RentProductType";
+import { RentProductInsertWithProductDtoType } from "@/types/entities/RentProductType";
 
 const ProductSelector: React.FC = () => {
   const [searchText, setSearchText] = useState("");
@@ -31,7 +31,7 @@ const ProductSelector: React.FC = () => {
     const newFormProduct: RentProductInsertWithProductDtoType = {
       id: product.id,
       product_description: product.description ?? "",
-      product_price: product.price,
+      product_price: Number(product.price) as number,
       product_id: product.id,
       measure_type: product.categories?.measure_type ?? EMeasureType.DRESS,
       waist: undefined,
@@ -50,7 +50,7 @@ const ProductSelector: React.FC = () => {
       return;
     }
 
-    const newProductList: RentProductInsertDtoType[] = products.some((item) => item.id === product.id)
+    const newProductList: RentProductInsertWithProductDtoType[] = products.some((item) => item.id === product.id)
       ? products.filter((item) => item.id !== product.id)
       : [...products, newFormProduct];
 

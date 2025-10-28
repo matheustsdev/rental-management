@@ -9,7 +9,7 @@ import { api } from "@/services/api";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import SecondaryButton from "@/atoms/SecondaryButton";
-import { RentInsertWithProductDtoType, RentType, RentUpdateWithProductDtoType } from "@/types/entities/RentType";
+import { RentInsertWithProductDto, RentType, RentUpdateWithProductDto } from "@/types/entities/RentType";
 import ProductSelector from "../molecules/ProductSelector";
 import AddRentInfoStep from "@/molecules/AddRentInfoStep";
 import AddRentResume from "@/molecules/AddRentResume";
@@ -176,7 +176,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       clientContact,
     } = data;
 
-    const rentInsertData: RentInsertWithProductDtoType = {
+    const rentInsertData: RentInsertWithProductDto = {
       address: clientAddress,
       phone: clientContact,
       client_name: clientName,
@@ -212,7 +212,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       clientContact,
     } = data;
 
-    const rentUpdateData: RentUpdateWithProductDtoType = {
+    const rentUpdateData: RentUpdateWithProductDto = {
       id: rentOnEdit?.id,
       address: clientAddress,
       phone: clientContact,

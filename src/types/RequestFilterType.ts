@@ -13,6 +13,6 @@ export type FilterOperator =
 export type RequestFilterType<T> = {
   [K in keyof T]?: {
     operator: FilterOperator;
-    value: any;
+    value: T;
   };
 };

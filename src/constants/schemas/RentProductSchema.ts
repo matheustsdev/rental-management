@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { EMeasureType } from "../EMeasureType";
+import { decimalSchema } from "./DecimalSchema";
+import { dateSchema } from "./DateSchema";
 
 export const RentProductSchema = z.object({
   id: z.string().optional(),
@@ -7,9 +9,7 @@ export const RentProductSchema = z.object({
   product_description: z.string({
     invalid_type_error: "Descrição do produto é obrigatória",
   }),
-  product_price: z.string({
-    invalid_type_error: "Informe um número válido para product_price",
-  }),
+  product_price: decimalSchema,
   actual_return_buffer_days: z
     .number({
       invalid_type_error:
@@ -17,38 +17,28 @@ export const RentProductSchema = z.object({
     })
     .optional()
     .nullable(),
-  actual_return_date: z
-    .string({
-      invalid_type_error: "actual_return_date deve ser uma string",
-    })
+  actual_return_date: dateSchema
     .optional()
     .nullable(),
-    waist: z
-    .number({ invalid_type_error: "Informe um número válido" })
+    waist: decimalSchema
     .optional()
     .nullable(),
-  bust: z
-    .number({ invalid_type_error: "Informe um número válido" })
+  bust: decimalSchema
     .optional()
     .nullable(),
-  hip: z
-    .number({ invalid_type_error: "Informe um número válido" })
+  hip: decimalSchema
     .optional()
     .nullable(),
-  shoulder: z
-    .number({ invalid_type_error: "Informe um número válido" })
+  shoulder: decimalSchema
     .optional()
     .nullable(),
-  sleeve: z
-    .number({ invalid_type_error: "Informe um número válido" })
+  sleeve: decimalSchema
     .optional()
     .nullable(),
-  height: z
-    .number({ invalid_type_error: "Informe um número válido" })
+  height: decimalSchema
     .optional()
     .nullable(),
-  back: z
-    .number({ invalid_type_error: "Informe um número válido" })
+  back: decimalSchema
     .optional()
     .nullable(),
   measure_type: z.enum(
@@ -57,8 +47,7 @@ export const RentProductSchema = z.object({
       errorMap: () => ({ message: "Tipo de medida inválido" })
     }
   ),
-  created_at: z
-    .string({ invalid_type_error: "created_at deve ser uma string" })
+  created_at: dateSchema
     .optional()
     .nullable(),
 });
