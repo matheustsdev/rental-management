@@ -1,7 +1,9 @@
-import { RentProductInsertWithProductDtoType, RentProductUpdateWithProductDtoType } from "./RentProductType";
+import { RentProductInsertWithProductDtoType, RentProductType, RentProductUpdateWithProductDtoType } from "./RentProductType";
 import { rents, Prisma } from "@prisma/client"
 
-export type RentType = rents;
+export type RentType = rents & {
+  rent_products: RentProductType[]
+}
 export type RentInsertDtoType = Prisma.rentsCreateInput;
 export type RentUpdateDtoType = Prisma.rentsUpdateInput;
 

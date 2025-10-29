@@ -9,7 +9,7 @@ import { api } from "@/services/api";
 import { ReactElement, useEffect, useRef, useState } from "react";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import SecondaryButton from "@/atoms/SecondaryButton";
-import { RentInsertWithProductDto, RentType, RentUpdateWithProductDto } from "@/types/entities/RentType";
+import { RentInsertWithProductDtoType, RentType, RentUpdateWithProductDtoType } from "@/types/entities/RentType";
 import ProductSelector from "../molecules/ProductSelector";
 import AddRentInfoStep from "@/molecules/AddRentInfoStep";
 import AddRentResume from "@/molecules/AddRentResume";
@@ -21,8 +21,18 @@ import { RentProductSchema } from "@/constants/schemas/RentProductSchema";
 import { RentProductUpdateDtoType } from "@/types/entities/RentProductType";
 
 const productSelectorSchema = z.object({
-  rentDate: z.string().nonempty("Informe a data de saída"),
-  returnDate: z.string().nonempty("Informe a data de devolução"),
+  rentDate: z.union([
+    z.date({
+      invalid_type_error: "Formato de data inválido.",
+    }),
+    z.string().nonempty("Informe a data de saída"),
+  ]),
+  returnDate: z.union([
+    z.date({
+      invalid_type_error: "Formato de data inválido.",
+    }),
+    z.string().nonempty("Informe a data de devolução"),
+  ]),
   productIds: z
     .array(z.string(), { required_error: "Selecione pelo menos um produto" })
     .min(1, "Selecione pelo menos um produto"),
@@ -176,7 +186,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       clientContact,
     } = data;
 
-    const rentInsertData: RentInsertWithProductDto = {
+    const rentInsertData: RentInsertWithProductDtoType = {
       address: clientAddress,
       phone: clientContact,
       client_name: clientName,
@@ -212,7 +222,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       clientContact,
     } = data;
 
-    const rentUpdateData: RentUpdateWithProductDto = {
+    const rentUpdateData: RentUpdateWithProductDtoType = {
       id: rentOnEdit?.id,
       address: clientAddress,
       phone: clientContact,
@@ -369,12 +379,12 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     setValue("clientContact", rentOnEdit.phone ?? "");
     setValue("clientName", rentOnEdit.client_name ?? "");
     setValue("discountType", rentOnEdit.discount_type ?? EDiscountTypes.FIXED);
-    setValue("discountValue", rentOnEdit.discount_value ?? 0);
-    setValue("finalTotalValue", rentOnEdit.total_value - (rentOnEdit.discount_value ?? 0));
+    setValue("discountValue", Number(rentOnEdit.discount_value ?? 0));
+    setValue("finalTotalValue", Number(rentOnEdit.total_value) - Number(rentOnEdit.discount_value ?? 0));
     setValue("internalObservations", rentOnEdit.internal_observations ?? "");
     setValue("receiptObservations", rentOnEdit.receipt_observations ?? "");
-    setValue("signal", rentOnEdit.signal_value ?? 0);
-    setValue("remainingValue", rentOnEdit.remaining_value ?? 0);
+    setValue("signal", Number(rentOnEdit.signal_value ?? 0));
+    setValue("remainingValue", Number(rentOnEdit.remaining_value ?? 0));
     setValue("rentDate", rentOnEdit.rent_date);
     setValue("returnDate", rentOnEdit.return_date ?? "");
     setValue("rentProducts", rentOnEdit.rent_products);

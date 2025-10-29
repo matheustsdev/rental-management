@@ -1,4 +1,5 @@
 import PrimaryButton from "@/atoms/PrimaryButton";
+import Currency from "@/models/Currency";
 import { ProductType } from "@/types/entities/ProductType";
 import { Card, Flex, Text } from "@chakra-ui/react";
 
@@ -16,7 +17,7 @@ const ProductCard: React.FC<IProductCardProps> = ({ product, onEdit }) => {
       <Card.Body>
         <Flex flexDir="column">
           <Text>{product.description}</Text>
-          <Text>R$ {product.price}</Text>
+          <Text>{new Currency(product.price).toString()}</Text>
           <Text>{product.categories?.name}</Text>
         </Flex>
       </Card.Body>

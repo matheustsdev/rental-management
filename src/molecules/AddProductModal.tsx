@@ -9,7 +9,7 @@ import { api } from "@/services/api";
 import { useEffect, useRef, useState } from "react";
 import Select from "@/atoms/Select";
 import { CategoryType } from "@/types/entities/CategoryType";
-import { ProductInsertDtoType, ProductType } from "@/types/entities/ProductType";
+import { ProductInsertWithCategoryDtoType, ProductType } from "@/types/entities/ProductType";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import SecondaryButton from "@/atoms/SecondaryButton";
 
@@ -54,7 +54,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
 
       const { categoryId, description, receiptDescription, price, reference } = data;
 
-      const productInsertData: ProductInsertDtoType = {
+      const productInsertData: ProductInsertWithCategoryDtoType = {
         price,
         reference,
         description,
@@ -114,7 +114,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
 
     setValue("categoryId", productOnEdit.category_id ?? "");
     setValue("description", productOnEdit.description ?? "");
-    setValue("price", productOnEdit.price);
+    setValue("price", Number(productOnEdit.price));
     setValue("receiptDescription", productOnEdit.receipt_description ?? "");
     setValue("reference", productOnEdit.reference);
   }, [productOnEdit]);
