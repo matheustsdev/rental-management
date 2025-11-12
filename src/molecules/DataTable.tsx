@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Table, Flex, Text, IconButton, Icon } from "@chakra-ui/react";
+import { Table, Flex, Text, IconButton, Icon, Spinner } from "@chakra-ui/react";
 import { IoChevronForwardOutline, IoChevronBackOutline, IoArrowUp, IoArrowDown } from "react-icons/io5";
 import Select from "@/atoms/Select";
 
@@ -21,7 +21,7 @@ interface DataTableProps<T> {
   totalPages?: number;
   currentPage?: number;
   isLoading?: boolean;
-  onPageChange?: (page: number) => void;
+  onPageChange?: (page: number) => Promise<void>;
   onRowsPerPageChange?: (rows: number) => void;
   onSort?: (column: keyof T, direction: "asc" | "desc") => void;
   actions?: (row: T) => React.ReactNode;
@@ -65,7 +65,7 @@ export function DataTable<T extends { id: string }>({
                 onClick={() => column.sortable && handleSort(column.key)}
                 cursor={column.sortable ? "pointer" : "default"}
               >
-                <Flex align="center" justify={column.align || "start"} color="white">
+                <Flex align="center" justify={column.align || "start"} color="white" pl="4">
                   {column.header}
                   {column.sortable && (
                     <>
@@ -85,39 +85,29 @@ export function DataTable<T extends { id: string }>({
               </Table.ColumnHeader>
             ))}
             {actions && (
-              <Table.ColumnHeader w="fit-content" color="white">
+              <Table.ColumnHeader w="fit-content" color="white" pl="4">
                 Ações
               </Table.ColumnHeader>
             )}
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {isLoading ? (
-            <Table.Row>
-              <Table.Cell colSpan={columns.length + (actions ? 1 : 0)}>
-                <Flex justify="center" align="center">
-                  Carregando...
-                </Flex>
-              </Table.Cell>
+          {data.map((row, i) => (
+            <Table.Row key={row.id} bg={i % 2 === 0 ? "taupe.50" : "taupe.100"}>
+              {columns.map((column) => (
+                <Table.Cell key={String(column.key)} textAlign={column.align || "start"} pl="4">
+                  {column.cell ? column.cell(row) : String(row[column.key])}
+                </Table.Cell>
+              ))}
+              {actions && (
+                <Table.Cell maxW="fit-content" minW="fit-content">
+                  <Flex maxW="fit-content" minW="fit-content">
+                    {actions(row)}
+                  </Flex>
+                </Table.Cell>
+              )}
             </Table.Row>
-          ) : (
-            data.map((row, i) => (
-              <Table.Row key={row.id} bg={i % 2 === 0 ? "terracotta.50" : "beige.50"}>
-                {columns.map((column) => (
-                  <Table.Cell key={String(column.key)} textAlign={column.align || "start"}>
-                    {column.cell ? column.cell(row) : String(row[column.key])}
-                  </Table.Cell>
-                ))}
-                {actions && (
-                  <Table.Cell maxW="fit-content" minW="fit-content">
-                    <Flex maxW="fit-content" minW="fit-content">
-                      {actions(row)}
-                    </Flex>
-                  </Table.Cell>
-                )}
-              </Table.Row>
-            ))
-          )}
+          ))}
         </Table.Body>
       </Table.Root>
 
@@ -128,22 +118,22 @@ export function DataTable<T extends { id: string }>({
           <IconButton
             size="sm"
             mr={2}
-            onClick={() => onPageChange?.(Math.max(1, currentPage - 1))}
-            disabled={currentPage === 1}
+            onClick={async () => await onPageChange?.(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1 || isLoading}
             aria-label="Página anterior"
           >
-            <IoChevronBackOutline />
+            {isLoading ? <Spinner /> : <IoChevronBackOutline />}
           </IconButton>
           <Text mr={2}>
             {currentPage} de {totalPages}
           </Text>
           <IconButton
             size="sm"
-            disabled={currentPage === totalPages}
-            onClick={() => onPageChange?.(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages || isLoading}
+            onClick={async () => await onPageChange?.(Math.min(totalPages, currentPage + 1))}
             aria-label="Próxima página"
           >
-            <IoChevronForwardOutline />
+            {isLoading ? <Spinner /> : <IoChevronForwardOutline />}
           </IconButton>
         </Flex>
 

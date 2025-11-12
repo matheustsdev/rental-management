@@ -8,7 +8,7 @@ const PrimaryButton: React.FC<IPrimaryButtonProps> = ({ ...rest }) => {
       px="4"
       py="8"
       borderRadius="full"
-      bg="terracotta.500"
+      bg="primary.500"
       color="white"
       pos="absolute"
       bottom="4"

@@ -9,12 +9,12 @@ import { useEffect, useState } from "react";
 import { ProductType } from "@/types/entities/ProductType";
 import { api } from "@/services/api";
 import { toaster } from "@/atoms/Toaster";
-import PrimaryButton from "@/atoms/PrimaryButton";
 import ProductCard from "@/molecules/ProductCard";
 import { MdEdit } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
 import Fab from "@/atoms/Fab";
 import { InjectRelations } from "@/types/EntityType";
+import SecondaryButton from "@/atoms/SecondaryButton";
 
 export default function Home() {
   const { isMobile } = useDevice();
@@ -49,10 +49,10 @@ export default function Home() {
 
   const actions = (product: ProductType) => {
     return (
-      <Flex gap="4">
-        <PrimaryButton onClick={() => openUpdateModal(product)}>
+      <Flex gap="4" py="1">
+        <SecondaryButton p="2" onClick={() => openUpdateModal(product)}>
           <MdEdit />
-        </PrimaryButton>
+        </SecondaryButton>
       </Flex>
     );
   };
@@ -67,7 +67,7 @@ export default function Home() {
     onOpen();
   };
 
-  const loadProducts = async () => {
+  const loadProducts = async (newPage: number) => {
     try {
       setIsLoading(true);
 
@@ -77,13 +77,15 @@ export default function Home() {
         await api.get("/products", {
           params: {
             include: includes,
-            page: currentPage,
+            page: newPage,
+            orderBy: "reference",
           },
         })
       ).data;
 
-      setPagesTotal(Math.ceil(productsListRequest.total / 10));
       setProducts(productsListRequest.data);
+      setPagesTotal(Math.ceil(productsListRequest.total / 10));
+      setCurrentPage(newPage);
     } catch (e: unknown) {
       toaster.create({
         type: "error",
@@ -93,6 +95,19 @@ export default function Home() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const onUpsertProduct = (upsertedProduct: ProductType) => {
+    if (selectedProductRow) {
+      setProducts((prev) =>
+        prev.map((prevProduct) => (prevProduct.id === selectedProductRow.id ? upsertedProduct : prevProduct))
+      );
+
+      return;
+    }
+
+    setProducts((prev) => [upsertedProduct, ...prev]);
+    setPagesTotal(Math.ceil(products.length + 1 / 10));
   };
 
   const MobileDataDisplay = (
@@ -108,7 +123,7 @@ export default function Home() {
       columns={columns}
       data={products}
       currentPage={currentPage}
-      onPageChange={(page) => setCurrentPage(page)}
+      onPageChange={(updatedPage) => loadProducts(updatedPage)}
       totalPages={pagesTotal}
       actions={actions}
       isLoading={isLoading}
@@ -116,8 +131,8 @@ export default function Home() {
   );
 
   useEffect(() => {
-    loadProducts();
-  }, [currentPage]);
+    loadProducts(1);
+  }, []);
 
   return (
     <PageContainer title="Lista de produtos" flexDir="column" align="center" gap="8" overflowY="hidden">
@@ -132,7 +147,7 @@ export default function Home() {
       <AddProductModal
         isOpen={open}
         onClose={handleOnCloseModal}
-        onSave={(newProduct) => setProducts((prev) => [newProduct, ...prev])}
+        onSave={onUpsertProduct}
         productOnEdit={selectedProductRow}
       />
     </PageContainer>

@@ -9,7 +9,7 @@ interface IPageContainerProps extends Omit<FlexProps, "minW" | "color" | "bg"> {
 
 const PageContainer: React.FC<IPageContainerProps> = ({ title, ...rest }) => {
   return (
-    <Flex bg="beige.500" minW="100vw" minH="100vh" color="black" flexDir="column" gap="8" overflowY="hidden">
+    <Flex bg="body.400" minW="100vw" minH="100vh" color="black" flexDir="column" gap="8" overflowY="hidden">
       <Flex>
         <Navbar />
       </Flex>

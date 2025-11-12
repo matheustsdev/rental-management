@@ -239,7 +239,11 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       receipt_observations: receiptObservations,
     };
 
-    return await api.patch("rents", rentUpdateData);
+    const test = `rents/${rentOnEdit?.id}`;
+    console.log(test);
+    console.log("Rent >> ", rentUpdateData);
+
+    return await api.patch(`rents/${rentOnEdit?.id}`, rentUpdateData);
   };
 
   const onSubmit = async (data: RentFormType) => {
@@ -301,6 +305,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     }
 
     if (currentStep + 2 > steps.length) {
+      console.log("Sumibt");
       const values = methods.getValues();
 
       const selectedProducts = availableProducts.filter(({ product }) =>
@@ -308,7 +313,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       );
 
       if (selectedProducts.some((product) => product.availability !== EAvailabilityStatus.AVAILABLE)) {
-        return;
+        // return;
       }
 
       onSubmit(values);

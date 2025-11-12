@@ -9,7 +9,11 @@ import { api } from "@/services/api";
 import { useEffect, useRef, useState } from "react";
 import Select from "@/atoms/Select";
 import { CategoryType } from "@/types/entities/CategoryType";
-import { ProductInsertWithCategoryDtoType, ProductType } from "@/types/entities/ProductType";
+import {
+  ProductInsertWithCategoryDtoType,
+  ProductType,
+  ProductUpdateWithCategoryDtoType,
+} from "@/types/entities/ProductType";
 import PrimaryButton from "@/atoms/PrimaryButton";
 import SecondaryButton from "@/atoms/SecondaryButton";
 
@@ -48,7 +52,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
   const categoryId = useWatch({ control, name: "categoryId" });
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const onSubmit = async (data: ProductFormType) => {
+  const createProduct = async (data: ProductFormType) => {
     try {
       setIsLoading(true);
 
@@ -61,6 +65,10 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
         category_id: categoryId,
         receipt_description: receiptDescription,
       };
+
+      if (productOnEdit) {
+        await api.patch(`products/${productOnEdit.id}`, productInsertData);
+      }
 
       const newProductRequest = await api.post("products", productInsertData);
 
@@ -85,6 +93,51 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const updateProduct = async (data: ProductFormType) => {
+    try {
+      setIsLoading(true);
+
+      const { categoryId, description, receiptDescription, price, reference } = data;
+
+      const productInsertData: ProductUpdateWithCategoryDtoType = {
+        price,
+        reference,
+        description,
+        category_id: categoryId,
+        receipt_description: receiptDescription,
+      };
+
+      const updatedProductRequest = await api.patch(`products/${productOnEdit?.id}`, productInsertData);
+
+      if (updatedProductRequest.status !== 200) throw new Error(updatedProductRequest.data.message);
+
+      toaster.create({
+        type: "success",
+        title: updatedProductRequest.data.message,
+      });
+
+      onSave(updatedProductRequest.data.data);
+
+      reset();
+
+      if (!isInfiniteAdd) onClose();
+    } catch (e: unknown) {
+      toaster.create({
+        type: "error",
+        title: "Erro ao salvar",
+        description: (e as Error).message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onSubmit = async (data: ProductFormType) => {
+    if (productOnEdit) return updateProduct(data);
+
+    return createProduct(data);
   };
 
   const loadCategories = async () => {
@@ -194,7 +247,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
                   </SecondaryButton>
                 </Dialog.ActionTrigger>
                 <PrimaryButton w="24" type="submit" disabled={isLoading}>
-                  {isLoading ? <Spinner /> : "Adicionar"}
+                  {isLoading ? <Spinner /> : productOnEdit ? "Atualizar" : "Adicionar"}
                 </PrimaryButton>
               </Flex>
             </Dialog.Footer>
