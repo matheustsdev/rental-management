@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RentInsertDtoType, RentInsertWithProductDtoType, RentUpdateWithProductDtoType } from "@/types/entities/RentType";
+import { RentInsertDtoType, RentInsertWithProductDtoType } from "@/types/entities/RentType";
 import { DefaultResponse } from "@/models/DefaultResponse";
 import { prisma } from "@/services/prisma";
 import { ProductType } from "@/types/entities/ProductType";
 import { Prisma } from "@prisma/client";
 import { ErrorResponse } from "@/models/ErrorResponse";
+import { ApiError } from "@/models/ApiError";
 
 export async function GET(request: NextRequest) {
   try {
@@ -93,36 +94,17 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: NextRequest) {
-  try {
-    const body = (await request.json()) as RentUpdateWithProductDtoType;
+// export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+//   try {
+//     throw new ApiError("É obrigatório informar o ID do aluguel para atualiza-lo", 400);
 
-    if (!body.id) throw new Error("É obrigatório informar o ID do aluguel para atualiza-lo")
+//   } catch (error) {
+//     const apiError = error as ApiError;
+//     const errorResponse = new ErrorResponse(apiError.code ? apiError.message : "Erro ao atualizar aluguel", apiError.code ?? 500);
 
-    const updatedRent = await prisma.rents.update({
-      data: body,
-      where: {
-        id: body.id.toString()
-      },
-      include: {
-          rent_products: {
-            include: {
-              products: true
-            }
-          }
-        }
-    });
-
-    const response = new DefaultResponse(updatedRent, "Aluguel atualizado com sucesso", null, null, null);
-
-    return NextResponse.json(response, { status: 201 });
-  } catch (error) {
-    const errorResponse = new DefaultResponse(null, `Erro ao atualizar aluguel >> ${(error as Error).message}`, null, null, null);
-
-    return NextResponse.json(
-      errorResponse,
-      { status: 400 }
-    );
-  }
-}
-
+//     return NextResponse.json(
+//       errorResponse,
+//       { status: errorResponse.errorCode }
+//     );
+//   }
+// }

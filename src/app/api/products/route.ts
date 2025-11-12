@@ -4,6 +4,7 @@ import { prisma } from "@/services/prisma";
 import { DefaultResponse } from "@/models/DefaultResponse";
 import { Prisma } from "@prisma/client";
 import { DefaultArgs } from "@prisma/client/runtime/library";
+import { ErrorResponse } from "@/models/ErrorResponse";
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,12 +42,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(response, { status: 200 })
   } catch (error) {
+    const errorResponse = new ErrorResponse("Erro ao buscar produtos", 500, (error as Error).message)
+
     return NextResponse.json(
-      {
-        error: "Erro ao buscar produtos",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 500 }
+      errorResponse,
+      { status: errorResponse.errorCode }
     );
   }
 }
@@ -59,14 +59,15 @@ export async function POST(request: NextRequest) {
       data
     })
 
-    return NextResponse.json(newProduct, { status: 201 });
+    const response = new DefaultResponse(newProduct, "Produto criado com sucesso.", null, null, null);
+
+    return NextResponse.json(response, { status: 201 });
   } catch (error) {
+    const errorResponse = new ErrorResponse("Erro ao criar produto.", 500, (error as Error).message)
+
     return NextResponse.json(
-      {
-        error: "Erro ao criar produto",
-        details: error instanceof Error ? error.message : String(error),
-      },
-      { status: 400 }
+      errorResponse,
+      { status: errorResponse.errorCode }
     );
   }
 }
