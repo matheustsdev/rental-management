@@ -111,7 +111,7 @@ export default function Home() {
   };
 
   const MobileDataDisplay = (
-    <Flex flexDir="column" w="full" gap="4">
+    <Flex flexDir="column" w="full" gap="4" pb="40">
       {products.map((product) => (
         <ProductCard product={product} key={product.id} onEdit={openUpdateModal} />
       ))}

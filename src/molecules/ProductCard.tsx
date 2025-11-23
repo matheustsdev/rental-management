@@ -1,4 +1,4 @@
-import PrimaryButton from "@/atoms/PrimaryButton";
+import SecondaryButton from "@/atoms/SecondaryButton";
 import Currency from "@/models/Currency";
 import { ProductType } from "@/types/entities/ProductType";
 import { Card, Flex, Text } from "@chakra-ui/react";
@@ -14,7 +14,7 @@ const ProductCard: React.FC<IProductCardProps> = ({ product, onEdit }) => {
       <Card.Header pb="2" fontWeight="bold">
         {product.reference}
       </Card.Header>
-      <Card.Body>
+      <Card.Body fontSize="sm" pb="4">
         <Flex flexDir="column">
           <Text>{product.description}</Text>
           <Text>{new Currency(product.price).toString()}</Text>
@@ -22,11 +22,10 @@ const ProductCard: React.FC<IProductCardProps> = ({ product, onEdit }) => {
         </Flex>
       </Card.Body>
       <Card.Footer w="full">
-        <Flex w="full" align="center" justify="flex-end">
-          <PrimaryButton onClick={() => onEdit(product)}>Editar</PrimaryButton>
+        <Flex w="full" align="center" justify="flex-start">
+          <SecondaryButton onClick={() => onEdit(product)}>Editar</SecondaryButton>
         </Flex>
       </Card.Footer>
-      p
     </Card.Root>
   );
 };

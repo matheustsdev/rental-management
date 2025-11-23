@@ -12,9 +12,11 @@ import Fab from "@/atoms/Fab";
 import { AiOutlinePlus } from "react-icons/ai";
 import ReceiptView from "@/molecules/ReceiptView";
 import { usePDF } from "@react-pdf/renderer";
+import { useDevice } from "@/hooks/useDevice";
 
 const RentPage = () => {
   const { onClose, onOpen, open } = useDisclosure();
+  const { isMobile } = useDevice();
 
   const [rents, setRents] = useState<RentType[]>([]);
   const [selectedRent, setSelectedRent] = useState<RentType | null>(null);
@@ -57,7 +59,7 @@ const RentPage = () => {
     onClose();
   };
 
-  const handleGerarRecibo = (rent: RentType) => {
+  const handleGetReceipt = (rent: RentType) => {
     setSelectedRent(rent);
     updateInstance(<ReceiptView rent={rent} />);
     setDownloadRequested(true);
@@ -83,11 +85,11 @@ const RentPage = () => {
   }, [pdfLoading, pdfUrl, downloadRequested]);
 
   return (
-    <PageContainer title="Alugueis" flexDir="column" align="center">
-      <Grid w="full" templateColumns="repeat(auto-fill, 320px)" gap="8">
+    <PageContainer title="Lista de alugueis" flexDir="column" align="center">
+      <Grid w="full" templateColumns="repeat(auto-fill, 320px)" gap="8" pb={isMobile ? "40" : "unset"}>
         {rents.map((rent) => (
           <GridItem key={rent.id}>
-            <RentCard rent={rent} onEdit={handleOpenEditRent} onClickPreview={handleGerarRecibo} />
+            <RentCard rent={rent} onEdit={handleOpenEditRent} onClickPreview={handleGetReceipt} />
           </GridItem>
         ))}
       </Grid>

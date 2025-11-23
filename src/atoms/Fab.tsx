@@ -10,9 +10,10 @@ const PrimaryButton: React.FC<IPrimaryButtonProps> = ({ ...rest }) => {
       borderRadius="full"
       bg="primary.500"
       color="white"
-      pos="absolute"
+      pos="fixed"
       bottom="4"
       right="4"
+      zIndex="10"
       {...rest}
     />
   );

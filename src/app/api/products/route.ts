@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const pageSize = Number(searchParams.get("pageSize") || 10);
     const orderBy = searchParams.get("orderBy") as keyof TableRow<"products"> | undefined;
     const ascending = searchParams.get("ascending") !== "false";
-    const includes = searchParams.getAll("include") as (keyof InjectRelations<"products">)[];
+    const includes = searchParams.getAll("include[]") as (keyof InjectRelations<"products">)[];
 
     const start = (page - 1) * pageSize;
 

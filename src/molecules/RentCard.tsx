@@ -1,6 +1,6 @@
 "use client";
 
-import PrimaryButton from "@/atoms/PrimaryButton";
+import SecondaryButton from "@/atoms/SecondaryButton";
 import Currency from "@/models/Currency";
 import { RentType } from "@/types/entities/RentType";
 import { formatDate } from "@/utils/formatDate";
@@ -19,7 +19,7 @@ const RentCard: React.FC<IRentCardProps> = ({ rent, onEdit, onClickPreview }) =>
       <Card.Header pb="2" fontWeight="bold">
         {Number(rent.code)} - {rent.client_name}
       </Card.Header>
-      <Card.Body>
+      <Card.Body fontSize="sm" pb="4">
         <Flex flexDir="column">
           <Text>
             {formatDate(new Date(rent.rent_date), "dd 'de' MMMM")} -{" "}
@@ -32,15 +32,15 @@ const RentCard: React.FC<IRentCardProps> = ({ rent, onEdit, onClickPreview }) =>
         </Flex>
       </Card.Body>
       <Card.Footer w="full">
-        <Flex w="full" pt="4" align="center" justify="flex-end" gap="4">
-          <PrimaryButton onClick={() => onClickPreview(rent)}>
+        <Flex w="full" pt="4" align="center" justify="flex-start" gap="4">
+          <SecondaryButton onClick={() => onClickPreview(rent)}>
             <MdOutlineRemoveRedEye />
             Ver mais
-          </PrimaryButton>
-          <PrimaryButton onClick={() => onEdit(rent)}>
+          </SecondaryButton>
+          <SecondaryButton onClick={() => onEdit(rent)}>
             <MdEdit />
             Editar
-          </PrimaryButton>
+          </SecondaryButton>
         </Flex>
       </Card.Footer>
     </Card.Root>
