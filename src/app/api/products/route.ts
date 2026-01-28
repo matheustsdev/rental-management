@@ -10,8 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
 
-    const where = searchParams.get("where") ? JSON.parse(searchParams.get("where")!) : undefined;
-
+    const search = searchParams.get("search");
     const page = Number(searchParams.get("page") || 1);
     const pageSize = Number(searchParams.get("pageSize") || 10);
     const orderBy = searchParams.get("orderBy") as keyof TableRow<"products"> | undefined;
@@ -28,13 +27,29 @@ export async function GET(request: NextRequest) {
       includeObject[include] = true
     });
 
+
     const paginatedProducts = await prisma.products.findMany({
         skip: start,
         take: pageSize,
         orderBy: {
           [orderBy ?? "updated_at"]: ascending ? "asc" : "desc"
         },
-        where,
+        where: {
+          OR: [
+            {
+              reference: {
+                contains: search ?? "",
+                mode: "insensitive"
+              },
+            },
+            {
+              description: {
+                contains: search ?? "",
+                mode: "insensitive"
+              }
+            }
+          ]
+        },
         include: includeObject
     });
 

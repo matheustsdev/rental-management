@@ -5,7 +5,7 @@ import { DataTable, DataTableColumn } from "@/molecules/DataTable";
 import { useDevice } from "@/hooks/useDevice";
 import AddProductModal from "@/molecules/AddProductModal";
 import PageContainer from "@/molecules/PageContainer";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ProductType } from "@/types/entities/ProductType";
 import { api } from "@/services/api";
 import { toaster } from "@/atoms/Toaster";
@@ -15,6 +15,8 @@ import { AiOutlinePlus } from "react-icons/ai";
 import Fab from "@/atoms/Fab";
 import { InjectRelations } from "@/types/EntityType";
 import SecondaryButton from "@/atoms/SecondaryButton";
+import SearchBar from "@/atoms/SearchBar";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Home() {
   const { isMobile } = useDevice();
@@ -24,7 +26,9 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pagesTotal, setPagesTotal] = useState<number>(1);
   const [selectedProductRow, setSelectedProductRow] = useState<ProductType | null>(null);
+  const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const { value: debounce, isLoading: isLoadingDebounce } = useDebounce(searchText, 300);
 
   const columns: DataTableColumn<ProductType>[] = [
     {
@@ -67,7 +71,7 @@ export default function Home() {
     onOpen();
   };
 
-  const loadProducts = async (newPage: number) => {
+  const loadProducts = async (newPage: number, searchText: string) => {
     try {
       setIsLoading(true);
 
@@ -79,6 +83,7 @@ export default function Home() {
             include: includes,
             page: newPage,
             orderBy: "reference",
+            search: searchText,
           },
         })
       ).data;
@@ -100,7 +105,7 @@ export default function Home() {
   const onUpsertProduct = (upsertedProduct: ProductType) => {
     if (selectedProductRow) {
       setProducts((prev) =>
-        prev.map((prevProduct) => (prevProduct.id === selectedProductRow.id ? upsertedProduct : prevProduct))
+        prev.map((prevProduct) => (prevProduct.id === selectedProductRow.id ? upsertedProduct : prevProduct)),
       );
 
       return;
@@ -109,6 +114,20 @@ export default function Home() {
     setProducts((prev) => [upsertedProduct, ...prev]);
     setPagesTotal(Math.ceil(products.length + 1 / 10));
   };
+
+  const handleOnChangeSearchText = (newSearchText: string) => {
+    if (!newSearchText) {
+      setSearchText("");
+
+      return;
+    }
+
+    setSearchText(newSearchText);
+  };
+
+  const handleSearchTextChange = useCallback((text: string) => {
+    loadProducts(1, text);
+  }, []);
 
   const MobileDataDisplay = (
     <Flex flexDir="column" w="full" gap="4" pb="40">
@@ -123,7 +142,7 @@ export default function Home() {
       columns={columns}
       data={products}
       currentPage={currentPage}
-      onPageChange={(updatedPage) => loadProducts(updatedPage)}
+      onPageChange={(updatedPage) => loadProducts(updatedPage, debounce)}
       totalPages={pagesTotal}
       actions={actions}
       isLoading={isLoading}
@@ -131,19 +150,24 @@ export default function Home() {
   );
 
   useEffect(() => {
-    loadProducts(1);
-  }, []);
+    handleSearchTextChange(debounce);
+  }, [debounce, handleSearchTextChange]);
 
   return (
     <PageContainer title="Lista de produtos" flexDir="column" align="center" gap="8" overflowY="hidden">
+      <Flex w="full" flexDir="column" align="flex-start" justify="center">
+        <SearchBar
+          onChange={(e) => handleOnChangeSearchText(e.target.value)}
+          value={searchText}
+          isLoading={isLoadingDebounce}
+        />
+        {isMobile ? MobileDataDisplay : DesktopDataDisplay}
+      </Flex>
       <Fab onClick={onOpen} fontSize="2xl">
         <Icon boxSize="8">
           <AiOutlinePlus />
         </Icon>
       </Fab>
-      <Flex w="full" flexDir="column" align="center" justify="center">
-        {isMobile ? MobileDataDisplay : DesktopDataDisplay}
-      </Flex>
       <AddProductModal
         isOpen={open}
         onClose={handleOnCloseModal}
