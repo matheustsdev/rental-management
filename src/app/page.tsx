@@ -1,21 +1,21 @@
 "use client";
 
 import { Flex, Icon, useDisclosure } from "@chakra-ui/react";
-import { DataTable, DataTableColumn } from "@/molecules/DataTable";
+import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
 import { useDevice } from "@/hooks/useDevice";
-import AddProductModal from "@/molecules/AddProductModal";
-import PageContainer from "@/molecules/PageContainer";
+import AddProductModal from "@/components/molecules/AddProductModal";
+import PageContainer from "@/components/molecules/PageContainer";
 import { useCallback, useEffect, useState } from "react";
 import { ProductType } from "@/types/entities/ProductType";
 import { api } from "@/services/api";
-import { toaster } from "@/atoms/Toaster";
-import ProductCard from "@/molecules/ProductCard";
+import { toaster } from "@/components/atoms/Toaster";
+import ProductCard from "@/components/molecules/ProductCard";
 import { MdEdit } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
-import Fab from "@/atoms/Fab";
+import Fab from "@/components/atoms/Fab";
 import { InjectRelations } from "@/types/EntityType";
-import SecondaryButton from "@/atoms/SecondaryButton";
-import SearchBar from "@/atoms/SearchBar";
+import SecondaryButton from "@/components/atoms/SecondaryButton";
+import SearchBar from "@/components/atoms/SearchBar";
 import { useDebounce } from "@/hooks/useDebounce";
 
 export default function Home() {

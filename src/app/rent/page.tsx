@@ -1,16 +1,16 @@
 "use client";
 
-import PageContainer from "@/molecules/PageContainer";
-import AddRentModal from "@/organisms/AddRentModal";
+import PageContainer from "@/components/molecules/PageContainer";
+import AddRentModal from "@/components/organisms/AddRentModal";
 import { RentType } from "@/types/entities/RentType";
 import { Grid, GridItem, Icon, useDisclosure } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import RentCard from "@/molecules/RentCard";
-import { toaster } from "@/atoms/Toaster";
+import RentCard from "@/components/molecules/RentCard";
+import { toaster } from "@/components/atoms/Toaster";
 import { api } from "@/services/api";
-import Fab from "@/atoms/Fab";
+import Fab from "@/components/atoms/Fab";
 import { AiOutlinePlus } from "react-icons/ai";
-import ReceiptView from "@/molecules/ReceiptView";
+import ReceiptView from "@/components/molecules/ReceiptView";
 import { usePDF } from "@react-pdf/renderer";
 import { useDevice } from "@/hooks/useDevice";
 

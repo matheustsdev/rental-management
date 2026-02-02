@@ -1,8 +1,8 @@
 "use client";
 
 import { CloseButton, Dialog, Portal, Flex } from "@chakra-ui/react";
-import PrimaryButton from "@/atoms/PrimaryButton";
-import SecondaryButton from "@/atoms/SecondaryButton";
+import PrimaryButton from "@/components/atoms/PrimaryButton";
+import SecondaryButton from "@/components/atoms/SecondaryButton";
 
 interface IConfirmationModalProps {
   message: string;

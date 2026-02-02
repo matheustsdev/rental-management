@@ -4,9 +4,9 @@ import { Field, Flex, Input, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { RentFormType } from "@/organisms/AddRentModal";
 import { useFormContext, useWatch } from "react-hook-form";
-import ProductSelectorItem from "@/atoms/ProductSelectorItem";
+import ProductSelectorItem from "@/components/atoms/ProductSelectorItem";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
-import InputField from "@/atoms/InputField";
+import InputField from "@/components/atoms/InputField";
 import { EMeasureType } from "@/constants/EMeasureType";
 import { RentProductInsertWithProductDtoType } from "@/types/entities/RentProductType";
 
@@ -57,7 +57,7 @@ const ProductSelector: React.FC = () => {
     setValue("rentProducts", newProductList);
     setValue(
       "productIds",
-      newProductList.map((product) => product.product_id)
+      newProductList.map((product) => product.product_id),
     );
   };
 
@@ -65,7 +65,7 @@ const ProductSelector: React.FC = () => {
     const products = availableProducts.filter(
       ({ product }) =>
         product.description?.toLowerCase().includes(searchText.toLowerCase()) ||
-        product.reference?.toLowerCase().includes(searchText.toLowerCase())
+        product.reference?.toLowerCase().includes(searchText.toLowerCase()),
     );
 
     setFilteredProducts(searchText ? products : availableProducts);

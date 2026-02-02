@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Table, Flex, Text, IconButton, Icon, Spinner } from "@chakra-ui/react";
 import { IoChevronForwardOutline, IoChevronBackOutline, IoArrowUp, IoArrowDown } from "react-icons/io5";
-import Select from "@/atoms/Select";
+import Select from "@/components/atoms/Select";
 
 // Tipo para definição de colunas
 export interface DataTableColumn<T> {

@@ -1,7 +1,7 @@
 "use client";
 
-import SecondaryButton from "@/atoms/SecondaryButton";
-import TextRow from "@/atoms/TextRow";
+import SecondaryButton from "@/components/atoms/SecondaryButton";
+import TextRow from "@/components/atoms/TextRow";
 import Currency from "@/models/Currency";
 import { RentType } from "@/types/entities/RentType";
 import { formatDate } from "@/utils/formatDate";

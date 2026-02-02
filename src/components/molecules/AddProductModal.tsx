@@ -4,18 +4,18 @@ import { CloseButton, Dialog, Portal, Input, Flex, Field, Spinner, Checkbox } fr
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
-import { toaster } from "@/atoms/Toaster";
+import { toaster } from "@/components/atoms/Toaster";
 import { api } from "@/services/api";
 import { useEffect, useRef, useState } from "react";
-import Select from "@/atoms/Select";
+import Select from "@/components/atoms/Select";
 import { CategoryType } from "@/types/entities/CategoryType";
 import {
   ProductInsertWithCategoryDtoType,
   ProductType,
   ProductUpdateWithCategoryDtoType,
 } from "@/types/entities/ProductType";
-import PrimaryButton from "@/atoms/PrimaryButton";
-import SecondaryButton from "@/atoms/SecondaryButton";
+import PrimaryButton from "@/components/atoms/PrimaryButton";
+import SecondaryButton from "@/components/atoms/SecondaryButton";
 
 const productSchema = z.object({
   description: z.string().min(10, "Campo deve possuir, no mínimo, 10 caracteres"),

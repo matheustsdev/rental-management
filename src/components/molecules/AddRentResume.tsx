@@ -1,7 +1,7 @@
 "use client";
 
-import ProductResumeItem from "@/atoms/ProductResumeItem";
-import ResumeItem from "@/atoms/ResumeItem";
+import ProductResumeItem from "@/components/atoms/ProductResumeItem";
+import ResumeItem from "@/components/atoms/ResumeItem";
 import { RentFormType } from "@/organisms/AddRentModal";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { Flex } from "@chakra-ui/react";
@@ -19,7 +19,7 @@ const AddRentResume: React.FC = () => {
 
   useEffect(() => {
     const newListOfProducts = allAvailableProducts.filter((availableProduct) =>
-      productsIds.some((productId) => productId === availableProduct.product.id)
+      productsIds.some((productId) => productId === availableProduct.product.id),
     );
 
     setSelectedProducts(newListOfProducts);

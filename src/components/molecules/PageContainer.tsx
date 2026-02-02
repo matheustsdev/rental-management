@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "@/atoms/Navbar";
+import Navbar from "@/components/atoms/Navbar";
 import { Flex, FlexProps, Heading } from "@chakra-ui/react";
 
 interface IPageContainerProps extends Omit<FlexProps, "minW" | "color" | "bg"> {

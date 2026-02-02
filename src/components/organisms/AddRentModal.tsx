@@ -4,17 +4,17 @@ import { CloseButton, Dialog, Portal, Flex, Spinner, Checkbox, Steps } from "@ch
 import { z, ZodRawShape } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { toaster } from "@/atoms/Toaster";
+import { toaster } from "@/components/atoms/Toaster";
 import { api } from "@/services/api";
 import { ReactElement, useEffect, useRef, useState } from "react";
-import PrimaryButton from "@/atoms/PrimaryButton";
-import SecondaryButton from "@/atoms/SecondaryButton";
+import PrimaryButton from "@/components/atoms/PrimaryButton";
+import SecondaryButton from "@/components/atoms/SecondaryButton";
 import { RentInsertWithProductDtoType, RentType, RentUpdateWithProductDtoType } from "@/types/entities/RentType";
-import ProductSelector from "../molecules/ProductSelector";
-import AddRentInfoStep from "@/molecules/AddRentInfoStep";
-import AddRentResume from "@/molecules/AddRentResume";
+import ProductSelector from "../components/molecules/ProductSelector";
+import AddRentInfoStep from "@/components/molecules/AddRentInfoStep";
+import AddRentResume from "@/components/molecules/AddRentResume";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
-import ProductMeasures from "@/molecules/ProductMeasures";
+import ProductMeasures from "@/components/molecules/ProductMeasures";
 import { EDiscountTypes } from "@/constants/EDiscountType";
 import { EMeasureType } from "@/constants/EMeasureType";
 import { RentProductSchema } from "@/constants/schemas/RentProductSchema";
@@ -62,7 +62,7 @@ const productMeasuresSchema = z.object({
             });
           }
         }
-      })
+      }),
     )
     .min(1, "Selecione pelo menos um produto"),
 });
@@ -309,7 +309,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       const values = methods.getValues();
 
       const selectedProducts = availableProducts.filter(({ product }) =>
-        formSelectedProducts.some((item) => item.id === product.id)
+        formSelectedProducts.some((item) => item.id === product.id),
       );
 
       if (selectedProducts.some((product) => product.availability !== EAvailabilityStatus.AVAILABLE)) {
