@@ -5,7 +5,6 @@ import { prisma } from "@/services/prisma";
 import { ProductType } from "@/types/entities/ProductType";
 import { Prisma } from "@prisma/client";
 import { ErrorResponse } from "@/models/ErrorResponse";
-import { ApiError } from "@/models/ApiError";
 
 export async function GET(request: NextRequest) {
   try {
@@ -93,18 +92,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
-// export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-//   try {
-//     throw new ApiError("É obrigatório informar o ID do aluguel para atualiza-lo", 400);
-
-//   } catch (error) {
-//     const apiError = error as ApiError;
-//     const errorResponse = new ErrorResponse(apiError.code ? apiError.message : "Erro ao atualizar aluguel", apiError.code ?? 500);
-
-//     return NextResponse.json(
-//       errorResponse,
-//       { status: errorResponse.errorCode }
-//     );
-//   }
-// }

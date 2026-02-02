@@ -27,19 +27,22 @@ const RentPage = () => {
 
   const loadRents = async () => {
     try {
-      //setIsLoading(true);
+      const rentsListRequest = await api.get("/rents", {
+        params: {
+          orderBy: "code",
+          ascending: false,
+        },
+      });
 
-      const rentsListRequest = (await api.get("/rents")).data;
+      const rentsList = rentsListRequest.data.data;
 
-      setRents(rentsListRequest.data);
+      setRents(rentsList);
     } catch (e: unknown) {
       toaster.create({
         type: "error",
         title: "Erro ao buscar categorias",
         description: (e as Error).message,
       });
-    } finally {
-      //setIsLoading(false);
     }
   };
 
@@ -86,7 +89,13 @@ const RentPage = () => {
 
   return (
     <PageContainer title="Lista de alugueis" flexDir="column" align="center">
-      <Grid w="full" templateColumns="repeat(auto-fill, 320px)" gap="8" pb={isMobile ? "40" : "unset"}>
+      <Grid
+        w="full"
+        templateColumns="repeat(auto-fill, 320px)"
+        templateRows="repeat(auto-fill, 240px)"
+        gap="8"
+        pb={isMobile ? "40" : "unset"}
+      >
         {rents.map((rent) => (
           <GridItem key={rent.id}>
             <RentCard rent={rent} onEdit={handleOpenEditRent} onClickPreview={handleGetReceipt} />

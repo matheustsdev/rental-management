@@ -1,10 +1,11 @@
 "use client";
 
 import SecondaryButton from "@/atoms/SecondaryButton";
+import TextRow from "@/atoms/TextRow";
 import Currency from "@/models/Currency";
 import { RentType } from "@/types/entities/RentType";
 import { formatDate } from "@/utils/formatDate";
-import { Card, Flex, Text } from "@chakra-ui/react";
+import { Card, Flex } from "@chakra-ui/react";
 import { MdEdit, MdOutlineRemoveRedEye } from "react-icons/md";
 
 interface IRentCardProps {
@@ -15,20 +16,21 @@ interface IRentCardProps {
 
 const RentCard: React.FC<IRentCardProps> = ({ rent, onEdit, onClickPreview }) => {
   return (
-    <Card.Root p="4" boxShadow="8px 8px 6px -4px rgba(0,0,0,0.20)" bg="terracotta.50">
+    <Card.Root h="full" p="4" boxShadow="8px 8px 6px -4px rgba(0,0,0,0.20)" bg="terracotta.50">
       <Card.Header pb="2" fontWeight="bold">
         {Number(rent.code)} - {rent.client_name}
       </Card.Header>
       <Card.Body fontSize="sm" pb="4">
         <Flex flexDir="column">
-          <Text>
-            {formatDate(new Date(rent.rent_date), "dd 'de' MMMM")} -{" "}
-            {rent.return_date ? formatDate(new Date(rent.return_date), "dd 'de' MMMM") : ""}
-          </Text>
-          <Text>
-            {new Currency(rent.signal_value).toString()} / {new Currency(rent.total_value).toString()}
-          </Text>
-          <Text>{rent?.phone}</Text>
+          <TextRow
+            label="Período do aluguel"
+            value={`${formatDate(new Date(rent.rent_date), "dd 'de' MMM")} - ${rent.return_date ? formatDate(new Date(rent.return_date), "dd 'de' MMM") : ""}`}
+          />
+          <TextRow
+            label="Sinal / Total"
+            value={`${new Currency(rent.signal_value).toString()} / ${new Currency(rent.total_value).toString()}`}
+          />
+          <TextRow label="Telefone" value={rent?.phone ?? undefined} />
         </Flex>
       </Card.Body>
       <Card.Footer w="full">
