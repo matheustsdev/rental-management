@@ -3,13 +3,13 @@ import { PrismaClient } from "@prisma/client";
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { Product } from "@/core/domain/entities/Product";
 
-// Idealmente, importe sua instância singleton do Prisma aqui
-const prisma = new PrismaClient();
 
 export class PrismaProductRepository implements IProductRepository {
+  constructor(private prisma: PrismaClient) { }
+
   async findById(id: string): Promise<Product | null> {
     // 1. Busca no banco incluindo a relação com categories
-    const prismaProduct = await prisma.products.findUnique({
+    const prismaProduct = await this.prisma.products.findUnique({
       where: { id },
       include: {
         categories: true // <--- JOIN para pegar o buffer_days

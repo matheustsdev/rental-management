@@ -65,8 +65,6 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
 
             const fieldName = field as keyof typeof labels;
 
-            console.log("Errors >> ", errors);
-
             const inputError =
               errors.rentProducts && errors.rentProducts[productIndex]
                 ? errors.rentProducts[productIndex][fieldName]

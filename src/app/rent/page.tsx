@@ -51,15 +51,17 @@ const RentPage = () => {
     onOpen();
   };
 
-  const handleCloseModal = (updatedRent?: RentType) => {
-    if (updatedRent) {
-      const newRents = rents.map((rent) => (rent.id === updatedRent.id ? updatedRent : rent));
-
-      setRents(newRents);
-    }
-
+  const handleCloseModal = () => {
     setSelectedRent(null);
     onClose();
+  };
+
+  const handleSaveRent = (rent: RentType, isUpdate: boolean) => {
+    if (isUpdate) {
+      const newRents = rents.map((item) => (item.id === rent.id ? rent : item));
+
+      setRents(newRents);
+    } else setRents([rent, ...rents]);
   };
 
   const handleGetReceipt = (rent: RentType) => {
@@ -107,7 +109,7 @@ const RentPage = () => {
           <AiOutlinePlus />
         </Icon>
       </Fab>
-      <AddRentModal isOpen={open} onClose={handleCloseModal} rentOnEdit={selectedRent} />
+      <AddRentModal isOpen={open} onClose={handleCloseModal} onSave={handleSaveRent} rentOnEdit={selectedRent} />
     </PageContainer>
   );
 };

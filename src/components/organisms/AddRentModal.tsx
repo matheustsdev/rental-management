@@ -6,11 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { toaster } from "@/components/atoms/Toaster";
 import { api } from "@/services/api";
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { ReactElement, useActionState, useEffect, useRef, useState } from "react";
 import PrimaryButton from "@/components/atoms/PrimaryButton";
 import SecondaryButton from "@/components/atoms/SecondaryButton";
 import { RentInsertWithProductDtoType, RentType, RentUpdateWithProductDtoType } from "@/types/entities/RentType";
-import ProductSelector from "../components/molecules/ProductSelector";
+import ProductSelector from "@/components/molecules/ProductSelector";
 import AddRentInfoStep from "@/components/molecules/AddRentInfoStep";
 import AddRentResume from "@/components/molecules/AddRentResume";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
@@ -18,7 +18,10 @@ import ProductMeasures from "@/components/molecules/ProductMeasures";
 import { EDiscountTypes } from "@/constants/EDiscountType";
 import { EMeasureType } from "@/constants/EMeasureType";
 import { RentProductSchema } from "@/constants/schemas/RentProductSchema";
-import { RentProductUpdateDtoType } from "@/types/entities/RentProductType";
+import { createRentalAction } from "@/app/actions/createRentalAction";
+import { defaultInitialActionValue } from "@/constants/DefaultInitialActionValue";
+import { updateRentalAction } from "@/app/actions/updateRentalAction";
+import { ErrorResponse } from "@/models/ErrorResponse";
 
 const productSelectorSchema = z.object({
   rentDate: z.union([
@@ -97,7 +100,7 @@ type SchemaKeys = keyof RentFormType;
 interface IAddRentModalProps {
   onClose: (rent?: RentType) => void;
   isOpen: boolean;
-  onSave?: (newRent: RentType) => void;
+  onSave?: (newRent: RentType, isUpdate: boolean) => void;
   rentOnEdit: RentType | null;
 }
 

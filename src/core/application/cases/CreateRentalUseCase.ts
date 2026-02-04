@@ -1,15 +1,8 @@
-// src/core/application/use-cases/CreateRentalUseCase.ts
-import { v4 as uuid } from 'uuid';
-import { Rental } from "../../domain/entities/Rental";
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
-import { IProductRepository } from "@/core/domain/repositories/IProductRepository"; // Assumindo que existe
-
-type Input = {
-  productId: string;
-  startDate: Date;
-  endDate: Date;
-  clientName: string;
-};
+import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
+import { RentInsertWithProductDtoType, RentType } from "@/types/entities/RentType";
+import { Prisma } from "@prisma/client";
+import { ServerError } from "@/models/ServerError";
 
 export class CreateRentalUseCase {
   constructor(
@@ -17,35 +10,48 @@ export class CreateRentalUseCase {
     private productRepo: IProductRepository
   ) {}
 
-  async execute(input: Input): Promise<Rental> {
-    // 1. Buscar o produto para saber os dias de buffer (limpeza)
-    const product = await this.productRepo.findById(input.productId);
-    if (!product) throw new Error("Produto não encontrado");
+  async execute(input: RentInsertWithProductDtoType): Promise<RentType> {
+    const { rent_products, rent_date, return_date } = input;
 
-    // 2. Buscar aluguéis já existentes desse produto
-    const activeRentals = await this.rentalRepo.findActiveByProduct(input.productId);
+    // 1. Validar disponibilidade para cada produto
+    for (const rentProduct of rent_products) {
+      const product = await this.productRepo.findById(rentProduct.product_id);
 
-    // 3. Validar disponibilidade (Usando a lógica da Entidade de Domínio)
-    const hasConflict = activeRentals.some(rental => 
-      rental.conflictsWith(input.startDate, input.endDate, product.bufferDays)
-    );
+      if (!product) {
+        throw new ServerError(`Produto com ID ${rentProduct.product_id} não encontrado.`, 404);
+      }
 
-    if (hasConflict) {
-      throw new Error("Produto indisponível nestas datas (incluindo período de limpeza).");
+      const activeRentals = await this.rentalRepo.findActiveByProduct(rentProduct.product_id);
+      
+      const hasConflict = activeRentals.some(rental =>
+        rental.conflictsWith(new Date(rent_date), new Date(return_date!), product.bufferDays)
+      );
+
+      if (hasConflict) {
+        throw new ServerError(`Produto "${product.description}" indisponível entre as datas selecionadas (considerando período de limpeza).`);
+      }
     }
 
-    // 4. Criar a nova entidade de aluguel
-    const newRental = new Rental(
-      uuid(),
-      input.productId,
-      input.startDate,
-      input.endDate,
-      'ACTIVE'
-    );
+    // 2. Construir o payload de inserção para o Prisma
+    const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentsInput = {
+      createMany: {
+        data: rent_products.map((rp) => ({
+          product_id: rp.product_id,
+          product_price: rp.product_price,
+          product_description: rp.product_description,
+          measure_type: rp.measure_type,
+        })),
+      },
+    };
 
-    // 5. Salvar no banco (Infraestrutura)
-    await this.rentalRepo.save(newRental);
+    const insertRentPayload: Prisma.rentsCreateInput = {
+      ...input,
+      rent_products: rentProductsInsertPayload,
+    };
 
-    return newRental;
+    // 3. Criar o aluguel no banco de dados
+    const newRent = await this.rentalRepo.create(insertRentPayload);
+
+    return newRent;
   }
 }

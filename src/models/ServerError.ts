@@ -1,4 +1,4 @@
-export class ApiError extends Error {
+export class ServerError extends Error {
     constructor(message?: string, code?: number) {
         super(message);
 

@@ -1,26 +1,63 @@
 // src/core/infrastructure/prisma/PrismaRentalRepository.ts
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient } from "@prisma/client";
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { Rental } from "../../domain/entities/Rental";
-
-// Nota: Em um projeto Next.js real, é melhor usar uma instância singleton do Prisma
-// para evitar criar múltiplas conexões, especialmente em ambiente de desenvolvimento.
-const prisma = new PrismaClient();
+import { RentType } from "@/types/entities/RentType";
 
 export class PrismaRentalRepository implements IRentalRepository {
-  async findActiveByProduct(productId: string): Promise<Rental[]> {
-    // A query correta busca em 'rents' e filtra pela tabela relacional 'rent_products'
-    const rentRows = await prisma.rents.findMany({
-      where: {
-        // Busca aluguéis que contenham o produto especificado
+  constructor(private prisma: PrismaClient) { }
+  
+  save(rental: Rental): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+
+  async update(id: string, data: Prisma.rentsUpdateInput): Promise<RentType> {
+    const updatedRent = await this.prisma.rents.update({
+      where: { id },
+      data,
+      include: {
         rent_products: {
-          some: {
-            product_id: productId,
+          include: {
+            products: true,
           },
         },
-        // E que não estejam marcados como deletados (nosso análogo a 'CANCELADO')
-        deleted: false,
       },
+    });
+    return updatedRent;
+  }
+
+  async deleteRentProducts(rentId: string): Promise<void> {
+    await this.prisma.rent_products.updateMany({
+      where: { rent_id: rentId },
+      data: {
+        deleted: true,
+        deleted_at: new Date(),
+      },
+    });
+  }
+
+  async findActiveByProduct(productId: string, excludeRentId?: string): Promise<Rental[]> {
+    const where: Prisma.rentsWhereInput = {
+      // Busca aluguéis que contenham o produto especificado
+      rent_products: {
+        some: {
+          product_id: productId,
+          deleted: false,
+        },
+      },
+      // E que não estejam marcados como deletados (nosso análogo a 'CANCELADO')
+      deleted: false,
+    };
+
+    if (excludeRentId) {
+      where.id = {
+        not: excludeRentId,
+      };
+    }
+
+    // A query correta busca em 'rents' e filtra pela tabela relacional 'rent_products'
+    const rentRows = await this.prisma.rents.findMany({
+      where,
     });
 
     // Mapeia as linhas do banco de dados para a nossa Entidade de Domínio (Rental)
@@ -48,33 +85,17 @@ export class PrismaRentalRepository implements IRentalRepository {
     });
   }
 
-  // O método deve se chamar 'save' para corresponder à interface IRentalRepository
-  async save(rental: Rental): Promise<void> {
-    // Usamos uma transação para garantir que o aluguel (rents) e o item do aluguel (rent_products)
-    // sejam criados de forma atômica. Se um falhar, o outro é revertido.
-    await prisma.$transaction(async (tx) => {
-      const createdRent = await tx.rents.create({
-        data: {
-          id: rental.id,
-          rent_date: rental.startDate,
-          return_date: rental.endDate,
-          // ATENÇÃO: A entidade 'Rental' atual não possui esses dados.
-          // Eles precisam ser adicionados à entidade ou passados para o método 'save'.
-          client_name: "NOME DO CLIENTE AQUI", // Ex: rental.clientName
-          total_value: 0, // Ex: rental.totalValue
+  async create(data: Prisma.rentsCreateInput): Promise<RentType> {
+    const newRent = await this.prisma.rents.create({
+      data,
+      include: {
+        rent_products: {
+          include: {
+            products: true,
+          },
         },
-      });
-
-      await tx.rent_products.create({
-        data: {
-          rent_id: createdRent.id,
-          product_id: rental.productId,
-          // Estes dados viriam do produto, que deveria ser buscado aqui ou ter os dados passados.
-          product_price: 0,
-          product_description: "Descrição do produto aqui",
-          measure_type: "SUIT", // Este valor deve vir do produto/categoria
-        },
-      });
+      },
     });
+    return newRent;
   }
 }
