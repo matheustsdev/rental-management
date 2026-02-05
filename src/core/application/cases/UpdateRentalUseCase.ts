@@ -11,7 +11,7 @@ export class UpdateRentalUseCase {
   ) {}
 
   async execute(input: RentUpdateWithProductDtoType): Promise<RentType> {
-    const {  rent_products, rent_date, return_date, id } = input;
+    const { id, rent_products, rent_date, return_date, ...restOfInput } = input;
 
     if (!id || typeof id !== 'string') {
       throw new ServerError("É obrigatório informar o ID do aluguel para atualizar.", 400);
@@ -38,28 +38,30 @@ export class UpdateRentalUseCase {
         }
     }
 
-    // 2. O Prisma não aceita um nested update para `createMany`, `updateMany`, `deleteMany` em uma transação de update.
-    // A abordagem correta é deletar os antigos e criar os novos.
-    await this.rentalRepo.deleteRentProducts(id);
-
-    const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentsInput = {
-      createMany: {
-        data: rent_products.map((rp) => ({
-          product_id: rp.product_id,
-          product_price: rp.product_price,
-          product_description: rp.product_description,
-          measure_type: rp.measure_type,
-        })),
-      },
-    };
-    
-    // 3. Construir o payload de atualização para o Prisma
+    // 2. Construir o payload de atualização para o Prisma, lidando com atualizações parciais
     const updateRentPayload: Prisma.rentsUpdateInput = {
-      ...input,
-      id: undefined, // ID não pode estar no payload de dados
-      rent_products: rentProductsInsertPayload,
+      ...restOfInput,
+      ...(rent_date && { rent_date }),
+      ...(return_date && { return_date }),
     };
 
+    // 3. Se os produtos do aluguel estão sendo atualizados, deleta (soft delete) os antigos e cria os novos.
+    if (rent_products) {
+      await this.rentalRepo.deleteRentProducts(id);
+
+      const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentsInput = {
+        createMany: {
+          data: rent_products.map((rp) => ({
+            product_id: rp.product_id,
+            product_price: rp.product_price,
+            product_description: rp.product_description,
+            measure_type: rp.measure_type,
+          })),
+        },
+      };
+      updateRentPayload.rent_products = rentProductsInsertPayload;
+    }
+    
     // 4. Atualizar o aluguel no banco de dados
     const updatedRent = await this.rentalRepo.update(id, updateRentPayload);
 

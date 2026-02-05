@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RentInsertWithProductDtoType, RentType } from "@/types/entities/RentType";
+import { RentInsertWithProductDtoType, RentUpdateWithProductDtoType, RentType } from "@/types/entities/RentType";
 import { DefaultResponse } from "@/models/DefaultResponse";
 import { ErrorResponse } from "@/models/ErrorResponse";
 import { CreateRentalUseCase } from "@/core/application/cases/CreateRentalUseCase";
 import { productRepository, rentalRepository } from "@/core/infrastructure/repositoriesFactory";
 import { ListRentalUseCase } from "@/core/application/cases/ListRentalUseCase";
+import { UpdateRentalUseCase } from "@/core/application/cases/UpdateRentalUseCase";
+import { ServerError } from "@/models/ServerError";
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,6 +43,34 @@ export async function GET(request: NextRequest) {
   }
 }
 
+export async function PUT(request: NextRequest) {
+  try {
+    const body = (await request.json()) as RentUpdateWithProductDtoType;
+
+    const useCase = new UpdateRentalUseCase(rentalRepository, productRepository);
+    const updatedRent = await useCase.execute(body);
+
+    const response = new DefaultResponse(updatedRent, "Aluguel atualizado com sucesso.", null, null, null);
+
+    return NextResponse.json(response, { status: 200 });
+  } catch (error) {
+    if (error instanceof ServerError) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: error.code || 400 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error: "Erro ao atualizar aluguel",
+        details: error instanceof Error ? error.message : error,
+      },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as RentInsertWithProductDtoType;
@@ -53,11 +83,19 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    const errorResponse = error as ErrorResponse;
+    if (error instanceof ServerError) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: error.code || 400 }
+      );
+    }
 
     return NextResponse.json(
-      errorResponse,
-      { status: errorResponse.errorCode }
+      {
+        error: "Erro ao criar aluguel",
+        details: error instanceof Error ? error.message : error,
+      },
+      { status: 500 }
     );
   }
 }
