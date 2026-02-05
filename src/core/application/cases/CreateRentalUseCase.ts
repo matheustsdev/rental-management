@@ -27,6 +27,8 @@ export class CreateRentalUseCase {
         rental.conflictsWith(new Date(rent_date), new Date(return_date!), product.bufferDays)
       );
 
+      console.log("Conflixct >> ", hasConflict);
+
       if (hasConflict) {
         throw new ServerError(`Produto "${product.description}" indisponível entre as datas selecionadas (considerando período de limpeza).`);
       }

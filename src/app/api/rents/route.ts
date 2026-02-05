@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RentInsertDtoType, RentInsertWithProductDtoType } from "@/types/entities/RentType";
+import { RentInsertWithProductDtoType, RentType } from "@/types/entities/RentType";
 import { DefaultResponse } from "@/models/DefaultResponse";
-import { prisma } from "@/services/prisma";
-import { ProductType } from "@/types/entities/ProductType";
-import { Prisma } from "@prisma/client";
 import { ErrorResponse } from "@/models/ErrorResponse";
+import { CreateRentalUseCase } from "@/core/application/cases/CreateRentalUseCase";
+import { productRepository, rentalRepository } from "@/core/infrastructure/repositoriesFactory";
+import { ListRentalUseCase } from "@/core/application/cases/ListRentalUseCase";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,30 +15,19 @@ export async function GET(request: NextRequest) {
 
     const page = Number(searchParams.get("page") || 1);
     const pageSize = Number(searchParams.get("pageSize") || 10);
-    const orderBy = searchParams.get("orderBy") as keyof ProductType | undefined;
+    const orderBy = searchParams.get("orderBy") as keyof RentType | undefined;
     const ascending = searchParams.get("ascending") !== "false";
 
-    const start = (page - 1) * pageSize;
-
-    const count = await prisma.rents.count();
-
-    const paginatedRents = await prisma.rents.findMany({
-        skip: start,
-        take: pageSize,
-        orderBy: {
-          [orderBy ?? "updated_at"]: ascending ? "asc" : "desc"
-        },
-        where,
-        include: {
-          rent_products: {
-            include: {
-              products: true
-            }
-          }
-        }
+    const useCase = new ListRentalUseCase(rentalRepository);
+    const { data, count } = await useCase.execute({
+      where,
+      page,
+      pageSize,
+      orderBy,
+      ascending
     });
 
-    const response = new DefaultResponse(paginatedRents, "Busca de alugueis concluída.", page, pageSize, count);
+    const response = new DefaultResponse(data, "Busca de alugueis concluída.", page, pageSize, count);
 
     return NextResponse.json(response, { status: 200 })
   } catch (error) {
@@ -56,35 +45,15 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as RentInsertWithProductDtoType;
 
-    const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentsInput = {
-      createMany: {
-        data: body.rent_products.map((rentProduct) => ({
-          ...rentProduct
-        }))
-      }
-    }
+    const useCase = new CreateRentalUseCase(rentalRepository, productRepository);
 
-    const insertRentPayload: RentInsertDtoType = {
-      ...body,
-      rent_products: rentProductsInsertPayload,
-    }
+    const newRent = await useCase.execute(body);
 
-    const newRent = await prisma.rents.create({
-      data: insertRentPayload,
-      include: {
-          rent_products: {
-            include: {
-              products: true
-            }
-          }
-        }
-    });
-  
     const response = new DefaultResponse(newRent, "Aluguel criado com sucesso", null, null, null);
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    const errorResponse = new ErrorResponse("Erro ao criar aluguel", 500, (error as Error).message);
+    const errorResponse = error as ErrorResponse;
 
     return NextResponse.json(
       errorResponse,

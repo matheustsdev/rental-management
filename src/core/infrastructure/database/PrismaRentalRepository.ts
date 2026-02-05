@@ -1,14 +1,46 @@
 // src/core/infrastructure/prisma/PrismaRentalRepository.ts
 import { Prisma, PrismaClient } from "@prisma/client";
-import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
+import { IRentalRepository, RentalListInput } from "@/core/domain/repositories/IRentalRepository";
 import { Rental } from "../../domain/entities/Rental";
 import { RentType } from "@/types/entities/RentType";
 
 export class PrismaRentalRepository implements IRentalRepository {
   constructor(private prisma: PrismaClient) { }
-  
-  save(rental: Rental): Promise<void> {
-    throw new Error("Method not implemented.");
+
+  async create(data: Prisma.rentsCreateInput): Promise<RentType> {
+    const newRent = await this.prisma.rents.create({
+      data,
+      include: {
+        rent_products: {
+          include: {
+            products: true,
+          },
+        },
+      },
+    });
+
+    return newRent;
+  }
+
+  async list(params: RentalListInput): Promise<RentType[]> {
+    const { where, orderBy, ascending, page = 1, pageSize = 10 } = params;
+    const skip = (page - 1) * pageSize;
+    const orderDirection = ascending ? "asc" : "desc";
+    const orderByKey = orderBy || "updated_at";
+
+    return this.prisma.rents.findMany({
+      where,
+      skip,
+      take: pageSize,
+      orderBy: {
+        [orderByKey]: orderDirection,
+      },
+      include: {
+        rent_products: {
+          include: { products: true },
+        },
+      },
+    });
   }
 
   async update(id: string, data: Prisma.rentsUpdateInput): Promise<RentType> {
@@ -85,17 +117,7 @@ export class PrismaRentalRepository implements IRentalRepository {
     });
   }
 
-  async create(data: Prisma.rentsCreateInput): Promise<RentType> {
-    const newRent = await this.prisma.rents.create({
-      data,
-      include: {
-        rent_products: {
-          include: {
-            products: true,
-          },
-        },
-      },
-    });
-    return newRent;
+  async count(where?: Prisma.rentsWhereInput): Promise<number> {
+    return this.prisma.rents.count({ where });
   }
 }
