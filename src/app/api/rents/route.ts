@@ -55,10 +55,9 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
     if (error instanceof ServerError) {
-      return NextResponse.json(
-        { message: error.message },
-        { status: error.code || 400 }
-      );
+      const errorResponse = new ErrorResponse(error);
+
+      return NextResponse.json(errorResponse);
     }
 
     return NextResponse.json(
@@ -84,10 +83,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     if (error instanceof ServerError) {
-      return NextResponse.json(
-        { message: error.message },
-        { status: error.code || 400 }
-      );
+      const errorResponse = new ErrorResponse(error);
+
+      return NextResponse.json(errorResponse);
     }
 
     return NextResponse.json(
