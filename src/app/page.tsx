@@ -13,7 +13,6 @@ import ProductCard from "@/components/molecules/ProductCard";
 import { MdEdit } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
 import Fab from "@/components/atoms/Fab";
-import { InjectRelations } from "@/types/EntityType";
 import SecondaryButton from "@/components/atoms/SecondaryButton";
 import SearchBar from "@/components/atoms/SearchBar";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -75,12 +74,9 @@ export default function Home() {
     try {
       setIsLoading(true);
 
-      const includes: (keyof InjectRelations<"products">)[] = ["categories"];
-
       const productsListRequest = (
         await api.get("/products", {
           params: {
-            include: includes,
             page: newPage,
             orderBy: "reference",
             search: searchText,

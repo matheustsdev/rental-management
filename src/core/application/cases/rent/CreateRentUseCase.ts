@@ -4,7 +4,7 @@ import { RentInsertWithProductDtoType, RentType } from "@/types/entities/RentTyp
 import { Prisma } from "@prisma/client";
 import { ServerError } from "@/models/ServerError";
 
-export class CreateRentalUseCase {
+export class CreateRentUseCase {
   constructor(
     private rentalRepo: IRentalRepository,
     private productRepo: IProductRepository

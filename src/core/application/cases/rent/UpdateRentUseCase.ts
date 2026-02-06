@@ -1,12 +1,12 @@
-import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
+import { IRentalRepository as IRentRepository } from "@/core/domain/repositories/IRentalRepository";
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { RentUpdateWithProductDtoType, RentType } from "@/types/entities/RentType";
 import { Prisma } from "@prisma/client";
 import { ServerError } from "@/models/ServerError";
 
-export class UpdateRentalUseCase {
+export class UpdateRentUseCase {
   constructor(
-    private rentalRepo: IRentalRepository,
+    private rentRepository: IRentRepository,
     private productRepo: IProductRepository
   ) {}
 
@@ -26,7 +26,7 @@ export class UpdateRentalUseCase {
             }
 
             // Busca aluguéis ativos para o produto, excluindo o que está sendo editado
-            const activeRentals = await this.rentalRepo.findActiveByProduct(rentProduct.product_id as string, id);
+            const activeRentals = await this.rentRepository.findActiveByProduct(rentProduct.product_id as string, id);
             
             const hasConflict = activeRentals.some(rental =>
                 rental.conflictsWith(new Date(rent_date as string), new Date(return_date as string), product.bufferDays)
@@ -47,7 +47,7 @@ export class UpdateRentalUseCase {
 
     // 3. Se os produtos do aluguel estão sendo atualizados, deleta (soft delete) os antigos e cria os novos.
     if (rent_products) {
-      await this.rentalRepo.deleteRentProducts(id);
+      await this.rentRepository.deleteRentProducts(id);
 
       const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentsInput = {
         createMany: {
@@ -63,7 +63,7 @@ export class UpdateRentalUseCase {
     }
     
     // 4. Atualizar o aluguel no banco de dados
-    const updatedRent = await this.rentalRepo.update(id, updateRentPayload);
+    const updatedRent = await this.rentRepository.update(id, updateRentPayload);
 
     return updatedRent;
   }

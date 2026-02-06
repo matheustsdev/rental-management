@@ -8,7 +8,7 @@ export class PrismaRentalRepository implements IRentalRepository {
   constructor(private prisma: PrismaClient) { }
 
   async create(data: Prisma.rentsCreateInput): Promise<RentType> {
-    const newRent = await this.prisma.rents.create({
+    const newRent: RentType = await this.prisma.rents.create({
       data,
       include: {
         rent_products: {
@@ -55,6 +55,7 @@ export class PrismaRentalRepository implements IRentalRepository {
         },
       },
     });
+      
     return updatedRent;
   }
 

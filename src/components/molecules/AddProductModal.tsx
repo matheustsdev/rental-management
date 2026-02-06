@@ -102,6 +102,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
       const { categoryId, description, receiptDescription, price, reference } = data;
 
       const productInsertData: ProductUpdateWithCategoryDtoType = {
+        id: productOnEdit?.id,
         price,
         reference,
         description,
@@ -109,7 +110,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
         receipt_description: receiptDescription,
       };
 
-      const updatedProductRequest = await api.patch(`products/${productOnEdit?.id}`, productInsertData);
+      const updatedProductRequest = await api.put("products", productInsertData);
 
       if (updatedProductRequest.status !== 200) throw new Error(updatedProductRequest.data.message);
 

@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { InjectRelations, TableRow } from "@/types/EntityType";
-import { prisma } from "@/services/prisma";
+import { TableRow } from "@/types/EntityType";
 import { DefaultResponse } from "@/models/DefaultResponse";
-import { Prisma } from "@prisma/client";
-import { DefaultArgs } from "@prisma/client/runtime/library";
 import { ErrorResponse } from "@/models/ErrorResponse";
+import { ListProductUseCase, ListProductUseCaseInputType } from "@/core/application/cases/product/ListProductUseCase";
+import { productRepository } from "@/core/infrastructure/repositoriesFactory";
+import { ServerError } from "@/models/ServerError";
+import { ProductInsertDtoType, ProductUpdateDtoType } from "@/types/entities/ProductType";
+import { CreateProductlUseCase } from "@/core/application/cases/product/CreateProductUseCase";
+import { UpdateProductUseCase } from "@/core/application/cases/product/UpdateProductUseCase";
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,26 +18,9 @@ export async function GET(request: NextRequest) {
     const pageSize = Number(searchParams.get("pageSize") || 10);
     const orderBy = searchParams.get("orderBy") as keyof TableRow<"products"> | undefined;
     const ascending = searchParams.get("ascending") !== "false";
-    const includes = searchParams.getAll("include[]") as (keyof InjectRelations<"products">)[];
 
-    const start = (page - 1) * pageSize;
-
-    const count = await prisma.products.count();
-
-    const includeObject: Prisma.productsInclude<DefaultArgs> = {};
-
-    includes.forEach((include) => {
-      includeObject[include] = true
-    });
-
-
-    const paginatedProducts = await prisma.products.findMany({
-        skip: start,
-        take: pageSize,
-        orderBy: {
-          [orderBy ?? "updated_at"]: ascending ? "asc" : "desc"
-        },
-        where: {
+    const listUseCaseInput: ListProductUseCaseInputType = {
+      where: {
           OR: [
             {
               reference: {
@@ -50,39 +36,86 @@ export async function GET(request: NextRequest) {
             }
           ]
         },
-        include: includeObject
-    });
+      page,
+      pageSize,
+      orderBy,
+      ascending
+    };
 
-    const response = new DefaultResponse(paginatedProducts, "Busca de produtos concluída.", page, pageSize, count);
+    const useCase = new ListProductUseCase(productRepository);
+
+    const { data, count } = await useCase.execute(listUseCaseInput);
+
+    const response = new DefaultResponse(data, "Busca de produtos concluída.", page, pageSize, count);
 
     return NextResponse.json(response, { status: 200 })
   } catch (error) {
-    const errorResponse = new ErrorResponse("Erro ao buscar produtos", 500, (error as Error).message)
+      if (error instanceof ServerError) {
+         const errorResponse = new ErrorResponse(error);
+   
+         return NextResponse.json(errorResponse);
+       }
+   
+       return NextResponse.json(
+         {
+           error: "Erro ao listar produtos",
+           details: error instanceof Error ? error.message : error,
+         },
+         { status: 500 }
+       );
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = (await request.json()) as ProductUpdateDtoType;
+  
+    const useCase = new UpdateProductUseCase(productRepository);
+    const updatedProduct = await useCase.execute(body);
+  
+    const response = new DefaultResponse(updatedProduct, "Produto atualizado com sucesso.", null, null, null);
+  
+    return NextResponse.json(response, { status: 200 });
+  } catch (error) {
+    if (error instanceof ServerError) {
+      const errorResponse = new ErrorResponse(error);
+
+      return NextResponse.json(errorResponse);
+    }
 
     return NextResponse.json(
-      errorResponse,
-      { status: errorResponse.errorCode }
+      {
+        error: "Erro ao atualizar produto",
+        details: error instanceof Error ? error.message : error,
+      },
+      { status: 500 }
     );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
+    const body = (await request.json()) as ProductInsertDtoType;
 
-    const newProduct = await prisma.products.create({
-      data
-    })
+    const useCase = new CreateProductlUseCase(productRepository);
+    const newProduct = await useCase.execute(body);
 
     const response = new DefaultResponse(newProduct, "Produto criado com sucesso.", null, null, null);
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    const errorResponse = new ErrorResponse("Erro ao criar produto.", 500, (error as Error).message)
+    if (error instanceof ServerError) {
+      const errorResponse = new ErrorResponse(error);
+
+      return NextResponse.json(errorResponse);
+    }
 
     return NextResponse.json(
-      errorResponse,
-      { status: errorResponse.errorCode }
+      {
+        error: "Erro ao criar produto",
+        details: error instanceof Error ? error.message : error,
+      },
+      { status: 500 }
     );
   }
 }

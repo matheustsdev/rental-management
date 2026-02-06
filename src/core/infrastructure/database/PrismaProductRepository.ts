@@ -1,11 +1,43 @@
 // src/core/infrastructure/repositories/PrismaProductRepository.ts
-import { PrismaClient } from "@prisma/client";
-import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
+import { Prisma, PrismaClient } from "@prisma/client";
+import { IProductRepository, ProductListInput } from "@/core/domain/repositories/IProductRepository";
 import { Product } from "@/core/domain/entities/Product";
+import { ProductType } from "@/types/entities/ProductType";
 
 
 export class PrismaProductRepository implements IProductRepository {
   constructor(private prisma: PrismaClient) { }
+
+  async create(data: Prisma.productsCreateInput): Promise<ProductType> {
+    return this.prisma.products.create({ data, include: { categories: true }});
+  }
+
+  async list(params: ProductListInput): Promise<ProductType[]> {
+    const { where, orderBy, ascending, page = 1, pageSize = 10 } = params;
+    const skip = (page - 1) * pageSize;
+    const orderDirection = ascending ? "asc" : "desc";
+    const orderByKey = orderBy || "updated_at";
+
+    return this.prisma.products.findMany({
+      where,
+      skip,
+      take: pageSize,
+      orderBy: {
+        [orderByKey]: orderDirection,
+      },
+      include: {
+        categories: true
+      }
+    });
+  }
+
+  async update(id: string, data: Prisma.productsUpdateInput): Promise<ProductType> {
+    return this.prisma.products.update({
+      where: { id },
+      data,
+      include: { categories: true }
+    });
+  }
 
   async findById(id: string): Promise<Product | null> {
     // 1. Busca no banco incluindo a relação com categories
@@ -33,5 +65,9 @@ export class PrismaProductRepository implements IProductRepository {
       Number(prismaProduct.price), // Prisma Decimal -> JS Number
       bufferDays
     );
+  }
+
+  async count(where?: Prisma.productsWhereInput): Promise<number> {
+    return this.prisma.products.count({ where });
   }
 }

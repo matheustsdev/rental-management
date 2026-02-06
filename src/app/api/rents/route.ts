@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { RentInsertWithProductDtoType, RentUpdateWithProductDtoType, RentType } from "@/types/entities/RentType";
 import { DefaultResponse } from "@/models/DefaultResponse";
 import { ErrorResponse } from "@/models/ErrorResponse";
-import { CreateRentalUseCase } from "@/core/application/cases/CreateRentalUseCase";
+import { CreateRentUseCase } from "@/core/application/cases/rent/CreateRentUseCase";
 import { productRepository, rentalRepository } from "@/core/infrastructure/repositoriesFactory";
-import { ListRentalUseCase } from "@/core/application/cases/ListRentalUseCase";
-import { UpdateRentalUseCase } from "@/core/application/cases/UpdateRentalUseCase";
+import { ListRentUseCase } from "@/core/application/cases/rent/ListRentUseCase";
+import { UpdateRentUseCase } from "@/core/application/cases/rent/UpdateRentUseCase";
 import { ServerError } from "@/models/ServerError";
 
 export async function GET(request: NextRequest) {
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     const orderBy = searchParams.get("orderBy") as keyof RentType | undefined;
     const ascending = searchParams.get("ascending") !== "false";
 
-    const useCase = new ListRentalUseCase(rentalRepository);
+    const useCase = new ListRentUseCase(rentalRepository);
     const { data, count } = await useCase.execute({
       where,
       page,
@@ -47,7 +47,7 @@ export async function PUT(request: NextRequest) {
   try {
     const body = (await request.json()) as RentUpdateWithProductDtoType;
 
-    const useCase = new UpdateRentalUseCase(rentalRepository, productRepository);
+    const useCase = new UpdateRentUseCase(rentalRepository, productRepository);
     const updatedRent = await useCase.execute(body);
 
     const response = new DefaultResponse(updatedRent, "Aluguel atualizado com sucesso.", null, null, null);
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as RentInsertWithProductDtoType;
 
-    const useCase = new CreateRentalUseCase(rentalRepository, productRepository);
+    const useCase = new CreateRentUseCase(rentalRepository, productRepository);
 
     const newRent = await useCase.execute(body);
 

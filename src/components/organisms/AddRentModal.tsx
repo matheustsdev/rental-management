@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { toaster } from "@/components/atoms/Toaster";
 import { api } from "@/services/api";
-import { ReactElement, useActionState, useEffect, useRef, useState } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import PrimaryButton from "@/components/atoms/PrimaryButton";
 import SecondaryButton from "@/components/atoms/SecondaryButton";
 import { RentInsertWithProductDtoType, RentType, RentUpdateWithProductDtoType } from "@/types/entities/RentType";
@@ -18,10 +18,6 @@ import ProductMeasures from "@/components/molecules/ProductMeasures";
 import { EDiscountTypes } from "@/constants/EDiscountType";
 import { EMeasureType } from "@/constants/EMeasureType";
 import { RentProductSchema } from "@/constants/schemas/RentProductSchema";
-import { createRentalAction } from "@/app/actions/createRentalAction";
-import { defaultInitialActionValue } from "@/constants/DefaultInitialActionValue";
-import { updateRentalAction } from "@/app/actions/updateRentalAction";
-import { ErrorResponse } from "@/models/ErrorResponse";
 
 const productSelectorSchema = z.object({
   rentDate: z.union([
@@ -104,7 +100,7 @@ interface IAddRentModalProps {
   rentOnEdit: RentType | null;
 }
 
-const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, rentOnEdit }) => {
+const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, rentOnEdit }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInfiniteAdd, setIsInfiniteAdd] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -232,7 +228,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       client_name: clientName,
       discount_type: discountType,
       discount_value: discountValue,
-      rent_products: rentProducts as RentProductUpdateDtoType[],
+      rent_products: rentProducts,
       remaining_value: remainingValue,
       rent_date: new Date(rentDate).toISOString(),
       return_date: new Date(returnDate).toISOString(),
@@ -242,11 +238,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       receipt_observations: receiptObservations,
     };
 
-    const test = `rents/${rentOnEdit?.id}`;
-    console.log(test);
-    console.log("Rent >> ", rentUpdateData);
-
-    return await api.patch(`rents/${rentOnEdit?.id}`, rentUpdateData);
+    return await api.put("rents", rentUpdateData);
   };
 
   const onSubmit = async (data: RentFormType) => {
@@ -264,10 +256,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
         type: "success",
         title: "Produto cadastrado!",
       });
-
-      if (onSave) {
-        onSave(rentRequest.data);
-      }
 
       setCurrentStep(0);
       if (!isInfiniteAdd) handleOnClose();
@@ -308,7 +296,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     }
 
     if (currentStep + 2 > steps.length) {
-      console.log("Sumibt");
       const values = methods.getValues();
 
       const selectedProducts = availableProducts.filter(({ product }) =>
