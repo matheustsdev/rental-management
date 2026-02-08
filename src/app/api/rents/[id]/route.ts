@@ -3,14 +3,14 @@ import { prisma } from "@/services/prisma";
 import { DefaultResponse } from "@/models/DefaultResponse";
 import { ErrorResponse } from "@/models/ErrorResponse";
 import { RentUpdateWithProductDtoType } from "@/types/entities/RentType";
-import { ApiError } from "@/models/ApiError";
+import { ServerError } from "@/models/ServerError";
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const body = (await request.json()) as RentUpdateWithProductDtoType;
     const id = (await params).id;
 
-    if (!id) throw new ApiError("É obrigatório informar o ID do aluguel para atualiza-lo", 400);
+    if (!id) throw new ServerError("É obrigatório informar o ID do aluguel para atualiza-lo", 400);
 
     
 
@@ -32,8 +32,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    const apiError = error as ApiError;
-    const errorResponse = new ErrorResponse(apiError.code ? apiError.message : "Erro ao atualizar aluguel", apiError.code ?? 500, apiError.message);
+    const apiError = error as ServerError;
+    const errorResponse = new ErrorResponse(apiError);
 
     return NextResponse.json(
       errorResponse,
