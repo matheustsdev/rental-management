@@ -9,9 +9,9 @@ export class ListProductAvailabilityUseCase {
     private productRepository: IProductRepository,
   ) {}
 
-  async execute(input: ListProductUseCaseInputType): Promise<ListUseCaseReturnType<ProductType>> {
+  async execute(searchText: string, startDate: Date, endDate: Date): Promise<ListUseCaseReturnType<ProductType>> {
     const count = await this.productRepository.count();
-    const data = await this.productRepository.list(input);
+    const data = await this.productRepository.listWithAvailability(searchText, startDate, endDate);
 
     return { data, count };
   }

@@ -54,7 +54,7 @@ model rent_products {
   deleted                   Boolean?      @default(false)
   deleted_at                DateTime?     @db.Timestamptz(6)
   products                  products      @relation(fields: [product_id], references: [id], onUpdate: NoAction)
-  rents                     rents         @relation(fields: [rent_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  rent                      rents         @relation(fields: [rent_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([rent_id, product_id])
   @@index([product_id], map: "idx_rent_products_product_id")
@@ -65,7 +65,7 @@ model rents {
   id                    String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   created_at            DateTime?           @default(now()) @db.Timestamptz(6)
   rent_date             DateTime            @db.Date
-  return_date           DateTime?           @db.Date
+  return_date           DateTime            @db.Date
   client_name           String              @db.VarChar(255)
   address               String?
   phone                 String?             @db.VarChar(20)
