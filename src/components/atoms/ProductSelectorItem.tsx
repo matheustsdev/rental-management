@@ -16,10 +16,15 @@ const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
   isSelected,
   onChangeSelection,
 }) => {
-  const { product } = productAvailability;
-
   return (
-    <Flex key={product.id} w="full" borderWidth={1} p={2} borderRadius="md" bg={isSelected ? "green.50" : "white"}>
+    <Flex
+      key={productAvailability.id}
+      w="full"
+      borderWidth={1}
+      p={2}
+      borderRadius="md"
+      bg={isSelected ? "green.50" : "white"}
+    >
       <Checkbox.Root
         variant="outline"
         checked={isSelected}
@@ -32,9 +37,9 @@ const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
         <Checkbox.Label w="full">
           <Flex align="flex-start" justify="space-between" w="full">
             <Flex flexDir="column">
-              <Text fontWeight="bold">{product.description}</Text>
+              <Text fontWeight="bold">{productAvailability.description}</Text>
               <Text fontSize="sm" color="gray.500">
-                Ref: {product.reference} | {new Currency(product.price).toString()}
+                Ref: {productAvailability.reference} | {new Currency(productAvailability.price).toString()}
               </Text>
             </Flex>
             <Status.Root

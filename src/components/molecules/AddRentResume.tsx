@@ -2,13 +2,13 @@
 
 import ProductResumeItem from "@/components/atoms/ProductResumeItem";
 import ResumeItem from "@/components/atoms/ResumeItem";
-import { RentFormType } from "@/organisms/AddRentModal";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { Flex } from "@chakra-ui/react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { formatDate } from "@/utils/formatDate";
 import Currency from "@/models/Currency";
 import { useEffect, useState } from "react";
+import { RentFormType } from "../organisms/AddRentModal";
 
 const AddRentResume: React.FC = () => {
   const [selectedProducts, setSelectedProducts] = useState<ProductAvailabilityType[]>([]);
@@ -19,7 +19,7 @@ const AddRentResume: React.FC = () => {
 
   useEffect(() => {
     const newListOfProducts = allAvailableProducts.filter((availableProduct) =>
-      productsIds.some((productId) => productId === availableProduct.product.id),
+      productsIds.some((productId) => productId === availableProduct.id),
     );
 
     setSelectedProducts(newListOfProducts);
@@ -45,7 +45,7 @@ const AddRentResume: React.FC = () => {
       <ResumeItem prop="Observação interna" value={formValues?.internalObservations ?? ""} />
       <Flex flexDir="column" align="flex-start" pt="4" gap="2">
         {selectedProducts.map((product) => (
-          <ProductResumeItem key={product.product.id} productAvailability={product} />
+          <ProductResumeItem key={product.id} productAvailability={product} />
         ))}
       </Flex>
     </Flex>

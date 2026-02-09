@@ -2,9 +2,9 @@
 
 import { Accordion, Flex } from "@chakra-ui/react";
 import ProductMeasureItem from "@/components/atoms/ProductMeasureItem";
-import { RentFormType } from "@/organisms/AddRentModal";
 import { useFormContext, useWatch } from "react-hook-form";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
+import { RentFormType } from "../organisms/AddRentModal";
 
 const ProductMeasures: React.FC = () => {
   const { control } = useFormContext<RentFormType>();
@@ -12,16 +12,18 @@ const ProductMeasures: React.FC = () => {
   const rentProducts = useWatch({ control, name: "rentProducts" });
   const allAvailableProducts = useWatch({ control, name: "allAvailableProducts" });
 
+  console.log("rentProducts >> ", rentProducts);
+
   return (
     <Flex flexDir="column" gap={4} align="center" w="full">
       <Flex w="full" align="center" justify="space-between" gap="12" flexDir="column">
         <Accordion.Root display="flex" flexDirection="column" gap="4">
           {allAvailableProducts
             .filter((availableProduct: ProductAvailabilityType) =>
-              rentProducts.some((rentProduct) => rentProduct.product_id === availableProduct.product.id),
+              rentProducts.some((rentProduct) => rentProduct.product_id === availableProduct.id),
             )
             .map((rentProduct) => (
-              <ProductMeasureItem key={rentProduct.product.id} productAvailability={rentProduct} />
+              <ProductMeasureItem key={rentProduct.id} productAvailability={rentProduct} />
             ))}
         </Accordion.Root>
       </Flex>

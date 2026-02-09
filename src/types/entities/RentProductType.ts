@@ -7,11 +7,11 @@ export type RentProductType = rent_products & {
 export type RentProductInsertDtoType = Prisma.rent_productsCreateInput;
 export type RentProductUpdateDtoType = Prisma.rent_productsCreateInput;
 
-export type RentProductInsertWithProductDtoType = Omit<RentProductInsertDtoType, "products" | "rents"> & {
+export type RentProductInsertWithProductDtoType = Omit<RentProductInsertDtoType, "products" | "rent"> & {
     product_id: string;
 }
 
 // Using RentProductInsertDtoType because the update is a delete of rent_products and readd 
-export type RentProductUpdateWithProductDtoType = Omit<RentProductInsertDtoType, "products" | "rents"> & {
+export type RentProductUpdateWithProductDtoType = Omit<RentProductInsertDtoType, "products" | "rent"> & {
     product_id: string;
 }

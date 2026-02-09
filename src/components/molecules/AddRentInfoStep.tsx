@@ -4,9 +4,9 @@ import { Flex, Text } from "@chakra-ui/react";
 import { useFormContext, useWatch } from "react-hook-form";
 import InputField from "@/components/atoms/InputField";
 import InputAreaField from "@/components/atoms/InputAreaField";
-import { RentFormType } from "@/organisms/AddRentModal";
 import { useEffect } from "react";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
+import { RentFormType } from "../organisms/AddRentModal";
 
 const AddRentInfoStep: React.FC = () => {
   const {
@@ -23,10 +23,10 @@ const AddRentInfoStep: React.FC = () => {
 
   useEffect(() => {
     const productsWithAvailabilitySelected: ProductAvailabilityType[] = availableProducts.filter((availableProduct) =>
-      formSelectedProducts.some((product) => product.id === availableProduct.product.id),
+      formSelectedProducts.some((product) => product.id === availableProduct.id),
     );
 
-    const productValue = productsWithAvailabilitySelected.reduce((acc, item) => acc + Number(item.product.price), 0);
+    const productValue = productsWithAvailabilitySelected.reduce((acc, item) => acc + Number(item.price), 0);
 
     setValue("totalValue", productValue);
     setValue("finalTotalValue", productValue - (discountValue ?? 0));

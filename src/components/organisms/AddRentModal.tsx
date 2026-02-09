@@ -341,7 +341,9 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, rentOnEdi
         })
       ).data;
 
-      methods.setValue("allAvailableProducts", productsListRequest);
+      console.log("productsListRequest", productsListRequest);
+
+      methods.setValue("allAvailableProducts", productsListRequest.data);
     } catch (e: unknown) {
       toaster.create({
         type: "error",

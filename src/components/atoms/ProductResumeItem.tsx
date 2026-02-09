@@ -10,14 +10,12 @@ interface IProductResumeItemProps {
 }
 
 const ProductResumeItem: React.FC<IProductResumeItemProps> = ({ productAvailability }) => {
-  const { product } = productAvailability;
-
   return (
-    <Flex key={product.id} w="full" borderWidth={1} p={2} borderRadius="md" bg="green.50">
+    <Flex key={productAvailability.id} w="full" borderWidth={1} p={2} borderRadius="md" bg="green.50">
       <Flex flexDir="column" flex={1}>
-        <Text fontWeight="bold">{product.description}</Text>
+        <Text fontWeight="bold">{productAvailability.description}</Text>
         <Text fontSize="sm" color="gray.500">
-          Ref: {product.reference} | {new Currency(product.price).toString()}
+          Ref: {productAvailability.reference} | {new Currency(productAvailability.price).toString()}
         </Text>
       </Flex>
       <Status.Root colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}>

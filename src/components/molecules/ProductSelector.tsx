@@ -2,13 +2,13 @@
 
 import { Field, Flex, Input, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { RentFormType } from "@/organisms/AddRentModal";
 import { useFormContext, useWatch } from "react-hook-form";
 import ProductSelectorItem from "@/components/atoms/ProductSelectorItem";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import InputField from "@/components/atoms/InputField";
 import { EMeasureType } from "@/constants/EMeasureType";
 import { RentProductInsertWithProductDtoType } from "@/types/entities/RentProductType";
+import { RentFormType } from "../organisms/AddRentModal";
 
 const ProductSelector: React.FC = () => {
   const [searchText, setSearchText] = useState("");
@@ -26,14 +26,12 @@ const ProductSelector: React.FC = () => {
   const availableProducts = useWatch({ control, name: "allAvailableProducts" });
 
   const toggleProductSelection = (productAvailability: ProductAvailabilityType) => {
-    const { product } = productAvailability;
-
     const newFormProduct: RentProductInsertWithProductDtoType = {
-      id: product.id,
-      product_description: product.description ?? "",
-      product_price: Number(product.price) as number,
-      product_id: product.id,
-      measure_type: product.categories?.measure_type ?? EMeasureType.DRESS,
+      id: productAvailability.id,
+      product_description: productAvailability.description ?? "",
+      product_price: Number(productAvailability.price) as number,
+      product_id: productAvailability.id,
+      measure_type: productAvailability.categories?.measure_type ?? EMeasureType.DRESS,
       waist: undefined,
       bust: undefined,
       hip: undefined,
@@ -50,8 +48,10 @@ const ProductSelector: React.FC = () => {
       return;
     }
 
-    const newProductList: RentProductInsertWithProductDtoType[] = products.some((item) => item.id === product.id)
-      ? products.filter((item) => item.id !== product.id)
+    const productAlreadyExists = products.some((item) => item.id === productAvailability.id);
+
+    const newProductList: RentProductInsertWithProductDtoType[] = productAlreadyExists
+      ? products.filter((item) => item.id !== productAvailability.id)
       : [...products, newFormProduct];
 
     setValue("rentProducts", newProductList);
@@ -63,7 +63,7 @@ const ProductSelector: React.FC = () => {
 
   useEffect(() => {
     const products = availableProducts.filter(
-      ({ product }) =>
+      (product: ProductAvailabilityType) =>
         product.description?.toLowerCase().includes(searchText.toLowerCase()) ||
         product.reference?.toLowerCase().includes(searchText.toLowerCase()),
     );
@@ -72,7 +72,7 @@ const ProductSelector: React.FC = () => {
   }, [availableProducts, searchText]);
 
   return (
-    <Flex flexDir="column" gap={4} align="center" w="full">
+    <Flex flexDir="column" gap={2} align="center" w="full">
       <Flex w="full" align="center" justify="space-between" gap="12">
         <InputField type="date" label="Data de saída" error={errors.rentDate} registerProps={register("rentDate")} />
         <InputField
@@ -112,9 +112,9 @@ const ProductSelector: React.FC = () => {
 
         {filteredProducts.map((productAvailability) => (
           <ProductSelectorItem
-            key={productAvailability.product.id}
+            key={productAvailability.id}
             productAvailability={productAvailability}
-            isSelected={products.some((item) => item.product_id === productAvailability.product.id)}
+            isSelected={products.some((item) => item.id === productAvailability.id)}
             onChangeSelection={toggleProductSelection}
           />
         ))}
