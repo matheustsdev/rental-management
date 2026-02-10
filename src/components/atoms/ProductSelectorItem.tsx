@@ -4,6 +4,7 @@ import { Flex, Text, Checkbox, Status } from "@chakra-ui/react";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import Currency from "@/models/Currency";
+import { availability_status } from "@prisma/client";
 
 interface IProductSelectorItemProps {
   productAvailability: ProductAvailabilityType;
@@ -16,6 +17,22 @@ const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
   isSelected,
   onChangeSelection,
 }) => {
+  const getAvailabilityText = (availability: availability_status) => {
+    if (availability === EAvailabilityStatus.AVAILABLE) return "Disponível";
+    if (availability === EAvailabilityStatus.UNAVAILABLE) return "Alugado";
+    if (availability === EAvailabilityStatus.BUFFER_OCCUPIED) return "Em limpeza";
+
+    return "";
+  };
+
+  const getAvailabilityColor = (availability: availability_status) => {
+    if (availability === EAvailabilityStatus.AVAILABLE) return "green";
+    if (availability === EAvailabilityStatus.UNAVAILABLE) return "red";
+    if (availability === EAvailabilityStatus.BUFFER_OCCUPIED) return "orange";
+
+    return "";
+  };
+
   return (
     <Flex
       key={productAvailability.id}
@@ -42,12 +59,8 @@ const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
                 Ref: {productAvailability.reference} | {new Currency(productAvailability.price).toString()}
               </Text>
             </Flex>
-            <Status.Root
-              colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}
-            >
-              <Text fontSize="xs">
-                {productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "Disponível" : "Alugado"}
-              </Text>
+            <Status.Root colorPalette={getAvailabilityColor(productAvailability.availability)}>
+              <Text fontSize="xs">{getAvailabilityText(productAvailability.availability)}</Text>
               <Status.Indicator />
             </Status.Root>
           </Flex>

@@ -9,6 +9,7 @@ import { formatDate } from "@/utils/formatDate";
 import Currency from "@/models/Currency";
 import { useEffect, useState } from "react";
 import { RentFormType } from "../organisms/AddRentModal";
+import { getUTCDateFromInput } from "@/utils/getUTCDateFromInput";
 
 const AddRentResume: React.FC = () => {
   const [selectedProducts, setSelectedProducts] = useState<ProductAvailabilityType[]>([]);
@@ -30,11 +31,11 @@ const AddRentResume: React.FC = () => {
       <ResumeItem prop="Cliente" value={formValues.clientName ?? ""} />
       <ResumeItem
         prop="Data do aluguel"
-        value={formValues.rentDate ? formatDate(new Date(formValues.rentDate), "dd 'de' MMMM") : ""}
+        value={formValues.rentDate ? formatDate(getUTCDateFromInput(formValues.rentDate), "dd 'de' MMMM") : ""}
       />
       <ResumeItem
         prop="Data da devolução"
-        value={formValues.returnDate ? formatDate(new Date(formValues.returnDate), "dd 'de' MMMM") : ""}
+        value={formValues.returnDate ? formatDate(getUTCDateFromInput(formValues.returnDate), "dd 'de' MMMM") : ""}
       />
       <ResumeItem prop="Valor total" value={new Currency(formValues.totalValue).toString()} />
       <ResumeItem prop="Desconto" value={new Currency(formValues.discountValue).toString()} />

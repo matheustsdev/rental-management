@@ -12,8 +12,6 @@ const ProductMeasures: React.FC = () => {
   const rentProducts = useWatch({ control, name: "rentProducts" });
   const allAvailableProducts = useWatch({ control, name: "allAvailableProducts" });
 
-  console.log("rentProducts >> ", rentProducts);
-
   return (
     <Flex flexDir="column" gap={4} align="center" w="full">
       <Flex w="full" align="center" justify="space-between" gap="12" flexDir="column">

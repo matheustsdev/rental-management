@@ -35,7 +35,7 @@ export class CreateRentUseCase {
     }
 
     // 2. Construir o payload de inserção para o Prisma
-    const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentsInput = {
+    const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentInput = {
       createMany: {
         data: rent_products.map((rp) => ({
           product_id: rp.product_id,

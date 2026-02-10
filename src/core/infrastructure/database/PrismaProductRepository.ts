@@ -1,11 +1,11 @@
 // src/core/infrastructure/repositories/PrismaProductRepository.ts
-import { Prisma, PrismaClient } from "@prisma/client";
+import { availability_status, Prisma, PrismaClient } from "@prisma/client";
 import { IProductRepository, ProductListInput } from "@/core/domain/repositories/IProductRepository";
 import { Product } from "@/core/domain/entities/Product";
 import { ProductType } from "@/types/entities/ProductType";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
-import { addDays, isWithinInterval } from "date-fns";
+import { addDays, areIntervalsOverlapping } from "date-fns";
 
 
 export class PrismaProductRepository implements IProductRepository {
@@ -70,21 +70,33 @@ export class PrismaProductRepository implements IProductRepository {
         const defaultBuffer = product.categories?.post_return_buffer_days ?? 0;
         const realBuffer = rentProduct.actual_return_buffer_days ?? defaultBuffer;
         const rent = rentProduct.rent;
-        const realReturnDate = addDays(new Date(rent.rent_date), realBuffer);
+        const realReturnDate = addDays(new Date(rent.return_date), realBuffer);
 
         return {
           ...rent,
           rent_date: new Date(rent.rent_date),
-          return_date: realReturnDate,
+          return_date: new Date(rent.return_date),
+          return_with_buffer_date: realReturnDate,
         }
       });
 
       const sortedRentsDateBuferred = rentsDateBuferred.sort((a, b) => new Date(a.return_date).getTime() - new Date(b.return_date).getTime());
-      const rentInUse = sortedRentsDateBuferred.find((rent) => isWithinInterval(new Date(rent.return_date), { start: startDate, end: endDate }));
+      const rentInUse = sortedRentsDateBuferred.find((rent) => areIntervalsOverlapping({ start: new Date(rent.rent_date), end: new Date(rent.return_with_buffer_date)}, { start: startDate, end: endDate }));
+
+      let availability: availability_status = !rentInUse ? EAvailabilityStatus.AVAILABLE : EAvailabilityStatus.UNAVAILABLE;
+
+      if (rentInUse) {
+        const isOnBufferPeriod = areIntervalsOverlapping({ start: new Date(rentInUse.return_date), end: new Date(rentInUse.return_with_buffer_date) }, { start: startDate, end: endDate });
+
+        if (isOnBufferPeriod) {
+          availability = EAvailabilityStatus.BUFFER_OCCUPIED;
+        }
+      }
+
 
       return {
         ...product,
-        availability: !rentInUse ? EAvailabilityStatus.AVAILABLE : EAvailabilityStatus.UNAVAILABLE,
+        availability
       }
     });
 

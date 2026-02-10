@@ -18,6 +18,7 @@ import ProductMeasures from "@/components/molecules/ProductMeasures";
 import { EDiscountTypes } from "@/constants/EDiscountType";
 import { EMeasureType } from "@/constants/EMeasureType";
 import { RentProductSchema } from "@/constants/schemas/RentProductSchema";
+import { getUTCDateFromInput } from "@/utils/getUTCDateFromInput";
 
 const productSelectorSchema = z.object({
   rentDate: z.union([
@@ -100,7 +101,7 @@ interface IAddRentModalProps {
   rentOnEdit: RentType | null;
 }
 
-const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, rentOnEdit }) => {
+const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, rentOnEdit }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isInfiniteAdd, setIsInfiniteAdd] = useState<boolean>(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -193,8 +194,8 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, rentOnEdi
       discount_value: discountValue,
       rent_products: rentProducts,
       remaining_value: remainingValue,
-      rent_date: new Date(rentDate).toISOString(),
-      return_date: new Date(returnDate).toISOString(),
+      rent_date: getUTCDateFromInput(rentDate).toISOString(),
+      return_date: getUTCDateFromInput(returnDate).toISOString(),
       signal_value: signal,
       total_value: totalValue,
       internal_observations: internalObservations,
@@ -252,6 +253,8 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, rentOnEdi
 
       if (rentRequest.status !== 201) throw new Error(rentRequest.statusText);
 
+      if (onSave) onSave(rentRequest.data, !!rentOnEdit);
+
       toaster.create({
         type: "success",
         title: "Produto cadastrado!",
@@ -298,7 +301,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, rentOnEdi
     if (currentStep + 2 > steps.length) {
       const values = methods.getValues();
 
-      const selectedProducts = availableProducts.filter(({ product }) =>
+      const selectedProducts = availableProducts.filter((product) =>
         formSelectedProducts.some((item) => item.id === product.id),
       );
 
@@ -341,8 +344,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, rentOnEdi
         })
       ).data;
 
-      console.log("productsListRequest", productsListRequest);
-
       methods.setValue("allAvailableProducts", productsListRequest.data);
     } catch (e: unknown) {
       toaster.create({
@@ -360,6 +361,9 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, rentOnEdi
   };
 
   useEffect(() => {
+    console.log("Rent date >> ", rentDate);
+    console.log("Return date >> ", returnDate);
+
     if (rentDate && returnDate) loadProducts();
   }, [rentDate, returnDate]);
 
@@ -389,6 +393,10 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, rentOnEdi
     const selectedRentProductIds = rentOnEdit.rent_products.map((rentProduct) => rentProduct.product_id);
     setValue("productIds", selectedRentProductIds);
   }, [rentOnEdit]);
+
+  useEffect(() => {
+    console.log("Erros >> ", methods.formState.errors);
+  }, [methods]);
 
   return (
     <>
