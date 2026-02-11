@@ -1,20 +1,18 @@
 "use client";
 
-import SecondaryButton from "@/components/atoms/SecondaryButton";
 import TextRow from "@/components/atoms/TextRow";
 import Currency from "@/models/Currency";
 import { RentType } from "@/types/entities/RentType";
 import { formatDate } from "@/utils/formatDate";
 import { Card, Flex } from "@chakra-ui/react";
-import { MdEdit, MdOutlineRemoveRedEye } from "react-icons/md";
+import ButtonMenu, { ButtonMenuItemsType } from "../atoms/ButtonMenu";
 
 interface IRentCardProps {
   rent: RentType;
-  onClickPreview: (rent: RentType) => void;
-  onEdit: (rent: RentType) => void;
+  menuItens: ButtonMenuItemsType<RentType>[];
 }
 
-const RentCard: React.FC<IRentCardProps> = ({ rent, onEdit, onClickPreview }) => {
+const RentCard: React.FC<IRentCardProps> = ({ rent, menuItens }) => {
   return (
     <Card.Root h="full" p="4" boxShadow="8px 8px 6px -4px rgba(0,0,0,0.20)" bg="terracotta.50">
       <Card.Header pb="2" fontWeight="bold">
@@ -34,15 +32,10 @@ const RentCard: React.FC<IRentCardProps> = ({ rent, onEdit, onClickPreview }) =>
         </Flex>
       </Card.Body>
       <Card.Footer w="full">
-        <Flex w="full" pt="4" align="center" justify="flex-start" gap="4">
-          <SecondaryButton onClick={() => onClickPreview(rent)}>
-            <MdOutlineRemoveRedEye />
+        <Flex w="full" pt="4" align="center" justify="flex-end" gap="4">
+          <ButtonMenu items={menuItens} actionData={rent}>
             Ver mais
-          </SecondaryButton>
-          <SecondaryButton onClick={() => onEdit(rent)}>
-            <MdEdit />
-            Editar
-          </SecondaryButton>
+          </ButtonMenu>
         </Flex>
       </Card.Footer>
     </Card.Root>

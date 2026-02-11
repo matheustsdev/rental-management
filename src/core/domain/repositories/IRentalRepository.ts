@@ -17,4 +17,5 @@ export interface IRentalRepository {
   deleteRentProducts(rentId: string): Promise<void>;
   count(where?: Prisma.rentsWhereInput): Promise<number>;
   list(params: RentalListInput): Promise<RentType[]>;
+  delete(id: string): Promise<void>;
 }

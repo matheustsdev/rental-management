@@ -29,7 +29,10 @@ export class PrismaRentalRepository implements IRentalRepository {
     const orderByKey = orderBy || "updated_at";
 
     return this.prisma.rents.findMany({
-      where,
+      where: {
+        ...where,
+        deleted: false,
+      },
       skip,
       take: pageSize,
       orderBy: {
@@ -120,5 +123,24 @@ export class PrismaRentalRepository implements IRentalRepository {
 
   async count(where?: Prisma.rentsWhereInput): Promise<number> {
     return this.prisma.rents.count({ where });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.rents.update({
+        where: { id },
+        data: {
+          deleted: true,
+          deleted_at: new Date(),
+        },
+      }),
+      this.prisma.rent_products.updateMany({
+        where: { rent_id: id },
+        data: {
+          deleted: true,
+          deleted_at: new Date(),
+        },
+      }),
+    ]);
   }
 }

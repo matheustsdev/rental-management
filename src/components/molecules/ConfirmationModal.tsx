@@ -8,10 +8,17 @@ interface IConfirmationModalProps {
   message: string;
   onClose: () => void;
   isOpen: boolean;
-  onSave: () => void;
+  onClickActionButton: () => void;
+  actionLabel: string;
 }
 
-const ConfirmationModal: React.FC<IConfirmationModalProps> = ({ isOpen, onClose, onSave, message }) => {
+const ConfirmationModal: React.FC<IConfirmationModalProps> = ({
+  isOpen,
+  onClose,
+  onClickActionButton,
+  message,
+  actionLabel,
+}) => {
   return (
     <Dialog.Root lazyMount open={isOpen} onOpenChange={onClose} placement="center">
       <Portal>
@@ -31,8 +38,8 @@ const ConfirmationModal: React.FC<IConfirmationModalProps> = ({ isOpen, onClose,
                     Cancelar
                   </SecondaryButton>
                 </Dialog.ActionTrigger>
-                <PrimaryButton w="24" onClick={() => onSave()}>
-                  Salvar
+                <PrimaryButton w="24" onClick={() => onClickActionButton()}>
+                  {actionLabel}
                 </PrimaryButton>
               </Flex>
             </Dialog.Footer>

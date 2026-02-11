@@ -13,9 +13,18 @@ import { AiOutlinePlus } from "react-icons/ai";
 import ReceiptView from "@/components/molecules/ReceiptView";
 import { usePDF } from "@react-pdf/renderer";
 import { useDevice } from "@/hooks/useDevice";
+import { ButtonMenuItemsType } from "@/components/atoms/ButtonMenu";
+import { MdDelete, MdEdit, MdOutlineRemoveRedEye } from "react-icons/md";
+import ConfirmationModal from "@/components/molecules/ConfirmationModal";
+import { ErrorResponse } from "@/models/ErrorResponse";
 
 const RentPage = () => {
   const { onClose, onOpen, open } = useDisclosure();
+  const {
+    onClose: onCloseDeleteConfirmation,
+    onOpen: onOpenDeleteConfirmation,
+    open: isOpenDeleteConfirmation,
+  } = useDisclosure();
   const { isMobile } = useDevice();
 
   const [rents, setRents] = useState<RentType[]>([]);
@@ -24,6 +33,24 @@ const RentPage = () => {
   const [downloadRequested, setDownloadRequested] = useState(false);
 
   const { loading: pdfLoading, url: pdfUrl } = instance;
+
+  const menuItems: ButtonMenuItemsType<RentType>[] = [
+    {
+      label: "Emitir recibo",
+      action: (rent) => handleGetReceipt(rent),
+      icon: <MdOutlineRemoveRedEye />,
+    },
+    {
+      label: "Editar",
+      action: (rent) => handleOpenEditRent(rent),
+      icon: <MdEdit />,
+    },
+    {
+      label: "Excluir",
+      action: (rent) => handleOpenDeleteConfirmation(rent),
+      icon: <MdDelete />,
+    },
+  ];
 
   const loadRents = async () => {
     try {
@@ -70,6 +97,40 @@ const RentPage = () => {
     setDownloadRequested(true);
   };
 
+  const handleOpenDeleteConfirmation = (rent: RentType) => {
+    setSelectedRent(rent);
+    onOpenDeleteConfirmation();
+  };
+
+  const deleteRent = async (id: string) => {
+    try {
+      if (!id) throw new Error("ID não informado");
+
+      const query = await api.delete(`rents/${id}`);
+      const response = query.data;
+
+      if (response instanceof ErrorResponse) throw response;
+
+      const newRents = rents.filter((rent) => rent.id !== selectedRent?.id);
+
+      setRents(newRents);
+
+      onCloseDeleteConfirmation();
+
+      toaster.create({
+        type: "success",
+        title: "Sucesso",
+        description: response.message,
+      });
+    } catch (error) {
+      toaster.create({
+        type: "error",
+        title: "Erro ao deletar",
+        description: (error as Error).message,
+      });
+    }
+  };
+
   useEffect(() => {
     loadRents().then();
   }, []);
@@ -100,21 +161,23 @@ const RentPage = () => {
       >
         {rents.map((rent) => (
           <GridItem key={rent.id}>
-            <RentCard rent={rent} onEdit={handleOpenEditRent} onClickPreview={handleGetReceipt} />
+            <RentCard rent={rent} menuItens={menuItems} />
           </GridItem>
         ))}
       </Grid>
-      <Fab
-        onClick={() =>
-          toaster.create({ description: "Pode seeer: na minha casa tu senta na pica", title: "Teste", type: "success" })
-        }
-        fontSize="2xl"
-      >
+      <Fab onClick={() => onOpen()} fontSize="2xl">
         <Icon boxSize="8">
           <AiOutlinePlus />
         </Icon>
       </Fab>
       <AddRentModal isOpen={open} onClose={handleCloseModal} onSave={handleSaveRent} rentOnEdit={selectedRent} />
+      <ConfirmationModal
+        actionLabel="Deletar"
+        isOpen={isOpenDeleteConfirmation}
+        onClose={onCloseDeleteConfirmation}
+        message={`Deseja deletar o aluguel de código ${selectedRent?.code ?? ""}`}
+        onClickActionButton={() => deleteRent(selectedRent?.id ?? "")}
+      />
     </PageContainer>
   );
 };

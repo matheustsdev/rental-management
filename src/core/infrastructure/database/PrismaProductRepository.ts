@@ -22,7 +22,10 @@ export class PrismaProductRepository implements IProductRepository {
     const orderByKey = orderBy || "updated_at";
 
     return this.prisma.products.findMany({
-      where,
+      where: {
+        ...where,
+        deleted: false
+      },
       skip,
       take: pageSize,
       orderBy: {
@@ -37,6 +40,7 @@ export class PrismaProductRepository implements IProductRepository {
   async listWithAvailability(searchText: string, startDate: Date, endDate: Date): Promise<ProductAvailabilityType[]> {
     const products = await this.prisma.products.findMany({
       where: {
+        deleted: false,
         OR: [
             {
               reference: {
@@ -58,11 +62,14 @@ export class PrismaProductRepository implements IProductRepository {
       include: {
         categories: true,
         rent_products: {
-            include: {
-              rent: true
-            }
+          where: {
+            deleted: false
+          },
+          include: {
+            rent: true,
           }
         }
+      }
     });
 
     const productWithAvailability = products.map((product): ProductAvailabilityType => {

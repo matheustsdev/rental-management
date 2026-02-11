@@ -361,9 +361,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   };
 
   useEffect(() => {
-    console.log("Rent date >> ", rentDate);
-    console.log("Return date >> ", returnDate);
-
     if (rentDate && returnDate) loadProducts();
   }, [rentDate, returnDate]);
 

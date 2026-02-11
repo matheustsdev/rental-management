@@ -1,43 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/services/prisma";
 import { DefaultResponse } from "@/models/DefaultResponse";
 import { ErrorResponse } from "@/models/ErrorResponse";
-import { RentUpdateWithProductDtoType } from "@/types/entities/RentType";
 import { ServerError } from "@/models/ServerError";
+import { DeleteRentUseCase } from "@/core/application/cases/rent/DeleteRentUseCase";
+import { rentalRepository } from "@/core/infrastructure/repositoriesFactory";
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const body = (await request.json()) as RentUpdateWithProductDtoType;
     const id = (await params).id;
 
-    if (!id) throw new ServerError("É obrigatório informar o ID do aluguel para atualiza-lo", 400);
-
+    if (!id) throw new ServerError("É obrigatório informar o ID do aluguel para deleta-lo", 400);
     
-
-    const updatedRent = await prisma.rents.update({
-      data: body,
-      where: {
-        id: id.toString()
-      },
-      include: {
-          rent_products: {
-            include: {
-              products: true
-            }
-          }
-        }
-    });
-
-    const response = new DefaultResponse(updatedRent, "Aluguel atualizado com sucesso", null, null, null);
+    const useCase = new DeleteRentUseCase(rentalRepository);
+    await useCase.execute(id);
+    
+    const response = new DefaultResponse(null, "Aluguel deletado com sucesso", null, null, null);
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    const apiError = error as ServerError;
-    const errorResponse = new ErrorResponse(apiError);
+    if (error instanceof ServerError) {
+      const errorResponse = new ErrorResponse(error);
+
+      return NextResponse.json(errorResponse);
+    }
 
     return NextResponse.json(
-      errorResponse,
-      { status: errorResponse.errorCode }
+      {
+        error: "Erro ao deletar aluguel",
+        details: error instanceof Error ? error.message : error,
+      },
+      { status: 500 }
     );
   }
 }
