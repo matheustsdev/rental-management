@@ -104,7 +104,12 @@ const RentPage = () => {
           </GridItem>
         ))}
       </Grid>
-      <Fab onClick={onOpen} fontSize="2xl">
+      <Fab
+        onClick={() =>
+          toaster.create({ description: "Pode seeer: na minha casa tu senta na pica", title: "Teste", type: "success" })
+        }
+        fontSize="2xl"
+      >
         <Icon boxSize="8">
           <AiOutlinePlus />
         </Icon>
