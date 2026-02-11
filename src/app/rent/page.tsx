@@ -3,8 +3,8 @@
 import PageContainer from "@/components/molecules/PageContainer";
 import AddRentModal from "@/components/organisms/AddRentModal";
 import { RentType } from "@/types/entities/RentType";
-import { Grid, GridItem, Icon, useDisclosure } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { Flex, Grid, GridItem, Icon, useDisclosure } from "@chakra-ui/react";
+import { useCallback, useEffect, useState } from "react";
 import RentCard from "@/components/molecules/RentCard";
 import { toaster } from "@/components/atoms/Toaster";
 import { api } from "@/services/api";
@@ -12,11 +12,12 @@ import Fab from "@/components/atoms/Fab";
 import { AiOutlinePlus } from "react-icons/ai";
 import ReceiptView from "@/components/molecules/ReceiptView";
 import { usePDF } from "@react-pdf/renderer";
-import { useDevice } from "@/hooks/useDevice";
 import { ButtonMenuItemsType } from "@/components/atoms/ButtonMenu";
 import { MdDelete, MdEdit, MdOutlineRemoveRedEye } from "react-icons/md";
 import ConfirmationModal from "@/components/molecules/ConfirmationModal";
 import { ErrorResponse } from "@/models/ErrorResponse";
+import SearchBar from "@/components/atoms/SearchBar";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const RentPage = () => {
   const { onClose, onOpen, open } = useDisclosure();
@@ -25,12 +26,13 @@ const RentPage = () => {
     onOpen: onOpenDeleteConfirmation,
     open: isOpenDeleteConfirmation,
   } = useDisclosure();
-  const { isMobile } = useDevice();
 
   const [rents, setRents] = useState<RentType[]>([]);
   const [selectedRent, setSelectedRent] = useState<RentType | null>(null);
   const [instance, updateInstance] = usePDF({ document: <></> });
   const [downloadRequested, setDownloadRequested] = useState(false);
+  const [searchText, setSearchText] = useState<string>("");
+  const { value: debounce, isLoading: isLoadingDebounce } = useDebounce(searchText, 300);
 
   const { loading: pdfLoading, url: pdfUrl } = instance;
 
@@ -52,12 +54,15 @@ const RentPage = () => {
     },
   ];
 
-  const loadRents = async () => {
+  const loadRents = async (page: number, searchText: string) => {
     try {
       const rentsListRequest = await api.get("/rents", {
         params: {
           orderBy: "code",
           ascending: false,
+          search: searchText,
+          page,
+          pageSize: 50,
         },
       });
 
@@ -67,7 +72,7 @@ const RentPage = () => {
     } catch (e: unknown) {
       toaster.create({
         type: "error",
-        title: "Erro ao buscar categorias",
+        title: "Erro ao buscar alugueis",
         description: (e as Error).message,
       });
     }
@@ -102,6 +107,20 @@ const RentPage = () => {
     onOpenDeleteConfirmation();
   };
 
+  const handleOnChangeSearchText = (newSearchText: string) => {
+    if (!newSearchText) {
+      setSearchText("");
+
+      return;
+    }
+
+    setSearchText(newSearchText);
+  };
+
+  const handleSearchTextChange = useCallback((text: string) => {
+    loadRents(1, text);
+  }, []);
+
   const deleteRent = async (id: string) => {
     try {
       if (!id) throw new Error("ID não informado");
@@ -132,7 +151,7 @@ const RentPage = () => {
   };
 
   useEffect(() => {
-    loadRents().then();
+    loadRents(1, "").then();
   }, []);
 
   useEffect(() => {
@@ -150,14 +169,26 @@ const RentPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pdfLoading, pdfUrl, downloadRequested]);
 
+  useEffect(() => {
+    handleSearchTextChange(debounce);
+  }, [debounce, handleSearchTextChange]);
+
   return (
     <PageContainer title="Lista de alugueis" flexDir="column" align="center">
+      <Flex w="full" align="flex-start">
+        <SearchBar
+          onChange={(e) => handleOnChangeSearchText(e.target.value)}
+          value={searchText}
+          isLoading={isLoadingDebounce}
+        />
+      </Flex>
       <Grid
         w="full"
+        minH="full"
         templateColumns="repeat(auto-fill, 320px)"
         templateRows="repeat(auto-fill, 240px)"
         gap="8"
-        pb={isMobile ? "40" : "unset"}
+        alignItems="flex-start"
       >
         {rents.map((rent) => (
           <GridItem key={rent.id}>

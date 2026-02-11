@@ -6,6 +6,7 @@ import { RentType } from "@/types/entities/RentType";
 import { formatDate } from "@/utils/formatDate";
 import { Card, Flex } from "@chakra-ui/react";
 import ButtonMenu, { ButtonMenuItemsType } from "../atoms/ButtonMenu";
+import { MdArrowDropDown } from "react-icons/md";
 
 interface IRentCardProps {
   rent: RentType;
@@ -14,7 +15,7 @@ interface IRentCardProps {
 
 const RentCard: React.FC<IRentCardProps> = ({ rent, menuItens }) => {
   return (
-    <Card.Root h="full" p="4" boxShadow="8px 8px 6px -4px rgba(0,0,0,0.20)" bg="terracotta.50">
+    <Card.Root minH="full" w="full" p="4" boxShadow="8px 8px 6px -4px rgba(0,0,0,0.20)" bg="terracotta.50">
       <Card.Header pb="2" fontWeight="bold">
         {Number(rent.code)} - {rent.client_name}
       </Card.Header>
@@ -33,8 +34,9 @@ const RentCard: React.FC<IRentCardProps> = ({ rent, menuItens }) => {
       </Card.Body>
       <Card.Footer w="full">
         <Flex w="full" pt="4" align="center" justify="flex-end" gap="4">
-          <ButtonMenu items={menuItens} actionData={rent}>
+          <ButtonMenu items={menuItens} actionData={rent} justifyContent="space-between" gap="4">
             Ver mais
+            <MdArrowDropDown />
           </ButtonMenu>
         </Flex>
       </Card.Footer>

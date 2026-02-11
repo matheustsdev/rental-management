@@ -13,8 +13,7 @@ export async function GET(request: NextRequest) {
 
     const searchParams = request.nextUrl.searchParams;
 
-    const where = searchParams.get("where") ? JSON.parse(searchParams.get("where")!) : undefined;
-
+    const search = searchParams.get("search");
     const page = Number(searchParams.get("page") || 1);
     const pageSize = Number(searchParams.get("pageSize") || 10);
     const orderBy = searchParams.get("orderBy") as keyof RentType | undefined;
@@ -22,7 +21,28 @@ export async function GET(request: NextRequest) {
 
     const useCase = new ListRentUseCase(rentalRepository);
     const { data, count } = await useCase.execute({
-      where,
+      where: {
+        OR: [
+          {
+            client_name: {
+              contains: search ?? "",
+              mode: "insensitive"
+            },
+          },
+          {
+            phone: {
+              contains: search ?? "",
+              mode: "insensitive"
+            }
+          },
+          {
+            address: {
+              contains: search ?? "",
+              mode: "insensitive"
+            }
+          }
+        ]
+      },
       page,
       pageSize,
       orderBy,
