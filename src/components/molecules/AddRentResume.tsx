@@ -42,8 +42,8 @@ const AddRentResume: React.FC = () => {
       <ResumeItem prop="Valor a pagar" value={new Currency(formValues.finalTotalValue).toString()} />
       <ResumeItem prop="Sinal" value={new Currency(formValues.signal).toString()} />
       <ResumeItem prop="Restante" value={new Currency(formValues.remainingValue).toString()} />
-      <ResumeItem prop="Observação para recibo" value={formValues?.receiptObservations ?? ""} />
       <ResumeItem prop="Observação interna" value={formValues?.internalObservations ?? ""} />
+      <ResumeItem prop="Observação para recibo" value={formValues?.receiptObservations ?? ""} />
       <Flex flexDir="column" align="flex-start" pt="4" gap="2">
         {selectedProducts.map((product) => (
           <ProductResumeItem key={product.id} productAvailability={product} />

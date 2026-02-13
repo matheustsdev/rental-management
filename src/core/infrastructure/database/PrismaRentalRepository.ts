@@ -1,8 +1,10 @@
 // src/core/infrastructure/prisma/PrismaRentalRepository.ts
-import { Prisma, PrismaClient } from "@prisma/client";
+import { ERentStatus, Prisma, PrismaClient } from "@prisma/client";
 import { IRentalRepository, RentalListInput } from "@/core/domain/repositories/IRentalRepository";
 import { Rental } from "../../domain/entities/Rental";
 import { RentType } from "@/types/entities/RentType";
+import { RentReturnDTO } from "@/core/application/cases/rent/RentReturnUseCase";
+import { getUTCDateFromInput } from "@/utils/getUTCDateFromInput";
 
 export class PrismaRentalRepository implements IRentalRepository {
   constructor(private prisma: PrismaClient) { }
@@ -60,6 +62,44 @@ export class PrismaRentalRepository implements IRentalRepository {
     });
       
     return updatedRent;
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.$transaction([
+      this.prisma.rents.update({
+        where: { id },
+        data: {
+          deleted: true,
+          deleted_at: new Date(),
+        },
+      }),
+      this.prisma.rent_products.updateMany({
+        where: { rent_id: id },
+        data: {
+          deleted: true,
+          deleted_at: new Date(),
+        },
+      }),
+    ]);
+  }
+
+  async find(id: string) {
+    const rent = await this.prisma.rents.findUnique({
+      where: { id },
+      include: {
+        rent_products: {
+          include: {
+            products: {
+              include: {
+                categories: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return rent;
   }
 
   async deleteRentProducts(rentId: string): Promise<void> {
@@ -125,22 +165,40 @@ export class PrismaRentalRepository implements IRentalRepository {
     return this.prisma.rents.count({ where });
   }
 
-  async delete(id: string): Promise<void> {
-    await this.prisma.$transaction([
-      this.prisma.rents.update({
-        where: { id },
+  async returnRent(rentReturn: RentReturnDTO): Promise<RentType> {
+    const { id, rentProducts } = rentReturn;
+    const returnDate = getUTCDateFromInput(new Date());
+
+    const updateRentProductsQueries = rentProducts.map((rp) =>
+      this.prisma.rent_products.update({
+        where: { id: rp.id },
         data: {
-          deleted: true,
-          deleted_at: new Date(),
+          real_return_date: returnDate,
+          real_return_buffer_days: rp.realBuffer,
         },
-      }),
-      this.prisma.rent_products.updateMany({
-        where: { rent_id: id },
-        data: {
-          deleted: true,
-          deleted_at: new Date(),
+      })
+    );
+
+    const updateRentQuery = this.prisma.rents.update({
+      where: { id },
+      data: {
+        real_return_date: returnDate,
+        status: ERentStatus.FINISHED
+      },
+      include: {
+        rent_products: {
+          include: {
+            products: true,
+          },
         },
-      }),
+      },
+    });
+
+    const results = await this.prisma.$transaction([
+      ...updateRentProductsQueries,
+      updateRentQuery,
     ]);
+
+    return results[results.length - 1] as RentType;
   }
 }

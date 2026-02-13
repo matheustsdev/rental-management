@@ -13,11 +13,12 @@ import { AiOutlinePlus } from "react-icons/ai";
 import ReceiptView from "@/components/molecules/ReceiptView";
 import { usePDF } from "@react-pdf/renderer";
 import { ButtonMenuItemsType } from "@/components/atoms/ButtonMenu";
-import { MdDelete, MdEdit, MdOutlineRemoveRedEye } from "react-icons/md";
+import { MdDelete, MdEdit, MdOutlineRemoveRedEye, MdCheck } from "react-icons/md";
 import ConfirmationModal from "@/components/molecules/ConfirmationModal";
 import { ErrorResponse } from "@/models/ErrorResponse";
 import SearchBar from "@/components/atoms/SearchBar";
 import { useDebounce } from "@/hooks/useDebounce";
+import RentReturnModal from "@/components/organisms/RentReturnModal";
 
 const RentPage = () => {
   const { onClose, onOpen, open } = useDisclosure();
@@ -25,6 +26,11 @@ const RentPage = () => {
     onClose: onCloseDeleteConfirmation,
     onOpen: onOpenDeleteConfirmation,
     open: isOpenDeleteConfirmation,
+  } = useDisclosure();
+  const {
+    onClose: onCloseRentReturnModal,
+    onOpen: onOpenRentReturnModal,
+    open: isOpenRentReturnModal,
   } = useDisclosure();
 
   const [rents, setRents] = useState<RentType[]>([]);
@@ -51,6 +57,11 @@ const RentPage = () => {
       label: "Excluir",
       action: (rent) => handleOpenDeleteConfirmation(rent),
       icon: <MdDelete />,
+    },
+    {
+      label: "Devolução",
+      action: (rent) => handleOpenRentReturnModal(rent),
+      icon: <MdCheck />,
     },
   ];
 
@@ -115,6 +126,11 @@ const RentPage = () => {
     }
 
     setSearchText(newSearchText);
+  };
+
+  const handleOpenRentReturnModal = (rent: RentType) => {
+    setSelectedRent(rent);
+    onOpenRentReturnModal();
   };
 
   const handleSearchTextChange = useCallback((text: string) => {
@@ -202,6 +218,9 @@ const RentPage = () => {
         </Icon>
       </Fab>
       <AddRentModal isOpen={open} onClose={handleCloseModal} onSave={handleSaveRent} rentOnEdit={selectedRent} />
+      {selectedRent && (
+        <RentReturnModal rentOnEdit={selectedRent} isOpen={isOpenRentReturnModal} onClose={onCloseRentReturnModal} />
+      )}
       <ConfirmationModal
         actionLabel="Deletar"
         isOpen={isOpenDeleteConfirmation}

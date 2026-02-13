@@ -18,4 +18,6 @@ export interface IRentalRepository {
   count(where?: Prisma.rentsWhereInput): Promise<number>;
   list(params: RentalListInput): Promise<RentType[]>;
   delete(id: string): Promise<void>;
+  find(id: string): Promise<RentType | null>;
+  returnRent(rentReturn: RentReturnDTO): Promise<RentType>
 }

@@ -41,8 +41,8 @@ model rent_products {
   product_price             Decimal       @db.Decimal(10, 2)
   product_description       String
   created_at                DateTime?     @default(now()) @db.Timestamptz(6)
-  actual_return_buffer_days Int?
-  actual_return_date        DateTime?     @db.Date
+  real_return_buffer_days Int?
+  real_return_date        DateTime?     @db.Date
   bust                      Decimal?      @db.Decimal
   waist                     Decimal?      @db.Decimal
   hip                       Decimal?      @db.Decimal
@@ -63,6 +63,7 @@ model rent_products {
 
 model rents {
   id                    String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  status                ERentStatus         @default(SCHEDULED)
   created_at            DateTime?           @default(now()) @db.Timestamptz(6)
   rent_date             DateTime            @db.Date
   return_date           DateTime            @db.Date
@@ -80,6 +81,7 @@ model rents {
   internal_observations String?
   receipt_observations  String?
   code                  Decimal             @default(dbgenerated("nextval('rents_code_seq'::regclass)")) @db.Decimal
+  real_return_date      DateTime?           @db.Date
   rent_products         rent_products[]
 
   @@index([client_name], map: "idx_rents_client_name")
@@ -98,6 +100,28 @@ enum discount_type_enum {
 }
 
 enum measures_type {
+  SUIT
+  DRESS
+}
+
+enum ERentStatus {
+  FINISHED
+  SCHEDULED
+  IN_PROGRESS
+}
+
+enum EAvailabilityStatus {
+  AVAILABLE
+  UNAVAILABLE
+  BUFFER_OCCUPIED
+}
+
+enum EDiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+enum EMeasuresType {
   SUIT
   DRESS
 }

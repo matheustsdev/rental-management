@@ -49,7 +49,7 @@ export class UpdateRentUseCase {
     if (rent_products) {
       await this.rentRepository.deleteRentProducts(id);
 
-      const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentsInput = {
+      const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentInput = {
         createMany: {
           data: rent_products.map((rp) => ({
             product_id: rp.product_id,

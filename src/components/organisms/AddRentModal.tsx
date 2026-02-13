@@ -1,9 +1,9 @@
 "use client";
 
-import { CloseButton, Dialog, Portal, Flex, Spinner, Checkbox, Steps } from "@chakra-ui/react";
+import { Dialog, Flex, Spinner, Checkbox, Steps } from "@chakra-ui/react";
 import { z, ZodRawShape } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toaster } from "@/components/atoms/Toaster";
 import { api } from "@/services/api";
 import { ReactElement, useEffect, useRef, useState } from "react";
@@ -19,6 +19,7 @@ import { EDiscountTypes } from "@/constants/EDiscountType";
 import { EMeasureType } from "@/constants/EMeasureType";
 import { RentProductSchema } from "@/constants/schemas/RentProductSchema";
 import { getUTCDateFromInput } from "@/utils/getUTCDateFromInput";
+import BaseFormModal from "../molecules/BaseFormModal";
 
 const productSelectorSchema = z.object({
   rentDate: z.union([
@@ -391,89 +392,64 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     setValue("productIds", selectedRentProductIds);
   }, [rentOnEdit]);
 
-  useEffect(() => {
-    console.log("Erros >> ", methods.formState.errors);
-  }, [methods]);
-
   return (
-    <>
-      <FormProvider {...methods}>
-        <Dialog.Root lazyMount open={isOpen} onOpenChange={() => handleOnClose()} placement="center">
-          <Portal>
-            <Dialog.Backdrop />
-            <Dialog.Positioner p="4">
-              <Dialog.Content
-                as="form"
-                p="4"
-                bg="body.400"
-                color="black"
-                onSubmit={methods.handleSubmit(onSubmit)}
-                ref={contentRef}
-                h="75vh"
-                overflowY="auto"
-              >
-                <Dialog.Header py="4">
-                  <Dialog.Title>Adicionar aluguel</Dialog.Title>
-                </Dialog.Header>
-                <Dialog.Body>
-                  <Steps.Root step={currentStep} onStepChange={(e) => handleUpdateStep(e.step)} count={steps.length}>
-                    <Steps.List>
-                      {steps.map((step, index) => (
-                        <Steps.Item key={index} index={index} title={step.title}>
-                          <Steps.Trigger type="button">
-                            <Steps.Indicator />
-                            <Steps.Title>{step.title}</Steps.Title>
-                          </Steps.Trigger>
-                          <Steps.Separator />
-                        </Steps.Item>
-                      ))}
-                    </Steps.List>
+    <BaseFormModal
+      contentRef={contentRef}
+      isOpen={isOpen}
+      onClose={handleOnClose}
+      methods={methods}
+      onSubmit={methods.handleSubmit(onSubmit)}
+    >
+      <Dialog.Header py="4">
+        <Dialog.Title>Adicionar aluguel</Dialog.Title>
+      </Dialog.Header>
+      <Dialog.Body>
+        <Steps.Root step={currentStep} onStepChange={(e) => handleUpdateStep(e.step)} count={steps.length}>
+          <Steps.List>
+            {steps.map((step, index) => (
+              <Steps.Item key={index} index={index} title={step.title}>
+                <Steps.Trigger type="button">
+                  <Steps.Indicator />
+                  <Steps.Title>{step.title}</Steps.Title>
+                </Steps.Trigger>
+                <Steps.Separator />
+              </Steps.Item>
+            ))}
+          </Steps.List>
 
-                    {steps.map((step, index) => (
-                      <Steps.Content key={index} index={index}>
-                        {step.description}
-                      </Steps.Content>
-                    ))}
-                  </Steps.Root>
-                </Dialog.Body>
-                <Dialog.Footer
-                  display="flex"
-                  alignItems="center"
-                  justifyContent={rentOnEdit ? "flex-end" : "space-between"}
-                  pt="8"
-                >
-                  <Checkbox.Root
-                    checked={isInfiniteAdd}
-                    onCheckedChange={(e) => setIsInfiniteAdd(!!e.checked)}
-                    variant="outline"
-                  >
-                    <Checkbox.HiddenInput />
-                    <Checkbox.Control />
-                    <Checkbox.Label>Continuar adicionando</Checkbox.Label>
-                  </Checkbox.Root>
-                  <Flex gap="4">
-                    <SecondaryButton
-                      variant="outline"
-                      type="button"
-                      minW="24"
-                      onClick={() => handlePreviousStep(currentStep - 1)}
-                    >
-                      Voltar
-                    </SecondaryButton>
-                    <PrimaryButton w="24" type="button" disabled={isLoading} onClick={handleNextStep}>
-                      {handleNextButtonText()}
-                    </PrimaryButton>
-                  </Flex>
-                </Dialog.Footer>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton size="sm" />
-                </Dialog.CloseTrigger>
-              </Dialog.Content>
-            </Dialog.Positioner>
-          </Portal>
-        </Dialog.Root>
-      </FormProvider>
-    </>
+          {steps.map((step, index) => (
+            <Steps.Content key={index} index={index}>
+              {step.description}
+            </Steps.Content>
+          ))}
+        </Steps.Root>
+      </Dialog.Body>
+      <Dialog.Footer
+        display="flex"
+        alignItems="center"
+        justifyContent={rentOnEdit ? "flex-end" : "space-between"}
+        pt="8"
+      >
+        <Checkbox.Root checked={isInfiniteAdd} onCheckedChange={(e) => setIsInfiniteAdd(!!e.checked)} variant="outline">
+          <Checkbox.HiddenInput />
+          <Checkbox.Control />
+          <Checkbox.Label>Continuar adicionando</Checkbox.Label>
+        </Checkbox.Root>
+        <Flex gap="4">
+          <SecondaryButton
+            variant="outline"
+            type="button"
+            minW="24"
+            onClick={() => handlePreviousStep(currentStep - 1)}
+          >
+            Voltar
+          </SecondaryButton>
+          <PrimaryButton w="24" type="button" disabled={isLoading} onClick={handleNextStep}>
+            {handleNextButtonText()}
+          </PrimaryButton>
+        </Flex>
+      </Dialog.Footer>
+    </BaseFormModal>
   );
 };
 
