@@ -1,5 +1,5 @@
 import SecondaryButton from "@/components/atoms/SecondaryButton";
-import Currency from "@/models/Currency";
+import Currency from "@/utils/models/Currency";
 import { ProductType } from "@/types/entities/ProductType";
 import { Card, Flex, Text } from "@chakra-ui/react";
 

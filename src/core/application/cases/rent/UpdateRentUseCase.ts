@@ -2,7 +2,7 @@ import { IRentalRepository as IRentRepository } from "@/core/domain/repositories
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { RentUpdateWithProductDtoType, RentType } from "@/types/entities/RentType";
 import { Prisma } from "@prisma/client";
-import { ServerError } from "@/models/ServerError";
+import { ServerError } from "@/utils/models/ServerError";
 
 export class UpdateRentUseCase {
   constructor(

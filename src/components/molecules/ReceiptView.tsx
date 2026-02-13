@@ -1,7 +1,7 @@
 import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { RentType } from "@/types/entities/RentType";
-import Currency from "@/models/Currency";
+import Currency from "@/utils/models/Currency";
 import { formatDate } from "@/utils/formatDate";
 
 const styles = StyleSheet.create({

@@ -15,7 +15,7 @@ import { usePDF } from "@react-pdf/renderer";
 import { ButtonMenuItemsType } from "@/components/atoms/ButtonMenu";
 import { MdDelete, MdEdit, MdOutlineRemoveRedEye, MdCheck } from "react-icons/md";
 import ConfirmationModal from "@/components/molecules/ConfirmationModal";
-import { ErrorResponse } from "@/models/ErrorResponse";
+import { ErrorResponse } from "@/utils/models/ErrorResponse";
 import SearchBar from "@/components/atoms/SearchBar";
 import { useDebounce } from "@/hooks/useDebounce";
 import RentReturnModal from "@/components/organisms/RentReturnModal";
@@ -201,9 +201,10 @@ const RentPage = () => {
       <Grid
         w="full"
         minH="full"
-        templateColumns="repeat(auto-fill, 320px)"
+        templateColumns={{ base: "repeat(auto-fill, 100%)", lg: "repeat(auto-fill, 400px)" }}
         templateRows="repeat(auto-fill, 240px)"
-        gap="8"
+        columnGap="8"
+        rowGap="2"
         alignItems="flex-start"
       >
         {rents.map((rent) => (
@@ -219,7 +220,12 @@ const RentPage = () => {
       </Fab>
       <AddRentModal isOpen={open} onClose={handleCloseModal} onSave={handleSaveRent} rentOnEdit={selectedRent} />
       {selectedRent && (
-        <RentReturnModal rentOnEdit={selectedRent} isOpen={isOpenRentReturnModal} onClose={onCloseRentReturnModal} />
+        <RentReturnModal
+          rentOnEdit={selectedRent}
+          isOpen={isOpenRentReturnModal}
+          onClose={onCloseRentReturnModal}
+          onSave={() => {}}
+        />
       )}
       <ConfirmationModal
         actionLabel="Deletar"

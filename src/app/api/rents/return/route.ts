@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DefaultResponse } from "@/models/DefaultResponse";
-import { ErrorResponse } from "@/models/ErrorResponse";
-import { ServerError } from "@/models/ServerError";
+import { DefaultResponse } from "@/utils/models/DefaultResponse";
+import { ErrorResponse } from "@/utils/models/ErrorResponse";
+import { ServerError } from "@/utils/models/ServerError";
 import { rentalRepository } from "@/core/infrastructure/repositoriesFactory";
 import { RentReturnDTO, RentReturnUseCase } from "@/core/application/cases/rent/RentReturnUseCase";
 

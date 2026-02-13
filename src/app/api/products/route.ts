@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { TableRow } from "@/types/EntityType";
-import { DefaultResponse } from "@/models/DefaultResponse";
-import { ErrorResponse } from "@/models/ErrorResponse";
+import { DefaultResponse } from "@/utils/models/DefaultResponse";
+import { ErrorResponse } from "@/utils/models/ErrorResponse";
 import { ListProductUseCase, ListProductUseCaseInputType } from "@/core/application/cases/product/ListProductUseCase";
 import { productRepository } from "@/core/infrastructure/repositoriesFactory";
-import { ServerError } from "@/models/ServerError";
+import { ServerError } from "@/utils/models/ServerError";
 import { ProductInsertDtoType, ProductUpdateDtoType } from "@/types/entities/ProductType";
 import { CreateProductlUseCase } from "@/core/application/cases/product/CreateProductUseCase";
 import { UpdateProductUseCase } from "@/core/application/cases/product/UpdateProductUseCase";

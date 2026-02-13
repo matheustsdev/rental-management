@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/services/prisma";
-import { DefaultResponse } from "@/models/DefaultResponse";
-import { ErrorResponse } from "@/models/ErrorResponse";
+import { DefaultResponse } from "@/utils/models/DefaultResponse";
+import { ErrorResponse } from "@/utils/models/ErrorResponse";
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

@@ -6,7 +6,7 @@ import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { Flex } from "@chakra-ui/react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { formatDate } from "@/utils/formatDate";
-import Currency from "@/models/Currency";
+import Currency from "@/utils/models/Currency";
 import { useEffect, useState } from "react";
 import { RentFormType } from "../organisms/AddRentModal";
 import { getUTCDateFromInput } from "@/utils/getUTCDateFromInput";

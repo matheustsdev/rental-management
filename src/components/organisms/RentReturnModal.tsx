@@ -13,7 +13,7 @@ import { Prisma } from "@prisma/client";
 import PrimaryButton from "../atoms/PrimaryButton";
 import { toaster } from "../atoms/Toaster";
 import TextRow from "../atoms/TextRow";
-import Currency from "@/models/Currency";
+import Currency from "@/utils/models/Currency";
 import { RentReturnDTO } from "@/core/application/cases/rent/RentReturnUseCase";
 
 const schema = z.object({
@@ -132,7 +132,7 @@ const RentReturnModal: React.FC<IRentReturnModalProps> = ({ isOpen, onClose, onS
   };
 
   useEffect(() => {
-    if (rentOnEdit) loadRent(rentOnEdit.id);
+    if (rentOnEdit) loadRent(rentOnEdit.id).then();
   }, [rentOnEdit]);
 
   return (

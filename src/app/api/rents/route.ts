@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RentInsertWithProductDtoType, RentUpdateWithProductDtoType, RentType } from "@/types/entities/RentType";
-import { DefaultResponse } from "@/models/DefaultResponse";
-import { ErrorResponse } from "@/models/ErrorResponse";
+import { DefaultResponse } from "@/utils/models/DefaultResponse";
+import { ErrorResponse } from "@/utils/models/ErrorResponse";
 import { CreateRentUseCase } from "@/core/application/cases/rent/CreateRentUseCase";
 import { productRepository, rentalRepository } from "@/core/infrastructure/repositoriesFactory";
 import { ListRentUseCase } from "@/core/application/cases/rent/ListRentUseCase";
 import { UpdateRentUseCase } from "@/core/application/cases/rent/UpdateRentUseCase";
-import { ServerError } from "@/models/ServerError";
+import { ServerError } from "@/utils/models/ServerError";
 
 export async function GET(request: NextRequest) {
   try {

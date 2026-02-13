@@ -3,7 +3,7 @@
 import { Flex, Status, Text } from "@chakra-ui/react";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
-import Currency from "@/models/Currency";
+import Currency from "@/utils/models/Currency";
 
 interface IProductResumeItemProps {
   productAvailability: ProductAvailabilityType;

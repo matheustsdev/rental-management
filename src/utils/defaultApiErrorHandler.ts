@@ -1,5 +1,5 @@
-import { ErrorResponse } from "@/models/ErrorResponse";
-import { ServerError } from "@/models/ServerError";
+import { ErrorResponse } from "@/utils/models/ErrorResponse";
+import { ServerError } from "@/utils/models/ServerError";
 import { NextResponse } from "next/server";
 
 export function defaultApiErrorHandler(error: unknown) {

@@ -1,5 +1,5 @@
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
-import { ServerError } from "@/models/ServerError";
+import { ServerError } from "@/utils/models/ServerError";
 import { ProductType, ProductUpdateDtoType } from "@/types/entities/ProductType";
 
 export class UpdateProductUseCase {

@@ -1,4 +1,4 @@
-import { DefaultResponse } from "@/models/DefaultResponse";
+import { DefaultResponse } from "@/utils/models/DefaultResponse";
 
 export const defaultInitialActionValue: DefaultResponse<null> = {
     data: null,

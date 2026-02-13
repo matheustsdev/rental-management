@@ -3,7 +3,7 @@
 import { Flex, Text, Checkbox, Status } from "@chakra-ui/react";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
-import Currency from "@/models/Currency";
+import Currency from "@/utils/models/Currency";
 import { availability_status } from "@prisma/client";
 
 interface IProductSelectorItemProps {

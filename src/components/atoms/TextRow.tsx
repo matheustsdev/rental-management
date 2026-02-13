@@ -1,15 +1,18 @@
 "use client";
 
-import { Flex, Text } from "@chakra-ui/react";
+import { Flex, Text, Icon, FlexProps, IconProps } from "@chakra-ui/react";
 
-interface ITextRow {
+interface ITextRow extends Omit<FlexProps, "gap"> {
+  icon?: React.ReactNode;
   label?: string;
   value?: string;
+  iconSize?: IconProps["size"];
 }
 
-const TextRow: React.FC<ITextRow> = ({ label, value }) => {
+const TextRow: React.FC<ITextRow> = ({ icon, label, value, iconSize, ...rest }) => {
   return (
-    <Flex gap="1">
+    <Flex gap="1" align="flex-end" {...rest}>
+      {icon && <Icon size={iconSize ?? "lg"}>{icon}</Icon>}
       {label && <Text fontWeight="bold">{label}: </Text>}
       <Text>{value ?? ""}</Text>
     </Flex>

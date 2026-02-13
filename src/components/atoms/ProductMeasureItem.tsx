@@ -6,7 +6,7 @@ import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import { measureFieldsLabels } from "@/constants/MeasureFields";
 import InputField from "./InputField";
 import { Path, useFormContext, useWatch } from "react-hook-form";
-import Currency from "@/models/Currency";
+import Currency from "@/utils/models/Currency";
 import { RentFormType } from "../organisms/AddRentModal";
 
 interface IProductMeasureItemProps {
