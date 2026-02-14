@@ -75,7 +75,7 @@ export class PrismaProductRepository implements IProductRepository {
     const productWithAvailability = products.map((product): ProductAvailabilityType => {
       const rentsDateBuferred = product.rent_products.map((rentProduct) => {
         const defaultBuffer = product.categories?.post_return_buffer_days ?? 0;
-        const realBuffer = rentProduct.actual_return_buffer_days ?? defaultBuffer;
+        const realBuffer = rentProduct.real_return_buffer_days ?? defaultBuffer;
         const rent = rentProduct.rent;
         const realReturnDate = addDays(new Date(rent.return_date), realBuffer);
 

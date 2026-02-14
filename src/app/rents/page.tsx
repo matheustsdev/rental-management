@@ -18,6 +18,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import RentReturnModal from "@/components/organisms/RentReturnModal";
 import { ERentStatus } from "@prisma/client";
 import { FaWhatsapp } from "react-icons/fa";
+import dynamic from "next/dynamic";
 
 const RentPage = () => {
   const { onClose, onOpen, open } = useDisclosure();
@@ -264,4 +265,6 @@ const RentPage = () => {
   );
 };
 
-export default RentPage;
+export default dynamic(() => Promise.resolve(RentPage), {
+  ssr: false,
+});

@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { Rental } from "../entities/Rental";
 import { RentType } from "@/types/entities/RentType";
+import { RentReturnDTO } from "@/core/application/cases/rent/RentReturnUseCase";
 
 export type RentalListInput = {
   where?: Prisma.rentsWhereInput;
