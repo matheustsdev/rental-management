@@ -1,11 +1,11 @@
 import { Box, ButtonProps, Menu, Portal } from "@chakra-ui/react";
-import PrimaryButton from "./PrimaryButton";
+import SecondaryButton from "./SecondaryButton";
 
 export type ButtonMenuItemsType<T> = {
   label: string;
   action: (data: T) => void;
   icon?: React.ReactNode;
-  isDisabled?: boolean;
+  getDisabled?: (data: T) => boolean;
 };
 
 type IButtonMenuProps<T> = Omit<ButtonProps, "bg" | "px"> & {
@@ -18,7 +18,7 @@ const ButtonMenu = <T extends object>({ actionData, items, ...rest }: IButtonMen
     <>
       <Menu.Root>
         <Menu.Trigger asChild>
-          <PrimaryButton {...rest} />
+          <SecondaryButton {...rest} />
         </Menu.Trigger>
         <Portal>
           <Menu.Positioner>
@@ -28,8 +28,8 @@ const ButtonMenu = <T extends object>({ actionData, items, ...rest }: IButtonMen
                   value={menuItem.label}
                   onClick={() => menuItem.action(actionData)}
                   key={menuItem.label}
-                  disabled={menuItem.isDisabled}
-                  cursor={menuItem.isDisabled ? "not-allowed" : "pointer"}
+                  disabled={menuItem.getDisabled?.(actionData) ?? false}
+                  cursor={(menuItem.getDisabled?.(actionData) ?? false) ? "not-allowed" : "pointer"}
                   p="2"
                 >
                   {menuItem.icon && menuItem.icon}

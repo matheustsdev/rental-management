@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "npx eslint",
-    "lint-fix": "npx eslint --fix",
+    "lint": "next lint",
+    "lint-fix": "next lint --fix",
     "typegen": "npx supabase gen types typescript --project-id juupzrzsmyojzroedars > ./src/types/supabase.types.ts"
   },
   "dependencies": {

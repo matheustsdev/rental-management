@@ -57,7 +57,7 @@ export function DataTable<T extends { id: string }>({
     <Flex flexDir="column" w="full" align="flex-end" justify="center" h="full">
       <Table.Root size="sm">
         <Table.Header>
-          <Table.Row bg="terracotta.500" py="4" color="white">
+          <Table.Row bg="secondary.500" py="4" color="white">
             {columns.map((column) => (
               <Table.ColumnHeader
                 key={String(column.key)}

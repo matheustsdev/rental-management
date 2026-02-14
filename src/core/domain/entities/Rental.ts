@@ -1,5 +1,5 @@
 // src/core/domain/entities/Rental.ts
-import { addDays, isWithinInterval } from 'date-fns';
+import { addDays } from 'date-fns';
 
 export class Rental {
   constructor(

@@ -3,22 +3,21 @@
 import PageContainer from "@/components/molecules/PageContainer";
 import AddRentModal from "@/components/organisms/AddRentModal";
 import { RentType } from "@/types/entities/RentType";
-import { Flex, Grid, GridItem, Icon, useDisclosure } from "@chakra-ui/react";
+import { Flex, Grid, GridItem, Spinner, Text, useDisclosure } from "@chakra-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import RentCard from "@/components/molecules/RentCard";
 import { toaster } from "@/components/atoms/Toaster";
 import { api } from "@/services/api";
-import Fab from "@/components/atoms/Fab";
-import { AiOutlinePlus } from "react-icons/ai";
 import ReceiptView from "@/components/molecules/ReceiptView";
 import { usePDF } from "@react-pdf/renderer";
 import { ButtonMenuItemsType } from "@/components/atoms/ButtonMenu";
 import { MdDelete, MdEdit, MdOutlineRemoveRedEye, MdCheck } from "react-icons/md";
 import ConfirmationModal from "@/components/molecules/ConfirmationModal";
 import { ErrorResponse } from "@/utils/models/ErrorResponse";
-import SearchBar from "@/components/atoms/SearchBar";
 import { useDebounce } from "@/hooks/useDebounce";
 import RentReturnModal from "@/components/organisms/RentReturnModal";
+import { ERentStatus } from "@prisma/client";
+import { FaWhatsapp } from "react-icons/fa";
 
 const RentPage = () => {
   const { onClose, onOpen, open } = useDisclosure();
@@ -38,6 +37,7 @@ const RentPage = () => {
   const [instance, updateInstance] = usePDF({ document: <></> });
   const [downloadRequested, setDownloadRequested] = useState(false);
   const [searchText, setSearchText] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { value: debounce, isLoading: isLoadingDebounce } = useDebounce(searchText, 300);
 
   const { loading: pdfLoading, url: pdfUrl } = instance;
@@ -62,11 +62,22 @@ const RentPage = () => {
       label: "Devolução",
       action: (rent) => handleOpenRentReturnModal(rent),
       icon: <MdCheck />,
+      getDisabled: (rent) => rent.status === ERentStatus.FINISHED,
+    },
+    {
+      label: "Contatar",
+      action: (rent) => {
+        const phone = rent.phone?.replace(/\D/g, "");
+        if (phone) window.open(`https://wa.me/55${phone}`, "_blank");
+      },
+      icon: <FaWhatsapp />,
     },
   ];
 
   const loadRents = async (page: number, searchText: string) => {
     try {
+      setIsLoading(true);
+
       const rentsListRequest = await api.get("/rents", {
         params: {
           orderBy: "code",
@@ -86,6 +97,8 @@ const RentPage = () => {
         title: "Erro ao buscar alugueis",
         description: (e as Error).message,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -190,34 +203,47 @@ const RentPage = () => {
   }, [debounce, handleSearchTextChange]);
 
   return (
-    <PageContainer title="Lista de alugueis" flexDir="column" align="center">
-      <Flex w="full" align="flex-start">
-        <SearchBar
-          onChange={(e) => handleOnChangeSearchText(e.target.value)}
-          value={searchText}
-          isLoading={isLoadingDebounce}
-        />
-      </Flex>
-      <Grid
-        w="full"
-        minH="full"
-        templateColumns={{ base: "repeat(auto-fill, 100%)", lg: "repeat(auto-fill, 400px)" }}
-        templateRows="repeat(auto-fill, 240px)"
-        columnGap="8"
-        rowGap="2"
-        alignItems="flex-start"
-      >
-        {rents.map((rent) => (
-          <GridItem key={rent.id}>
-            <RentCard rent={rent} menuItens={menuItems} />
-          </GridItem>
-        ))}
-      </Grid>
-      <Fab onClick={() => onOpen()} fontSize="2xl">
-        <Icon boxSize="8">
-          <AiOutlinePlus />
-        </Icon>
-      </Fab>
+    <PageContainer
+      title="Lista de alugueis"
+      flexDir="column"
+      align="center"
+      searchBarProps={{
+        onChange: (e) => handleOnChangeSearchText(e.target.value),
+        value: searchText,
+        isLoading: isLoadingDebounce,
+      }}
+      buttonProps={{
+        onClick: () => onOpen(),
+      }}
+      pb="40"
+      flex="1"
+    >
+      {isLoading ? (
+        <Flex w="full" minH="full" align="center" justify="center" flex="1">
+          <Spinner size="xl" />
+        </Flex>
+      ) : (
+        <Grid
+          w="full"
+          minH="full"
+          templateColumns={{ base: "repeat(auto-fill, 100%)", lg: "repeat(auto-fill, 400px)" }}
+          templateRows="repeat(auto-fill, 240px)"
+          columnGap="8"
+          rowGap="2"
+          alignItems="flex-start"
+        >
+          {rents.length === 0 ? (
+            <Text>Nenhum aluguel encontrado</Text>
+          ) : (
+            rents.map((rent) => (
+              <GridItem key={rent.id}>
+                <RentCard rent={rent} menuItens={menuItems} />
+              </GridItem>
+            ))
+          )}
+        </Grid>
+      )}
+
       <AddRentModal isOpen={open} onClose={handleCloseModal} onSave={handleSaveRent} rentOnEdit={selectedRent} />
       {selectedRent && (
         <RentReturnModal

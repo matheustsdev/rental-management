@@ -24,28 +24,12 @@ const InputField: React.FC<IInputFieldProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (registerOnChange) {
       if (inputProps.type === "number") {
-        const rawValue = e.target.value;
-        const numeric = rawValue === "" ? undefined : parseFloat(rawValue);
-
-        // Clone event changing the target value
-        const syntheticEvent = {
-          ...e,
-          target: { ...e.target, value: numeric },
-        } as unknown as React.ChangeEvent<HTMLInputElement>;
-
         registerOnChange(e);
 
         return;
       }
 
       if (inputProps.type === "date") {
-        const rawValue = e.target.value;
-        const dateValue = rawValue ? new Date(rawValue) : undefined;
-        const syntheticEvent = {
-          ...e,
-          target: { ...e.target, value: dateValue },
-        } as unknown as React.ChangeEvent<HTMLInputElement>;
-
         registerOnChange(e);
 
         return;
