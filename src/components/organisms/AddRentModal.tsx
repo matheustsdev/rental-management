@@ -20,6 +20,7 @@ import { EMeasureType } from "@/constants/EMeasureType";
 import { RentProductSchema } from "@/constants/schemas/RentProductSchema";
 import { getUTCDateFromInput } from "@/utils/getUTCDateFromInput";
 import BaseFormModal from "../molecules/BaseFormModal";
+import { RentProductType } from "@/types/entities/RentProductType";
 
 const productSelectorSchema = z.object({
   rentDate: z.union([
@@ -230,7 +231,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       client_name: clientName,
       discount_type: discountType,
       discount_value: discountValue,
-      rent_products: rentProducts,
+      rent_products: rentProducts as RentProductType[],
       remaining_value: remainingValue,
       rent_date: new Date(rentDate).toISOString(),
       return_date: new Date(returnDate).toISOString(),
