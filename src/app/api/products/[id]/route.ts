@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/services/prisma";
 import { DefaultResponse } from "@/utils/models/DefaultResponse";
 import { ErrorResponse } from "@/utils/models/ErrorResponse";
+import { ServerError } from "@/utils/models/ServerError";
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -19,7 +20,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    const errorResponse = new ErrorResponse("Erro ao atualizar produto.", 500, (error as Error).message);
+    const serverError = new ServerError((error as Error)?.message ?? "Erro ao atualizar produto", 500);
+    const errorResponse = new ErrorResponse(serverError);
 
     return NextResponse.json(
       errorResponse,
