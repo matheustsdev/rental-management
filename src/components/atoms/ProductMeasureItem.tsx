@@ -11,9 +11,10 @@ import { RentFormType } from "../organisms/AddRentModal";
 
 interface IProductMeasureItemProps {
   productAvailability: ProductAvailabilityType;
+  hasError: boolean;
 }
 
-const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailability }) => {
+const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailability, hasError }) => {
   const {
     control,
     register,
@@ -34,7 +35,7 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
       borderWidth={1}
       p={2}
       borderRadius="md"
-      bg="green.50"
+      bg={hasError ? "red.50" : "green.50"}
     >
       <Accordion.ItemTrigger>
         <Flex align="flex-start" justify="space-between" w="full">
@@ -43,6 +44,11 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
             <Text fontSize="sm" color="gray.500">
               Ref: {productAvailability.reference} | {new Currency(productAvailability.price).toString()}
             </Text>
+            {hasError && (
+              <Text color="red.500" fontSize="sm">
+                Verifique os campos de medida
+              </Text>
+            )}
           </Flex>
           <Status.Root
             colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}

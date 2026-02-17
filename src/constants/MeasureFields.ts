@@ -22,15 +22,15 @@ export const measureFieldsSchemas = {
 
 export const measureFieldsLabels = {
     [EMeasureType.DRESS]: {
-        waist: "Cintura",
         bust: "Busto",
+        waist: "Cintura",
         hip: "Quadril",
         shoulder: "Ombro"
     },
     [EMeasureType.SUIT]: {
-        waist: "Cintura",
         sleeve: "Manga",
+        back: "Costa",
         height: "Altura",
-        back: "Costa"
+        waist: "Cintura"
     }
 }

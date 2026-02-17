@@ -7,7 +7,10 @@ import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { RentFormType } from "../organisms/AddRentModal";
 
 const ProductMeasures: React.FC = () => {
-  const { control } = useFormContext<RentFormType>();
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<RentFormType>();
 
   const rentProducts = useWatch({ control, name: "rentProducts" });
   const allAvailableProducts = useWatch({ control, name: "allAvailableProducts" });
@@ -20,9 +23,12 @@ const ProductMeasures: React.FC = () => {
             .filter((availableProduct: ProductAvailabilityType) =>
               rentProducts.some((rentProduct) => rentProduct.product_id === availableProduct.id),
             )
-            .map((rentProduct) => (
-              <ProductMeasureItem key={rentProduct.id} productAvailability={rentProduct} />
-            ))}
+            .map((rentProduct) => {
+              const rentProductId = rentProducts.findIndex((item) => item.product_id === rentProduct.id);
+              const hasError = !!(errors.rentProducts && errors.rentProducts[rentProductId]);
+
+              return <ProductMeasureItem key={rentProduct.id} productAvailability={rentProduct} hasError={hasError} />;
+            })}
         </Accordion.Root>
       </Flex>
     </Flex>
