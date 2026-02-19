@@ -3,7 +3,7 @@
 import ProductResumeItem from "@/components/atoms/ProductResumeItem";
 import ResumeItem from "@/components/atoms/ResumeItem";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
-import { Flex } from "@chakra-ui/react";
+import { Accordion, Flex } from "@chakra-ui/react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { formatDate } from "@/utils/formatDate";
 import Currency from "@/utils/models/Currency";
@@ -44,11 +44,12 @@ const AddRentResume: React.FC = () => {
       <ResumeItem prop="Restante" value={new Currency(formValues.remainingValue).toString()} />
       <ResumeItem prop="Observação interna" value={formValues?.internalObservations ?? ""} />
       <ResumeItem prop="Observação para recibo" value={formValues?.receiptObservations ?? ""} />
-      <Flex flexDir="column" align="flex-start" pt="4" gap="2">
+      <Accordion.Root display="flex" flexDirection="column" gap="4">
         {selectedProducts.map((product) => (
           <ProductResumeItem key={product.id} productAvailability={product} />
         ))}
-      </Flex>
+      </Accordion.Root>
+      <Flex flexDir="column" align="flex-start" pt="4" gap="2"></Flex>
     </Flex>
   );
 };

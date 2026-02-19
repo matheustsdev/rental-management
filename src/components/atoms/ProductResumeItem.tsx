@@ -1,30 +1,88 @@
 "use client";
 
-import { Flex, Status, Text } from "@chakra-ui/react";
+import { Accordion, Flex, Status, Text } from "@chakra-ui/react";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import Currency from "@/utils/models/Currency";
+import { Path, useFormContext, useWatch } from "react-hook-form";
+import { RentFormType } from "../organisms/AddRentModal";
+import { measureFieldsLabels } from "@/constants/MeasureFields";
+import DefaultInput from "./DefaultInput";
 
 interface IProductResumeItemProps {
   productAvailability: ProductAvailabilityType;
 }
 
 const ProductResumeItem: React.FC<IProductResumeItemProps> = ({ productAvailability }) => {
+  const {
+    getValues,
+    control,
+    formState: { errors },
+  } = useFormContext<RentFormType>();
+
+  const mType = productAvailability.categories?.measure_type;
+  const labels = mType ? measureFieldsLabels[mType] : measureFieldsLabels.DRESS;
+
+  const rentProducts = useWatch({ control, name: "rentProducts" });
+
   return (
-    <Flex key={productAvailability.id} w="full" borderWidth={1} p={2} borderRadius="md" bg="green.50">
-      <Flex flexDir="column" flex={1}>
-        <Text fontWeight="bold">{productAvailability.description}</Text>
-        <Text fontSize="sm" color="gray.500">
-          Ref: {productAvailability.reference} | {new Currency(productAvailability.price).toString()}
-        </Text>
-      </Flex>
-      <Status.Root colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}>
-        <Text fontSize="xs">
-          {productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "Disponível" : "Alugado"}
-        </Text>
-        <Status.Indicator />
-      </Status.Root>
-    </Flex>
+    <Accordion.Item
+      display="flex"
+      flexDir="column"
+      value={productAvailability.id}
+      w="full"
+      borderWidth={1}
+      p={2}
+      borderRadius="md"
+      bg="green.50"
+    >
+      <Accordion.ItemTrigger>
+        <Flex align="flex-start" justify="space-between" w="full">
+          <Flex flexDir="column">
+            <Text fontWeight="bold">{productAvailability.description}</Text>
+            <Text fontSize="sm" color="gray.500">
+              Ref: {productAvailability.reference} | {new Currency(productAvailability.price).toString()}
+            </Text>
+          </Flex>
+          <Status.Root
+            colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}
+          >
+            <Text fontSize="xs">
+              {productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "Disponível" : "Alugado"}
+            </Text>
+            <Status.Indicator />
+          </Status.Root>
+        </Flex>
+      </Accordion.ItemTrigger>
+      <Accordion.ItemContent>
+        <Flex w="full" gap="4" pt="2">
+          {Object.entries(labels).map(([field, label]) => {
+            const productIndex = rentProducts.findIndex((item) => productAvailability.id === item.product_id);
+
+            const name = `rentProducts.${productIndex}.${field}` as Path<RentFormType>;
+
+            const fieldName = field as keyof typeof labels;
+
+            const inputError =
+              errors.rentProducts && errors.rentProducts[productIndex]
+                ? errors.rentProducts[productIndex][fieldName]
+                : undefined;
+
+            return (
+              <DefaultInput
+                key={`${name}-resume`}
+                label={label}
+                value={getValues(name)}
+                type="number"
+                step={0.1}
+                error={inputError}
+                disabled
+              />
+            );
+          })}
+        </Flex>
+      </Accordion.ItemContent>
+    </Accordion.Item>
   );
 };
 
