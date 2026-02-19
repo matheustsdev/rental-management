@@ -358,6 +358,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
 
   const handleOnClose = () => {
     methods.reset();
+    setCurrentStep(0);
 
     onClose();
   };

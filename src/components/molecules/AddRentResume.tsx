@@ -43,7 +43,7 @@ const AddRentResume: React.FC = () => {
       <ResumeItem prop="Sinal" value={new Currency(formValues.signal).toString()} />
       <ResumeItem prop="Restante" value={new Currency(formValues.remainingValue).toString()} />
       <ResumeItem prop="Observação interna" value={formValues?.internalObservations ?? ""} />
-      <ResumeItem prop="Observação para recibo" value={formValues?.receiptObservations ?? ""} />
+      <ResumeItem prop="Observação para recibo" value={formValues?.receiptObservations ?? ""} mb="8" />
       <Accordion.Root display="flex" flexDirection="column" gap="4">
         {selectedProducts.map((product) => (
           <ProductResumeItem key={product.id} productAvailability={product} />
