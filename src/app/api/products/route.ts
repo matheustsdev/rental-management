@@ -13,29 +13,14 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
 
-    const search = searchParams.get("search");
+    const search = searchParams.get("search") ?? undefined;
     const page = Number(searchParams.get("page") || 1);
     const pageSize = Number(searchParams.get("pageSize") || 10);
     const orderBy = searchParams.get("orderBy") as keyof TableRow<"products"> | undefined;
     const ascending = searchParams.get("ascending") !== "false";
 
     const listUseCaseInput: ListProductUseCaseInputType = {
-      where: {
-          OR: [
-            {
-              reference: {
-                contains: search ?? "",
-                mode: "insensitive"
-              },
-            },
-            {
-              description: {
-                contains: search ?? "",
-                mode: "insensitive"
-              }
-            }
-          ]
-        },
+      search,
       page,
       pageSize,
       orderBy,

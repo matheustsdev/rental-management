@@ -25,27 +25,59 @@ export class PrismaRentalRepository implements IRentalRepository {
   }
 
   async list(params: RentalListInput): Promise<RentType[]> {
-    const { where, orderBy, ascending, page = 1, pageSize = 10 } = params;
+    const { search, orderBy, ascending, page = 1, pageSize = 10 } = params;
     const skip = (page - 1) * pageSize;
     const orderDirection = ascending ? "asc" : "desc";
     const orderByKey = orderBy || "updated_at";
 
+    if (!search) {
+      return this.prisma.rents.findMany({
+            where: {
+              deleted: false,
+            },
+            skip,
+            take: pageSize,
+            orderBy: {
+              [orderByKey]: orderDirection,
+            },
+            include: {
+              rent_products: {
+                include: { products: true },
+              },
+            },
+      });
+    }
+
+    const searchTerm = `%${search}%`;
+    const matchedRents = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM rents
+      WHERE (
+        unaccent("client_name") ILIKE unaccent(${searchTerm})
+        OR unaccent("address") ILIKE unaccent(${searchTerm})
+        OR unaccent("phone") ILIKE unaccent(${searchTerm})
+      )
+      AND "deleted" = false
+    `;
+
+    const ids = matchedRents.map((rent) => rent.id);
+
     return this.prisma.rents.findMany({
-      where: {
-        ...where,
-        deleted: false,
-      },
-      skip,
-      take: pageSize,
-      orderBy: {
-        [orderByKey]: orderDirection,
-      },
-      include: {
-        rent_products: {
-          include: { products: true },
-        },
-      },
-    });
+            where: {
+              id: { in: ids },
+            },
+            skip,
+            take: pageSize,
+            orderBy: {
+              [orderByKey]: orderDirection,
+            },
+            include: {
+              rent_products: {
+                include: { products: true },
+              },
+            },
+      });
+
+    
   }
 
   async update(id: string, data: Prisma.rentsUpdateInput): Promise<RentType> {

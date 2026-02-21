@@ -16,26 +16,48 @@ export class PrismaProductRepository implements IProductRepository {
   }
 
   async list(params: ProductListInput): Promise<ProductType[]> {
-    const { where, orderBy, ascending, page = 1, pageSize = 10 } = params;
-    const skip = (page - 1) * pageSize;
-    const orderDirection = ascending ? "asc" : "desc";
-    const orderByKey = orderBy || "updated_at";
+  const { search, orderBy, ascending, page = 1, pageSize = 10 } = params;
+  const skip = (page - 1) * pageSize;
+  const orderDirection = ascending ? "asc" : "desc";
+  const orderByKey = orderBy || "updated_at";
 
+  if (!search) {
     return this.prisma.products.findMany({
-      where: {
-        ...where,
-        deleted: false
-      },
+      where: { deleted: false },
       skip,
       take: pageSize,
-      orderBy: {
-        [orderByKey]: orderDirection,
-      },
-      include: {
-        categories: true
-      }
+      orderBy: { [orderByKey]: orderDirection },
+      include: { categories: true }
     });
   }
+
+  const searchTerm = `%${search}%`;
+  const matchedProducts = await this.prisma.$queryRaw<{ id: string }[]>`
+    SELECT id FROM "products"
+    WHERE (
+      unaccent("reference") ILIKE unaccent(${searchTerm})
+      OR 
+      unaccent("description") ILIKE unaccent(${searchTerm})
+    )
+    AND "deleted" = false
+  `;
+
+  const ids = matchedProducts.map(p => p.id);
+
+  return this.prisma.products.findMany({
+    where: {
+      id: { in: ids }
+    },
+    skip,
+    take: pageSize,
+    orderBy: {
+      [orderByKey]: orderDirection,
+    },
+    include: {
+      categories: true
+    }
+  });
+}
 
   async listWithAvailability(searchText: string, startDate: Date, endDate: Date): Promise<ProductAvailabilityType[]> {
     const products = await this.prisma.products.findMany({

@@ -4,7 +4,7 @@ import { RentType } from "@/types/entities/RentType";
 import { RentReturnDTO } from "@/core/application/cases/rent/RentReturnUseCase";
 
 export type RentalListInput = {
-  where?: Prisma.rentsWhereInput;
+  search?: string;
   orderBy?: string;
   ascending?: boolean;
   page?: number;

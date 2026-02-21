@@ -4,7 +4,7 @@ import { ProductType } from "@/types/entities/ProductType";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 
 export type ProductListInput = {
-  where?: Prisma.productsWhereInput;
+  search?: string;
   orderBy?: string;
   ascending?: boolean;
   page?: number;
