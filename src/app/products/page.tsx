@@ -1,18 +1,16 @@
 "use client";
 
-import { Flex, Icon, Spinner, useDisclosure } from "@chakra-ui/react";
+import { Flex, Spinner, useDisclosure } from "@chakra-ui/react";
 import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
 import { useDevice } from "@/hooks/useDevice";
 import AddProductModal from "@/components/molecules/AddProductModal";
 import PageContainer from "@/components/molecules/PageContainer";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ProductType } from "@/types/entities/ProductType";
 import { api } from "@/services/api";
 import { toaster } from "@/components/atoms/Toaster";
 import ProductCard from "@/components/molecules/ProductCard";
 import { MdEdit } from "react-icons/md";
-import { AiOutlinePlus } from "react-icons/ai";
-import Fab from "@/components/atoms/Fab";
 import SecondaryButton from "@/components/atoms/SecondaryButton";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -27,6 +25,7 @@ export default function Home() {
   const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const { value: debounce, isLoading: isLoadingDebounce } = useDebounce(searchText, 300);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   const columns: DataTableColumn<ProductType>[] = [
     {
@@ -69,7 +68,7 @@ export default function Home() {
     onOpen();
   };
 
-  const loadProducts = async (newPage: number, searchText: string) => {
+  const loadProducts = async (newPage: number, searchText: string, shouldAppend: boolean = false) => {
     try {
       setIsLoading(true);
 
@@ -83,7 +82,11 @@ export default function Home() {
         })
       ).data;
 
-      setProducts(productsListRequest.data);
+      if (shouldAppend) {
+        setProducts((prev) => [...prev, ...productsListRequest.data]);
+      } else {
+        setProducts(productsListRequest.data);
+      }
       setPagesTotal(Math.ceil(productsListRequest.total / 10));
       setCurrentPage(newPage);
     } catch (e: unknown) {
@@ -121,6 +124,7 @@ export default function Home() {
   };
 
   const handleSearchTextChange = useCallback((text: string) => {
+    setCurrentPage(1);
     loadProducts(1, text);
   }, []);
 
@@ -129,6 +133,12 @@ export default function Home() {
       {products.map((product) => (
         <ProductCard product={product} key={product.id} onEdit={openUpdateModal} />
       ))}
+      <div ref={sentinelRef} style={{ height: "20px" }} />
+      {isLoading && (
+        <Flex w="full" minH="full" align="center" justify="center" flex="1">
+          <Spinner size="xl" />
+        </Flex>
+      )}
     </Flex>
   );
 
@@ -148,6 +158,25 @@ export default function Home() {
     handleSearchTextChange(debounce);
   }, [debounce, handleSearchTextChange]);
 
+  // Handle with load more in mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const intersectionObserver = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        if (currentPage < pagesTotal && !isLoading) {
+          loadProducts(currentPage + 1, searchText, true);
+        }
+      }
+    });
+
+    if (sentinelRef.current) {
+      intersectionObserver.observe(sentinelRef.current);
+    }
+
+    return () => intersectionObserver.disconnect();
+  }, [isMobile, currentPage, pagesTotal, isLoading, searchText]);
+
   return (
     <PageContainer
       title="Lista de produtos"
@@ -165,7 +194,7 @@ export default function Home() {
       }}
       flex="1"
     >
-      {isLoading ? (
+      {isLoading && products.length === 0 ? (
         <Flex w="full" minH="full" align="center" justify="center" flex="1">
           <Spinner size="xl" />
         </Flex>
@@ -174,12 +203,6 @@ export default function Home() {
           {isMobile ? MobileDataDisplay : DesktopDataDisplay}
         </Flex>
       )}
-
-      <Fab onClick={onOpen} fontSize="2xl">
-        <Icon boxSize="8">
-          <AiOutlinePlus />
-        </Icon>
-      </Fab>
       <AddProductModal
         isOpen={open}
         onClose={handleOnCloseModal}
