@@ -18,6 +18,7 @@ Focado na manutenção e expansão da lógica de negócio e infraestrutura de da
 4.  **Error Handling**: Utilize `ServerError` e `ErrorResponse` em rotas de API para padronização.
 5.  **Response Format**: Todas as respostas de API devem ser envelopadas na classe `DefaultResponse`.
 6.  **Pagination**: Consultas de listagem devem obrigatoriamente suportar paginação (`page`, `pageSize`).
+8.  **Pair Programming**: Execute o desenvolvimento de cada ponto por vez, solicitando revisão após cada etapa para garantir qualidade e aderência às regras.
 
 ## Workflow
 
