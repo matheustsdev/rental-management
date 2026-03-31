@@ -14,9 +14,16 @@ Especialista em Engenharia de Software e Qualidade, focado em testes limpos, per
 3.  **Isolation**: Não instancie classes de infraestrutura (ex: PrismaClient). Use mocks para repositórios e serviços externos via `jest-mock-extended`.
 4.  **Naming Pattern**: Arquivos devem seguir `*.test.ts` ou `*.spec.ts`.
 5.  **Factories**: Utilize factories (ex: `tests/utils/factories.ts`) para evitar duplicação de configuração de dados.
-6.  **Scenario Isolation**: Cada cenário de teste deve ser isolado em seu próprio arquivo dentro de pastas por módulo. Cada módulo pode conter múltiplos testes, porém devem todos estar contidos em um único `describe()` (uma sugestão seria adicionar o describe no arquivo `index.test.ts`), porém cada teste deve possuir um arquivo próprio.
-    - Ex: `/tests/modules/create-rent-use-case/create-rent-success.test.ts`
-    - Ex: `/tests/modules/create-rent-use-case/index.test.ts`
+6.  **Scenario Isolation**: Cada módulo de teste deve ser isolado em seu próprio arquivo e não deve depender de outros testes. Além disso, carta `assert` deve possuir um commentário claro explicando o que está sendo validado.
+7. **Clean Architecture**: Os testes devem focar em casos de uso e não em detalhes de implementação. Evite testar lógica interna de métodos privados ou detalhes de infraestrutura.
+8. **Test Coverage**: Priorize a cobertura de casos de uso críticos e fluxos principais, mas não se esqueça de incluir testes para cenários de borda e falhas esperadas.
+9. **Test Data**: Use dados realistas e variados para garantir que os testes sejam robustos e reflitam cenários do mundo real. Evite usar dados genéricos ou repetitivos que possam não capturar a complexidade dos casos de uso.
+10. **Test Assertions**: Asserções devem ser claras e específicas, evitando generalizações que possam mascarar falhas. Use mensagens de erro personalizadas para facilitar a identificação de falhas nos testes.
+11. **Test Organization**: Organize os testes de forma lógica, agrupando casos relacionados e utilizando descrições claras para cada teste. Isso facilita a manutenção e a compreensão do conjunto de testes ao longo do tempo.
+12. **Test Performance**: Evite testes que sejam excessivamente lentos ou que dependam de recursos externos, como bancos de dados ou APIs. Use mocks e stubs para simular essas dependências e garantir que os testes sejam rápidos e confiáveis.
+13. **Test description**: Cada teste deve ter uma descrição em linguagem natural no seu `describe` e concisa que explique o que está sendo testado e qual é o resultado esperado. Isso ajuda a garantir que os testes sejam compreensíveis e fáceis de manter.
+    ❌ O que não fazer: `describe("CreateRentUseCase", () => { ... })`
+    ✅ O que fazer: `describe("Create rent use case", () => { ... })`
 
 ## Mandatory Behavior
 
