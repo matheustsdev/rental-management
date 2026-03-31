@@ -1,10 +1,13 @@
-import { Prisma } from "@prisma/client";
+import { ERentStatus, Prisma } from "@prisma/client";
 import { Rental } from "../entities/Rental";
 import { RentType } from "@/types/entities/RentType";
 import { RentReturnDTO } from "@/core/application/cases/rent/RentReturnUseCase";
 
 export type RentalListInput = {
   search?: string;
+  status?: ERentStatus;
+  startDate?: Date;
+  endDate?: Date;
   orderBy?: string;
   ascending?: boolean;
   page?: number;

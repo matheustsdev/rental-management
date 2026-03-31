@@ -25,59 +25,56 @@ export class PrismaRentalRepository implements IRentalRepository {
   }
 
   async list(params: RentalListInput): Promise<RentType[]> {
-    const { search, orderBy, ascending, page = 1, pageSize = 10 } = params;
+    const { search, status, startDate, endDate, orderBy, ascending, page = 1, pageSize = 10 } = params;
     const skip = (page - 1) * pageSize;
     const orderDirection = ascending ? "asc" : "desc";
     const orderByKey = orderBy || "updated_at";
 
-    if (!search) {
-      return this.prisma.rents.findMany({
-            where: {
-              deleted: false,
-            },
-            skip,
-            take: pageSize,
-            orderBy: {
-              [orderByKey]: orderDirection,
-            },
-            include: {
-              rent_products: {
-                include: { products: true },
-              },
-            },
-      });
+    const where: Prisma.rentsWhereInput = {
+      deleted: false,
+    };
+
+    if (status) {
+      where.status = status;
     }
 
-    const searchTerm = `%${search}%`;
-    const matchedRents = await this.prisma.$queryRaw<{ id: string }[]>`
-      SELECT id FROM rents
-      WHERE (
-        unaccent("client_name") ILIKE unaccent(${searchTerm})
-        OR unaccent("address") ILIKE unaccent(${searchTerm})
-        OR unaccent("phone") ILIKE unaccent(${searchTerm})
-      )
-      AND "deleted" = false
-    `;
+    if (startDate || endDate) {
+      where.rent_date = {};
+      if (startDate) {
+        where.rent_date.gte = startDate;
+      }
+      if (endDate) {
+        where.rent_date.lte = endDate;
+      }
+    }
 
-    const ids = matchedRents.map((rent) => rent.id);
+    if (search) {
+      const searchTerm = `%${search}%`;
+      const matchedRents = await this.prisma.$queryRaw<{ id: string }[]>`
+        SELECT id FROM rents
+        WHERE (
+          unaccent("client_name") ILIKE unaccent(${searchTerm})
+          OR unaccent("address") ILIKE unaccent(${searchTerm})
+          OR unaccent("phone") ILIKE unaccent(${searchTerm})
+        )
+      `;
+      const ids = matchedRents.map((rent) => rent.id);
+      where.id = { in: ids };
+    }
 
     return this.prisma.rents.findMany({
-            where: {
-              id: { in: ids },
-            },
-            skip,
-            take: pageSize,
-            orderBy: {
-              [orderByKey]: orderDirection,
-            },
-            include: {
-              rent_products: {
-                include: { products: true },
-              },
-            },
-      });
-
-    
+      where,
+      skip,
+      take: pageSize,
+      orderBy: {
+        [orderByKey]: orderDirection,
+      },
+      include: {
+        rent_products: {
+          include: { products: true },
+        },
+      },
+    });
   }
 
   async update(id: string, data: Prisma.rentsUpdateInput): Promise<RentType> {
@@ -117,7 +114,7 @@ export class PrismaRentalRepository implements IRentalRepository {
 
   async find(id: string) {
     const rent = await this.prisma.rents.findUnique({
-      where: { id },
+      where: { id, deleted: false },
       include: {
         rent_products: {
           include: {
@@ -172,7 +169,8 @@ export class PrismaRentalRepository implements IRentalRepository {
     return rentRows.map((row) => {
       // Para a checagem de disponibilidade, consideramos 'deleted: false' como 'ACTIVE'.
       // Uma lógica mais complexa poderia diferenciar 'ACTIVE' de 'RETURNED' com base na data.
-      const status = "ACTIVE";
+      let status: 'ACTIVE' | 'CANCELED' | 'RETURNED' = "ACTIVE";
+      if (row.status === ERentStatus.FINISHED) status = 'RETURNED';
 
       // A entidade de domínio `Rental` espera uma `endDate`. O schema do banco
       // permite `return_date` nulo, o que pode causar inconsistências.
@@ -188,7 +186,8 @@ export class PrismaRentalRepository implements IRentalRepository {
         productId, // O contexto da busca é por este produto
         row.rent_date,
         row.return_date,
-        status
+        status,
+        row.real_return_date
       );
     });
   }

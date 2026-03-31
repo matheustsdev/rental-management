@@ -1,5 +1,4 @@
 import { Rental } from "../entities/Rental";
-import { areIntervalsOverlapping, addDays } from 'date-fns';
 
 export class AvailabilityService {
   static isAvailable(
@@ -8,14 +7,9 @@ export class AvailabilityService {
     existingRentals: Rental[],
     cleaningDays: number = 2
   ): boolean {
-     const hasConflict = existingRentals.some(rental => {
-      const rentalEndWithCleaning = addDays(rental.endDate, cleaningDays);
-      
-      return areIntervalsOverlapping(
-        { start: newStart, end: newEnd },
-        { start: rental.startDate, end: rentalEndWithCleaning }
-      );
-    });
+     const hasConflict = existingRentals.some(rental => 
+        rental.conflictsWith(newStart, newEnd, cleaningDays)
+     );
 
     return !hasConflict;
   }

@@ -1,7 +1,7 @@
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { ProductInsertDtoType, ProductType } from "@/types/entities/ProductType";
 
-export class CreateProductlUseCase {
+export class CreateProductUseCase {
   constructor(
     private productRepository: IProductRepository
   ) {}

@@ -7,7 +7,8 @@ export class Rental {
     public readonly productId: string,
     public readonly startDate: Date,
     public readonly endDate: Date,
-    public readonly status: 'ACTIVE' | 'CANCELED' | 'RETURNED'
+    public readonly status: 'ACTIVE' | 'CANCELED' | 'RETURNED',
+    public readonly realReturnDate?: Date | null
   ) {}
 
   // REGRA DE NEGÓCIO PURA:
@@ -21,14 +22,15 @@ export class Rental {
     if (this.status === 'CANCELED') return false;
 
     // A data que o produto fica realmente livre é:
-    // Data de Devolução + Dias de Limpeza
-    const busyUntil = addDays(this.endDate, bufferDays);
+    // (Data de Devolução Real se disponível, senão Planejada) + Dias de Limpeza
+    const baseReturnDate = this.realReturnDate || this.endDate;
+    const busyUntil = addDays(baseReturnDate, bufferDays);
 
-    // Verifica sobreposição de datas
-    // (Se o início desejado é antes do fim ocupado E o fim desejado é depois do início ocupado)
+    // Verifica sobreposição de datas (inclusive)
+    // (Se o início desejado é antes ou no dia do fim ocupado E o fim desejado é depois ou no dia do início ocupado)
     return (
-      targetStart < busyUntil && 
-      targetEnd > this.startDate
+      targetStart <= busyUntil && 
+      targetEnd >= this.startDate
     );
   }
 }
