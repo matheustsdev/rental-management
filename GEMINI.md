@@ -323,6 +323,7 @@ rental-management/
 │   ├── schema.prisma           # Database schema definition
 │   └── migrations/             # Database migration history
 └── public/                     # Static files
+└── tests/                      # Tests files
 ```
 
 ---
