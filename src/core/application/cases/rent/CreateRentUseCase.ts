@@ -16,13 +16,8 @@ export class CreateRentUseCase {
 
     const startDate = new Date(rent_date);
     const endDate = new Date(return_date);
-    const today = startOfDay(new Date());
 
     // 0. Validar datas
-    if (isBefore(startDate, today)) {
-      throw new ServerError("A data de aluguel não pode ser no passado.", 400);
-    }
-
     if (isBefore(endDate, startDate) || endDate.getTime() === startDate.getTime()) {
       throw new ServerError("A data de devolução deve ser posterior à data de aluguel.", 400);
     }

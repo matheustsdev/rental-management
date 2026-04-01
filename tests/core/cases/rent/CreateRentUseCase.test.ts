@@ -136,16 +136,6 @@ describe("Create rent use case", () => {
     await expect(useCase.execute(invalidInput)).rejects.toThrow("A data de devolução deve ser posterior à data de aluguel.");
   });
 
-  it("should reject rent with past dates", async () => {
-    const invalidInput: RentInsertWithProductDtoType = {
-      ...validRentInput,
-      rent_date: subDays(startOfDay(new Date()), 1),
-    };
-
-    // Valida se erro de data de aluguel no passado é lançado
-    await expect(useCase.execute(invalidInput)).rejects.toThrow("A data de aluguel não pode ser no passado.");
-  });
-
   it("should create rent with signal deposit", async () => {
     const inputWithSignal: RentInsertWithProductDtoType = {
       ...validRentInput,
