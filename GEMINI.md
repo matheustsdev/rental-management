@@ -130,6 +130,11 @@ Manage the inventory of items
 - **Use Cases**: Business logic using the clean architecture pattern
 - **Repository Pattern**: Abstraction for database operations
 
+### **Tests**
+- **Jest**: Testing framework
+- **React Testing Library**: Testing React components
+- **Faker**: Generating test data
+
 ### **Database**
 - **PostgreSQL**: Powerful relational database
 - **Prisma ORM**: Easy way to work with the database from JavaScript/TypeScript
