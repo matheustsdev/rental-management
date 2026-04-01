@@ -6,7 +6,7 @@ import { ListProductUseCase, ListProductUseCaseInputType } from "@/core/applicat
 import { productRepository } from "@/core/infrastructure/repositoriesFactory";
 import { ServerError } from "@/utils/models/ServerError";
 import { ProductInsertDtoType, ProductUpdateDtoType } from "@/types/entities/ProductType";
-import { CreateProductlUseCase } from "@/core/application/cases/product/CreateProductUseCase";
+import { CreateProductUseCase } from "@/core/application/cases/product/CreateProductUseCase";
 import { UpdateProductUseCase } from "@/core/application/cases/product/UpdateProductUseCase";
 
 export async function GET(request: NextRequest) {
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as ProductInsertDtoType;
 
-    const useCase = new CreateProductlUseCase(productRepository);
+    const useCase = new CreateProductUseCase(productRepository);
     const newProduct = await useCase.execute(body);
 
     const response = new DefaultResponse(newProduct, "Produto criado com sucesso.", null, null, null);
