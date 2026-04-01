@@ -3,7 +3,7 @@ import { IProductRepository } from "@/core/domain/repositories/IProductRepositor
 import { RentInsertWithProductDtoType, RentType } from "@/types/entities/RentType";
 import { Prisma } from "@prisma/client";
 import { ServerError } from "@/utils/models/ServerError";
-import { isBefore, startOfDay } from "date-fns";
+import { isBefore } from "date-fns";
 
 export class CreateRentUseCase {
   constructor(

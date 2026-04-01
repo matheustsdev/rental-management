@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { api } from "@/services/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AvailabilityType } from "@/types/entities/AvailabilityType";
 import { toaster } from "@/components/atoms/Toaster";
 import InputField from "@/components/atoms/InputField";
@@ -13,6 +13,7 @@ import PrimaryButton from "@/components/atoms/PrimaryButton";
 import RentCard from "./RentCard";
 import { ProductType } from "@/types/entities/ProductType";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
+import { ServerError } from "@/utils/models/ServerError";
 
 const availabilitySchema = z.object({
   startDate: z.string().min(1, "Data de início é obrigatória"),
@@ -62,11 +63,12 @@ const AvailabilityChecker: React.FC<IAvailabilityCheckerProps> = ({ product }) =
       });
 
       setAvailability(response.data.data);
-    } catch (error: any) {
+    } catch (error: unknown) {  
+      const serverError = error as ServerError;
       toaster.create({
         type: "error",
         title: "Erro ao consultar disponibilidade",
-        description: error.response?.data?.message || error.message,
+        description: serverError?.message,
       });
     } finally {
       setIsLoading(false);

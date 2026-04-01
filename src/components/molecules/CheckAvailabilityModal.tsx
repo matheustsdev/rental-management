@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, Portal, CloseButton, Separator, Text, Flex } from "@chakra-ui/react";
+import { Dialog, Portal, CloseButton, Text } from "@chakra-ui/react";
 import AvailabilityChecker from "./AvailabilityChecker";
 import { ProductType } from "@/types/entities/ProductType";
 
