@@ -7,10 +7,7 @@ jest.mock('@supabase/auth-helpers-nextjs', () => ({
 
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
-    auth: {
-      getUser: jest.fn().mockResolvedValue({ data: { user: {} }, error: null }),
-      signOut: jest.fn().mockResolvedValue({ error: null }),
-    },
+    auth: { },
     from: jest.fn().mockReturnValue({
       select: jest.fn().mockReturnThis(),
       insert: jest.fn().mockReturnThis(),
