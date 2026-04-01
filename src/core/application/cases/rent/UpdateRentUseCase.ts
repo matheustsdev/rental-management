@@ -72,7 +72,7 @@ export class UpdateRentUseCase {
             );
 
             if (hasConflict) {
-                throw new ServerError(`Produto "${product.product_description}" indisponível nas novas datas selecionadas.`);
+                throw new ServerError(`Produto "${product.description}" indisponível nas novas datas selecionadas.`);
             }
         }
     }
