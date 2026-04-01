@@ -16,7 +16,11 @@ export class PrismaRentalRepository implements IRentalRepository {
       include: {
         rent_products: {
           include: {
-            products: true,
+            products: {
+              include: {
+                categories: true,
+              },
+            },
           },
         },
       },
@@ -72,7 +76,13 @@ export class PrismaRentalRepository implements IRentalRepository {
       },
       include: {
         rent_products: {
-          include: { products: true },
+          include: {
+            products: {
+              include: {
+                categories: true,
+              },
+            },
+          },
         },
       },
     });
@@ -85,7 +95,11 @@ export class PrismaRentalRepository implements IRentalRepository {
       include: {
         rent_products: {
           include: {
-            products: true,
+            products: {
+              include: {
+                categories: true,
+              },
+            },
           },
         },
       },
@@ -264,7 +278,11 @@ export class PrismaRentalRepository implements IRentalRepository {
       include: {
         rent_products: {
           include: {
-            products: true,
+            products: {
+              include: {
+                categories: true,
+              },
+            },
           },
         },
       },
