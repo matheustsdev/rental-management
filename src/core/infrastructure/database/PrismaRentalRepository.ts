@@ -192,8 +192,52 @@ export class PrismaRentalRepository implements IRentalRepository {
     });
   }
 
-  async count(where?: Prisma.rentsWhereInput): Promise<number> {
-    return this.prisma.rents.count({ where });
+  async count(params: RentalListInput): Promise<number> {
+    const { search, status, startDate, endDate, orderBy, ascending, page = 1, pageSize = 10 } = params;
+    const skip = (page - 1) * pageSize;
+    const orderDirection = ascending ? "asc" : "desc";
+    const orderByKey = orderBy || "updated_at";
+
+    const where: Prisma.rentsWhereInput = {
+      deleted: false,
+    };
+
+    if (status) {
+      where.status = status;
+    }
+
+    if (startDate || endDate) {
+      where.rent_date = {};
+      if (startDate) {
+        where.rent_date.gte = startDate;
+      }
+      if (endDate) {
+        where.rent_date.lte = endDate;
+      }
+    }
+
+    if (search) {
+      const searchTerm = `%${search}%`;
+      const matchedRents = await this.prisma.$queryRaw<{ id: string }[]>`
+        SELECT id FROM rents
+        WHERE (
+          unaccent("client_name") ILIKE unaccent(${searchTerm})
+          OR unaccent("address") ILIKE unaccent(${searchTerm})
+          OR unaccent("phone") ILIKE unaccent(${searchTerm})
+        )
+      `;
+      const ids = matchedRents.map((rent) => rent.id);
+      where.id = { in: ids };
+    }
+
+    return this.prisma.rents.count({ 
+      where,
+      skip,
+      take: pageSize,
+      orderBy: {
+        [orderByKey]: orderDirection,
+      }
+    });
   }
 
   async returnRent(rentReturn: RentReturnDTO): Promise<RentType> {

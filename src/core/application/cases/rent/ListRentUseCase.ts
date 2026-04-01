@@ -9,7 +9,9 @@ export class ListRentUseCase {
   ) {}
 
   async execute(input: ListRentUseCaseInputType): Promise<{ data: RentType[]; count: number }> {
-    const count = await this.rentalRepo.count(input.where);
+
+    
+    const count = await this.rentalRepo.count(input);
     const data = await this.rentalRepo.list(input);
 
     return { data, count };
