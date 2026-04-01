@@ -2724,9 +2724,9 @@ axe-core@^4.10.0:
   resolved "https://registry.npmjs.org/axe-core/-/axe-core-4.10.3.tgz"
   integrity sha512-Xm7bpRXnDSX2YE2YFfBk2FnF0ep6tmG7xPh8iHee8MIcrgq762Nkce856dYtJYLkuIoYZvGfTs/PbZhideTcEg==
 
-axios@^1.8.4:
+axios@1.13.6:
   version "1.13.6"
-  resolved "https://registry.npmjs.org/axios/-/axios-1.13.6.tgz"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.13.6.tgz#c3f92da917dc209a15dd29936d20d5089b6b6c98"
   integrity sha512-ChTCHMouEe2kn713WHbQGcuYrr6fXTBiu460OTwWrWob16g1bXn4vtz07Ope7ewMozJAnEquLk5lWQWtBig9DQ==
   dependencies:
     follow-redirects "^1.15.11"
@@ -3642,7 +3642,7 @@ expect@30.3.0, expect@^30.0.0:
     jest-mock "30.3.0"
     jest-util "30.3.0"
 
-faker@*, faker@^5.5.3:
+faker@*:
   version "5.5.3"
   resolved "https://registry.npmjs.org/faker/-/faker-5.5.3.tgz"
   integrity sha512-wLTv2a28wjUyWkbnX7u/ABZBkUkIF2fCd73V6P2oFqEGEktDfzWx4UxrSqtPRw0xPRAcjeAOIiJWqZm3pP4u3g==

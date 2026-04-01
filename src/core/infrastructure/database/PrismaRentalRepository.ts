@@ -5,6 +5,7 @@ import { Rental } from "../../domain/entities/Rental";
 import { RentType } from "@/types/entities/RentType";
 import { RentReturnDTO } from "@/core/application/cases/rent/RentReturnUseCase";
 import { getUTCDateFromInput } from "@/utils/getUTCDateFromInput";
+import { subDays } from "date-fns";
 
 export class PrismaRentalRepository implements IRentalRepository {
   constructor(private prisma: PrismaClient) { }
@@ -275,5 +276,43 @@ export class PrismaRentalRepository implements IRentalRepository {
     ]);
 
     return results[results.length - 1] as RentType;
+  }
+
+  async findOverlappingRents(productId: string, startDate: Date, endDate: Date): Promise<RentType[]> {
+    const marginStartDate = subDays(startDate, 30);
+
+    return this.prisma.rents.findMany({
+      where: {
+        deleted: false,
+        rent_products: {
+          some: {
+            product_id: productId,
+            deleted: false,
+          },
+        },
+        rent_date: {
+          lte: endDate,
+        },
+        OR: [
+          { status: { not: ERentStatus.FINISHED } },
+          { real_return_date: { gte: marginStartDate } },
+          { return_date: { gte: marginStartDate } }
+        ]
+      },
+      orderBy: {
+        rent_date: 'asc',
+      },
+      include: {
+        rent_products: {
+          include: {
+            products: {
+              include: {
+                categories: true
+              }
+            }
+          }
+        },
+      },
+    });
   }
 }

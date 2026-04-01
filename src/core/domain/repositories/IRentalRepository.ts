@@ -23,5 +23,6 @@ export interface IRentalRepository {
   list(params: RentalListInput): Promise<RentType[]>;
   delete(id: string): Promise<void>;
   find(id: string): Promise<RentType | null>;
-  returnRent(rentReturn: RentReturnDTO): Promise<RentType>
+  returnRent(rentReturn: RentReturnDTO): Promise<RentType>;
+  findOverlappingRents(productId: string, startDate: Date, endDate: Date): Promise<RentType[]>;
 }

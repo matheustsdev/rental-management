@@ -5,7 +5,11 @@ export type RentType = Prisma.rentsGetPayload<{
   include: {
     rent_products: {
       include: {
-        products: true
+        products: {
+          include: {
+            categories: true
+          }
+        }
       }
     }
   }

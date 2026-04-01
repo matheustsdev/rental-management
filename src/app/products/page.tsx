@@ -10,18 +10,22 @@ import { ProductType } from "@/types/entities/ProductType";
 import { api } from "@/services/api";
 import { toaster } from "@/components/atoms/Toaster";
 import ProductCard from "@/components/molecules/ProductCard";
-import { MdEdit } from "react-icons/md";
 import SecondaryButton from "@/components/atoms/SecondaryButton";
 import { useDebounce } from "@/hooks/useDebounce";
+import { MdEdit, MdEventAvailable } from "react-icons/md";
+import CheckAvailabilityModal from "@/components/molecules/CheckAvailabilityModal";
 
 export default function Home() {
   const { isMobile } = useDevice();
   const { open, onClose, onOpen } = useDisclosure();
 
+  const { open: isAvailabilityOpen, onClose: onAvailabilityClose, onOpen: onAvailabilityOpen } = useDisclosure();
+
   const [products, setProducts] = useState<ProductType[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pagesTotal, setPagesTotal] = useState<number>(1);
   const [selectedProductRow, setSelectedProductRow] = useState<ProductType | null>(null);
+  const [productToCheck, setProductToCheck] = useState<ProductType | null>(null);
   const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const { value: debounce, isLoading: isLoadingDebounce } = useDebounce(searchText, 300);
@@ -54,6 +58,9 @@ export default function Home() {
         <SecondaryButton p="2" onClick={() => openUpdateModal(product)}>
           <MdEdit />
         </SecondaryButton>
+        <SecondaryButton p="2" onClick={() => openAvailabilityModal(product)}>
+          <MdEventAvailable />
+        </SecondaryButton>
       </Flex>
     );
   };
@@ -66,6 +73,16 @@ export default function Home() {
   const openUpdateModal = (product: ProductType) => {
     setSelectedProductRow(product);
     onOpen();
+  };
+
+  const openAvailabilityModal = (product: ProductType) => {
+    setProductToCheck(product);
+    onAvailabilityOpen();
+  };
+
+  const handleOnCloseAvailabilityModal = () => {
+    setProductToCheck(null);
+    onAvailabilityClose();
   };
 
   const loadProducts = async (newPage: number, searchText: string, shouldAppend: boolean = false) => {
@@ -131,7 +148,12 @@ export default function Home() {
   const MobileDataDisplay = (
     <Flex flexDir="column" w="full" gap="4" pb="40">
       {products.map((product) => (
-        <ProductCard product={product} key={product.id} onEdit={openUpdateModal} />
+        <ProductCard
+          product={product}
+          key={product.id}
+          onEdit={openUpdateModal}
+          onCheckAvailability={openAvailabilityModal}
+        />
       ))}
       <div ref={sentinelRef} style={{ height: "20px" }} />
       {isLoading && (
@@ -208,6 +230,11 @@ export default function Home() {
         onClose={handleOnCloseModal}
         onSave={onUpsertProduct}
         productOnEdit={selectedProductRow}
+      />
+      <CheckAvailabilityModal
+        isOpen={isAvailabilityOpen}
+        onClose={handleOnCloseAvailabilityModal}
+        product={productToCheck}
       />
     </PageContainer>
   );
