@@ -30,3 +30,4 @@ Você opera coordenando as seguintes skills especializadas:
     - Backend primeiro (Domain -> App -> Infra).
     - Frontend depois (Atoms -> Molecules -> Organisms -> Page).
 4.  **Verify**: Escreva e execute os testes (`test-developer`).
+5.  **Task progress tracking**: Quando finalizar algum ponto do desenvolvimento de uma task, coloque um emoji de ✅ no inicio dele com intuito de indicar que este foi finalizado.
