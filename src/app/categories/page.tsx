@@ -4,7 +4,7 @@ import { Flex, Spinner, useDisclosure, Box } from "@chakra-ui/react";
 import { DataTable, DataTableColumn } from "@/components/molecules/DataTable";
 import { useDevice } from "@/hooks/useDevice";
 import PageContainer from "@/components/molecules/PageContainer";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CategoryType } from "@/types/entities/CategoryType";
 import { api } from "@/services/api";
 import { toaster } from "@/components/atoms/Toaster";
@@ -14,6 +14,7 @@ import SecondaryButton from "@/components/atoms/SecondaryButton";
 import { useDebounce } from "@/hooks/useDebounce";
 import { MdEdit, MdDelete } from "react-icons/md";
 import CategoryCard from "@/components/molecules/CategoryCard";
+import { AxiosError } from "axios";
 
 export default function CategoriesPage() {
   const { isMobile } = useDevice();
@@ -94,12 +95,20 @@ export default function CategoriesPage() {
       
       setPagesTotal(Math.ceil(response.data.total / 10) || 1);
       setCurrentPage(newPage);
-    } catch (error: any) {
-      toaster.create({
-        type: "error",
-        title: "Erro ao buscar categorias",
-        description: error.message,
-      });
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        toaster.create({
+          type: "error",
+          title: "Erro ao buscar categorias",
+          description: error.response?.data?.error || error.message,
+        });
+      } else {
+        toaster.create({
+          type: "error",
+          title: "Erro ao buscar categorias",
+          description: "Erro desconhecido",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -137,12 +146,20 @@ export default function CategoriesPage() {
 
       setCategories((prev) => prev.filter((c) => c.id !== categoryToDelete.id));
       onCloseConfirm();
-    } catch (error: any) {
-      toaster.create({
-        type: "error",
-        title: "Erro ao excluir categoria",
-        description: error.response?.data?.error || error.message,
-      });
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        toaster.create({
+          type: "error",
+          title: "Erro ao excluir categoria",
+          description: error.response?.data?.error || error.message,
+        });
+      } else {
+        toaster.create({
+          type: "error",
+          title: "Erro ao excluir categoria",
+          description: "Erro desconhecido",
+        });
+      }
     } finally {
       setIsLoading(false);
       setCategoryToDelete(null);

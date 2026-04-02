@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, Flex, Spinner, Text } from "@chakra-ui/react";
+import { Dialog, Flex, Text } from "@chakra-ui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, Controller } from "react-hook-form";
 import { toaster } from "@/components/atoms/Toaster";
@@ -13,6 +13,7 @@ import InputField from "@/components/atoms/InputField";
 import Select from "@/components/atoms/Select";
 import BaseFormModal from "../molecules/BaseFormModal";
 import { z } from "zod";
+import { AxiosError } from "axios";
 
 // Shared form schema for the modal
 const formSchema = z.object({
@@ -99,12 +100,20 @@ const CategoryModal: React.FC<ICategoryModalProps> = ({ isOpen, onClose, categor
       });
 
       handleOnClose();
-    } catch (error: any) {
-      toaster.create({
-        type: "error",
-        title: "Erro ao salvar categoria",
-        description: error.response?.data?.error || error.message,
-      });
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        toaster.create({
+          type: "error",
+          title: "Erro ao salvar categoria",
+          description: error.response?.data?.error || error.message,
+        });
+      } else {
+        toaster.create({
+          type: "error",
+          title: "Erro ao salvar categoria",
+          description: "Erro desconhecido",
+        });
+      }
     } finally {
       setIsLoading(false);
     }

@@ -71,7 +71,7 @@ const ProductResumeItem: React.FC<IProductResumeItemProps> = ({ productAvailabil
             return (
               <DefaultInput
                 key={`${name}-resume`}
-                label={label}
+                label={label as string}
                 value={getValues(name)}
                 type="number"
                 step={0.1}
