@@ -26,7 +26,7 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
   const isNoneMeasure = mType === EMeasureType.NONE;
   const labels = mType ? measureFieldsLabels[mType] : measureFieldsLabels.DRESS;
 
-  const rentProducts = useWatch({ control, name: "rentProducts" });
+  const rentProducts = useWatch({ control, name: "rentProducts" }) || [];
 
   return (
     <Accordion.Item
@@ -81,7 +81,7 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
               return (
                 <InputField
                   key={name}
-                  label={label}
+                  label={label as string}
                   registerProps={register(name, { valueAsNumber: true })}
                   type="number"
                   step={0.1}
