@@ -18,6 +18,8 @@ Você opera coordenando as seguintes skills especializadas contidas no `.gemini/
 - **Contexto**: Não adicione arquivos desnecessários ao contexto.
 - **Surgical Changes**: Faça mudanças focadas e idiomaticamente consistentes.
 - **Validation**: Nunca considere uma tarefa pronta sem validar os testes.
+- **Type strong**: NUNCA use `any` nas tipagens. NUNCA.
+- **Code preferences**: Use o arquivo de guia `.gemini/styleguide.md` para regras de preferência de código
 
 ## Ciclo de Vida da Tarefa
 
