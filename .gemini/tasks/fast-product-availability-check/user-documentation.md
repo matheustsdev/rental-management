@@ -11,9 +11,9 @@ Essa funcionalidade permite verificar rapidamente se um produto está disponíve
 - **Indisponível / Alugado**: O produto já está em um aluguel (ativo ou agendado) para essas datas.
 - **Em Preparação / Buffer**: O produto já foi devolvido, mas está em período de higienização ou manutenção interna.
 
-### Buffer dinâmico
-- Se o aluguel estiver finalizado (`FINISHED`), o sistema calcula a disponibilidade baseada na **data real** da devolução somada aos dias de higienização.
-- Se o aluguel estiver agendado (`SCHEDULED`), o sistema calcula a disponibilidade baseada na **data prevista** da devolução somada aos dias de higienização.
+### Tempo de limpeza dinâmico
+- Se o aluguel estiver finalizado (`FINISHED`), o sistema calcula a disponibilidade baseada na **data real** da devolução somada aos dias de limpeza.
+- Se o aluguel estiver agendado (`SCHEDULED`), o sistema calcula a disponibilidade baseada na **data prevista** da devolução somada aos dias de limpeza.
 
 ## Guia do Usuário
 1.  Acesse a seção **Produtos** ou o widget de **Disponibilidade** na tela inicial.

@@ -25,7 +25,9 @@ Você opera coordenando as seguintes skills especializadas contidas no `.gemini/
     - Leia e adicione no contexto APENAS o ponto seguinte após o último ponto já desenvolvido. Para saber qual pontos já foram desenvolvidos, basta checar quais iniciam com ✅.
 2.  **Implement**: Use as SKILLs de Backend ou Frontend de acordo com a tarefa. Quando já houver adicionado uma dessas 2 SKILLs no contexto e houver finalizados todas as implementações de um deles, NÃO PUXE A PRÓXIMA SKILL, você só deve possuir em contexto uma das duas skills: Frontend ou Backend;
 3.  **Verify**: Escreva e execute os testes usando a SKILL `test-developer`.
-4.  **Task progress tracking**: Quando finalizar algum ponto do desenvolvimento de uma task, coloque um emoji de ✅ no inicio dele com intuito de indicar que este foi desenvolvido com sucesso.
+4.  **Check lint error**: Execute o comando `yarn lint-fix`, caso encontre algum erro já corrija-o.
+5.  **Remove useless variables** Cheque nos arquivos alterados/criados se existe alguma variável ou importação que não é utilizada no código
+6.  **Task progress tracking**: Quando finalizar algum ponto do desenvolvimento de uma task, coloque um emoji de ✅ no inicio dele com intuito de indicar que este foi desenvolvido com sucesso.
 
 ## O que NÃO fazer
 
