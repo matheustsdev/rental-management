@@ -5,7 +5,7 @@ export const ProductMeasuresSchema = z.object({
   id: z.string().optional(), // permite undefined
   rent_product_fk: z.string(),
   measure_type: z.enum(
-    [EMeasureType.DRESS, EMeasureType.SUIT],
+    [EMeasureType.DRESS, EMeasureType.SUIT, EMeasureType.NONE],
     { 
       errorMap: () => ({ message: "Tipo de medida inválido" })
     }

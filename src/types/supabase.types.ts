@@ -292,7 +292,7 @@ export type Database = {
     Enums: {
       availability_status: "AVAILABLE" | "UNAVAILABLE" | "BUFFER_OCCUPIED"
       discount_type_enum: "PERCENTAGE" | "FIXED"
-      measures_type: "SUIT" | "DRESS"
+      measures_type: "SUIT" | "DRESS" | "NONE"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -422,7 +422,7 @@ export const Constants = {
     Enums: {
       availability_status: ["AVAILABLE", "UNAVAILABLE", "BUFFER_OCCUPIED"],
       discount_type_enum: ["PERCENTAGE", "FIXED"],
-      measures_type: ["SUIT", "DRESS"],
+      measures_type: ["SUIT", "DRESS", "NONE"],
     },
   },
 } as const

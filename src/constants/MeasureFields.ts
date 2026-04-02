@@ -32,5 +32,6 @@ export const measureFieldsLabels = {
         back: "Costa",
         height: "Altura",
         waist: "Cintura"
-    }
+    },
+    [EMeasureType.NONE]: {}
 }

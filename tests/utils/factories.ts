@@ -3,6 +3,7 @@ import { Product } from "@/core/domain/entities/Product";
 import { Rental } from "@/core/domain/entities/Rental";
 import { RentType } from "@/types/entities/RentType";
 import { ProductType } from "@/types/entities/ProductType";
+import { CategoryType } from "@/types/entities/CategoryType";
 import { Decimal } from "@prisma/client/runtime/library";
 import { ERentStatus, measures_type } from "@prisma/client";
 
@@ -82,4 +83,17 @@ export const getRandomRentalEntity = (overrides?: Partial<Rental>): Rental => {
     overrides?.status ?? 'ACTIVE',
     overrides?.realReturnDate ?? null
   );
+};
+
+export const getRandomCategory = (overrides?: Partial<CategoryType>): CategoryType => {
+  return {
+    id: overrides?.id ?? faker.string.uuid(),
+    name: overrides?.name ?? faker.commerce.department(),
+    post_return_buffer_days: overrides?.post_return_buffer_days ?? faker.number.int({ min: 0, max: 7 }),
+    measure_type: overrides?.measure_type ?? faker.helpers.arrayElement(Object.values(measures_type)),
+    created_at: overrides?.created_at ?? new Date(),
+    updated_at: overrides?.updated_at ?? new Date(),
+    deleted: overrides?.deleted ?? false,
+    deleted_at: overrides?.deleted_at ?? null,
+  } as CategoryType;
 };

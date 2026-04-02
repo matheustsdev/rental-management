@@ -31,7 +31,7 @@ const ProductSelector: React.FC = () => {
       product_description: productAvailability.description ?? "",
       product_price: Number(productAvailability.price) as number,
       product_id: productAvailability.id,
-      measure_type: productAvailability.categories?.measure_type ?? EMeasureType.DRESS,
+      measure_type: productAvailability.categories?.measure_type ?? EMeasureType.NONE,
       waist: undefined,
       bust: undefined,
       hip: undefined,

@@ -32,7 +32,7 @@ const BaseFormModal = <T extends FieldValues>({
               color="black"
               onSubmit={onSubmit}
               ref={contentRef}
-              h="75vh"
+              h={{ base: "90vh", lg: "75vh" }}
               overflowY="auto"
             >
               {children}

@@ -20,6 +20,7 @@ Focado na construção de interfaces modernas, acessíveis e responsivas seguind
 6.  **Loading & Feedback**: Sempre mostre `Spinner` durante requisições e utilize `toaster` para mensagens de sucesso/erro.
 7.  **Service Usage**: Utilize o serviço `api` (`src/services/api.ts`) para todas as chamadas HTTP.
 8.  **Pair Programming**: Execute o desenvolvimento de cada ponto por vez, solicitando revisão após cada etapa para garantir qualidade e aderência às regras.
+9. **Mobile First**: Sempre desenvolva pensando primeiro no mobile e depois no desktop.
 
 ## Workflow
 

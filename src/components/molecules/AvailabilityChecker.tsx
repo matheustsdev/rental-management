@@ -107,12 +107,12 @@ const AvailabilityChecker: React.FC<IAvailabilityCheckerProps> = ({ product }) =
         return (
           <VStack align="stretch" gap="4" w="full">
             <Box p="4" bg="yellow.100" color="yellow.800" borderRadius="md">
-              <Text fontWeight="bold">Em Preparação / Buffer</Text>
+              <Text fontWeight="bold">Em Preparação</Text>
               <Text fontSize="sm">O período solicitado cai no intervalo de higienização de um aluguel.</Text>
             </Box>
             {availability.conflictingRent && (
               <>
-                <Text fontWeight="medium" fontSize="sm">Aluguel que gerou o buffer:</Text>
+                <Text fontWeight="medium" fontSize="sm">Aluguel que gerou o preparo:</Text>
                 <RentCard rent={availability.conflictingRent} menuItens={[]} />
               </>
             )}

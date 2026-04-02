@@ -41,6 +41,12 @@ const Navbar: React.FC = () => {
                   isActive={pathname.includes("/products")}
                   onClick={onClose}
                 />
+                <NavLink
+                  href="/categories"
+                  title="Categorias"
+                  isActive={pathname.includes("/categories")}
+                  onClick={onClose}
+                />
               </Flex>
             </Drawer.Body>
             <Drawer.CloseTrigger asChild>

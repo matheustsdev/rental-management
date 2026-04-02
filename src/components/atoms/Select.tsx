@@ -1,7 +1,7 @@
 "use client";
 
 import { Portal, Select as ChakraSelect, createListCollection, Flex } from "@chakra-ui/react";
-import { useRef } from "react";
+import React from "react";
 
 export type ListSelectOptionsType = {
   label: string;
@@ -41,8 +41,6 @@ const Select: React.FC<IListSelectProps> = ({
     itemToValue: (item) => item.value,
   });
 
-  const defaultRef = useRef<HTMLDivElement>(null);
-  const contentRef = dialogContentRef ?? defaultRef;
 
   return (
     <ChakraSelect.Root
@@ -72,7 +70,7 @@ const Select: React.FC<IListSelectProps> = ({
         </ChakraSelect.IndicatorGroup>
       </ChakraSelect.Control>
 
-      <Portal container={contentRef ?? undefined}>
+      <Portal container={dialogContentRef}>
         <ChakraSelect.Positioner>
           <ChakraSelect.Content>
             {optionsCollection.items.map((option) => (

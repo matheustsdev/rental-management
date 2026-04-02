@@ -39,38 +39,38 @@
 ## Passos de Implementação
 
 ### Frontend
-1. **[CreateCategoryModal]**: Implementar o componente `CategoryModal.tsx` como um `Organism`. Deve receber dados iniciais para edição ou estar vazio para criação. Usar `React Hook Form` e validação Zod.
+1. ✅ **[CreateCategoryModal]**: Implementar o componente `CategoryModal.tsx` como um `Organism`. Deve receber dados iniciais para edição ou estar vazio para criação. Usar `React Hook Form` e validação Zod.
    **Arquivos a serem alterados:**
    - `src/components/organisms/CategoryModal.tsx`
-2. **[CategoriesPage]**: Criar a página `/categories` (`src/app/categories/page.tsx`) utilizando o componente `DataTable.tsx` para listar as categorias e permitir abrir o modelo.
+2. ✅ **[CategoriesPage]**: Criar a página `/categories` (`src/app/categories/page.tsx`) utilizando o componente `DataTable.tsx` para listar as categorias e permitir abrir o modelo.
    **Arquivos a serem alterados:**
    - `src/app/categories/page.tsx`
-3. **[NavbarLink]**: Adicionar o link para a página de categorias no menu de navegação.
+3. ✅ **[NavbarLink]**: Adicionar o link para a página de categorias no menu de navegação.
    **Arquivos a serem alterados:**
    - `src/components/organisms/Navbar.tsx` (ou arquivo de navegação correspondente)
 
 ### Backend
-1. **[UpdateSchema]**: Atualizar o schema Prisma para incluir o tipo `NONE` nos enums de medida. Gerar cliente Prisma.
+1. ✅ **[UpdateSchema]**: Atualizar o schema Prisma para incluir o tipo `NONE` nos enums de medida. Gerar cliente Prisma.
    **Arquivos a serem alterados:**
    - `prisma/schema.prisma`
-2. **[UpdateEntity]**: Atualizar a tipagem da entidade Category.
+2. ✅ **[UpdateEntity]**: Atualizar a tipagem da entidade Category.
    **Arquivos a serem alterados:**
    - `src/types/entities/CategoryType.ts`
-3. **[RepositoryInterface]**: Definir a interface `ICategoryRepository` com os métodos CRUD necessários.
+3. ✅ **[RepositoryInterface]**: Definir a interface `ICategoryRepository` com os métodos CRUD necessários.
    **Arquivos a serem alterados:**
    - `src/core/domain/repositories/ICategoryRepository.ts`
-4. **[CreateDTOs]**: Definir os DTOs de entrada para as ações de categoria.
+4. ✅ **[CreateDTOs]**: Definir os DTOs de entrada para as ações de categoria.
    **Arquivos a serem alterados:**
    - `src/core/application/dtos/CreateCategoryDTO.ts`
    - `src/core/application/dtos/UpdateCategoryDTO.ts`
-5. **[ImplementUseCases]**: Criar os casos de uso para criação e atualização, aplicando regras de negócio (como não duplicidade de nome).
+5. ✅ **[ImplementUseCases]**: Criar os casos de uso para criação e atualização, aplicando regras de negócio (como não duplicidade de nome).
    **Arquivos a serem alterados:**
    - `src/core/application/use-cases/CreateCategoryUseCase.ts`
    - `src/core/application/use-cases/UpdateCategoryUseCase.ts`
-6. **[ImplementRepository]**: Implementar as operações do repositório usando o cliente Prisma.
+6. ✅ **[ImplementRepository]**: Implementar as operações do repositório usando o cliente Prisma.
    **Arquivos a serem alterados:**
    - `src/core/infrastructure/database/PrismaCategoryRepository.ts`
-7. **[APIEndpoints]**: Definir as rotas de API para lidar com as requisições do frontend.
+7. ✅ **[APIEndpoints]**: Definir as rotas de API para lidar com as requisições do frontend.
    **Arquivos a serem alterados:**
    - `src/app/api/categories/route.ts`
    - `src/app/api/categories/[id]/route.ts`

@@ -1,3 +1,9 @@
-import { EntityType } from "../EntityType";
+import { Prisma } from "@prisma/client";
 
-export type CategoryType = EntityType<"categories">;
+export type CategoryType = Prisma.categoriesGetPayload<{
+  include: {
+    _count: {
+      select: { products: true };
+    };
+  };
+}>;

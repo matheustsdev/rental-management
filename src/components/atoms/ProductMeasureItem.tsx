@@ -3,6 +3,7 @@
 import { Flex, Text, Status, Accordion } from "@chakra-ui/react";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
+import { EMeasureType } from "@/constants/EMeasureType";
 import { measureFieldsLabels } from "@/constants/MeasureFields";
 import InputField from "./InputField";
 import { Path, useFormContext, useWatch } from "react-hook-form";
@@ -22,6 +23,7 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
   } = useFormContext<RentFormType>();
 
   const mType = productAvailability.categories?.measure_type;
+  const isNoneMeasure = mType === EMeasureType.NONE;
   const labels = mType ? measureFieldsLabels[mType] : measureFieldsLabels.DRESS;
 
   const rentProducts = useWatch({ control, name: "rentProducts" });
@@ -36,8 +38,9 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
       p={2}
       borderRadius="md"
       bg={hasError ? "red.50" : "green.50"}
+      disabled={isNoneMeasure}
     >
-      <Accordion.ItemTrigger>
+      <Accordion.ItemTrigger cursor={isNoneMeasure ? "default" : "pointer"}>
         <Flex align="flex-start" justify="space-between" w="full">
           <Flex flexDir="column">
             <Text fontWeight="bold">{productAvailability.description}</Text>
@@ -60,33 +63,35 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
           </Status.Root>
         </Flex>
       </Accordion.ItemTrigger>
-      <Accordion.ItemContent>
-        <Flex w="full" gap="4" pt="2">
-          {Object.entries(labels).map(([field, label]) => {
-            const productIndex = rentProducts.findIndex((item) => productAvailability.id === item.product_id);
+      {!isNoneMeasure && (
+        <Accordion.ItemContent>
+          <Flex w="full" gap="4" pt="2">
+            {Object.entries(labels).map(([field, label]) => {
+              const productIndex = rentProducts.findIndex((item) => productAvailability.id === item.product_id);
 
-            const name = `rentProducts.${productIndex}.${field}` as Path<RentFormType>;
+              const name = `rentProducts.${productIndex}.${field}` as Path<RentFormType>;
 
-            const fieldName = field as keyof typeof labels;
+              const fieldName = field as keyof typeof labels;
 
-            const inputError =
-              errors.rentProducts && errors.rentProducts[productIndex]
-                ? errors.rentProducts[productIndex][fieldName]
-                : undefined;
+              const inputError =
+                errors.rentProducts && errors.rentProducts[productIndex]
+                  ? errors.rentProducts[productIndex][fieldName]
+                  : undefined;
 
-            return (
-              <InputField
-                key={name}
-                label={label}
-                registerProps={register(name, { valueAsNumber: true })}
-                type="number"
-                step={0.1}
-                error={inputError}
-              />
-            );
-          })}
-        </Flex>
-      </Accordion.ItemContent>
+              return (
+                <InputField
+                  key={name}
+                  label={label}
+                  registerProps={register(name, { valueAsNumber: true })}
+                  type="number"
+                  step={0.1}
+                  error={inputError}
+                />
+              );
+            })}
+          </Flex>
+        </Accordion.ItemContent>
+      )}
     </Accordion.Item>
   );
 };

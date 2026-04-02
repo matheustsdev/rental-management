@@ -1,69 +1,76 @@
-import { prisma } from "@/services/prisma";
-import { TableRow } from "@/types/EntityType";
+import { NextRequest, NextResponse } from "next/server";
 import { DefaultResponse } from "@/utils/models/DefaultResponse";
 import { ErrorResponse } from "@/utils/models/ErrorResponse";
 import { ServerError } from "@/utils/models/ServerError";
-import { NextRequest, NextResponse } from "next/server";
+import { categoryRepository } from "@/core/infrastructure/repositoriesFactory";
+import { ListCategoryUseCase } from "@/core/application/cases/category/ListCategoryUseCase";
+import { CreateCategoryUseCase } from "@/core/application/cases/category/CreateCategoryUseCase";
+import { CreateCategorySchema } from "@/core/application/dtos/CreateCategoryDTO";
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
 
-    const where = searchParams.get("where") ? JSON.parse(searchParams.get("where")!) : undefined;
-
+    const search = searchParams.get("search") ?? undefined;
     const page = Number(searchParams.get("page") || 1);
     const pageSize = Number(searchParams.get("pageSize") || 10);
-    const orderBy = searchParams.get("orderBy") as keyof TableRow<"categories"> | undefined;
+    const orderBy = searchParams.get("orderBy") || undefined;
     const ascending = searchParams.get("ascending") !== "false";
 
-    const start = (page - 1) * pageSize;
+    const useCase = new ListCategoryUseCase(categoryRepository);
 
-    const count = await prisma.categories.count();
-
-    const paginatedCategories = await prisma.categories.findMany({
-        skip: start,
-        take: pageSize,
-        orderBy: {
-          [orderBy ?? "updated_at"]: ascending ? "asc" : "desc"
-        },
-        where,
-        include: {
-          _count: true
-        }
+    const { data, count } = await useCase.execute({
+      search,
+      page,
+      pageSize,
+      orderBy,
+      ascending,
     });
-      
-    const response = new DefaultResponse(paginatedCategories, "Busca de categorias concluída.", page, pageSize, count);
 
-    return NextResponse.json(response, { status: 200 })
+    const response = new DefaultResponse(data, "Busca de categorias concluída.", page, pageSize, count);
+
+    return NextResponse.json(response, { status: 200 });
   } catch (error) {
-    const serverError = new ServerError((error as Error)?.message ?? "Erro ao buscar categorias", 500);
-    const errorResponse = new ErrorResponse(serverError);
+    if (error instanceof ServerError) {
+      return NextResponse.json(new ErrorResponse(error), { status: error.code || 500 });
+    }
 
     return NextResponse.json(
-      errorResponse,
-      { status: errorResponse.errorCode }
+      {
+        error: "Erro ao listar categorias",
+        details: error instanceof Error ? error.message : error,
+      },
+      { status: 500 }
     );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json();
+    const body = await request.json();
+    const validatedData = CreateCategorySchema.parse(body);
 
-    const newCategory = await prisma.categories.create({
-      data
-    })
+    const useCase = new CreateCategoryUseCase(categoryRepository);
+    const newCategory = await useCase.execute(validatedData);
 
-    const response = new DefaultResponse(newCategory, "Categoria criada com suvesso", null, null, null);
+    const response = new DefaultResponse(newCategory, "Categoria criada com sucesso.", null, null, null);
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
-    const serverError = new ServerError((error as Error)?.message ?? "Erro ao criar categorias", 500);
-    const errorResponse = new ErrorResponse(serverError);
+    if (error instanceof ServerError) {
+      return NextResponse.json(new ErrorResponse(error), { status: error.code || 500 });
+    }
+    
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
+       return NextResponse.json({ error: "Erro de validação", details: error }, { status: 400 });
+    }
 
     return NextResponse.json(
-      errorResponse,
-      { status: errorResponse.errorCode }
+      {
+        error: "Erro ao criar categoria",
+        details: error instanceof Error ? error.message : error,
+      },
+      { status: 500 }
     );
   }
 }

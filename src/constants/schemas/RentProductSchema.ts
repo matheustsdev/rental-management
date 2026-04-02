@@ -13,7 +13,7 @@ export const RentProductSchema = z.object({
   actual_return_buffer_days: z
     .number({
       invalid_type_error:
-        "Informe um número válido para actual_return_buffer_days",
+        "Informe um número válido para os dias de preparo real",
     })
     .optional()
     .nullable(),
@@ -42,7 +42,7 @@ export const RentProductSchema = z.object({
     .optional()
     .nullable(),
   measure_type: z.enum(
-    [EMeasureType.DRESS, EMeasureType.SUIT],
+    [EMeasureType.DRESS, EMeasureType.SUIT, EMeasureType.NONE],
     { 
       errorMap: () => ({ message: "Tipo de medida inválido" })
     }

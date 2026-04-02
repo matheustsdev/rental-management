@@ -62,7 +62,7 @@ export class CheckProductAvailabilityUseCase {
         return {
           status: EAvailabilityStatus.BUFFER_OCCUPIED,
           conflictingRent: rent,
-          message: "Este produto estará em período de higienização/buffer.",
+          message: "Este produto estará em período de higienização/preparo.",
         };
       }
     }
