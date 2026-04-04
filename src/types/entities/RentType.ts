@@ -25,3 +25,5 @@ export type RentInsertWithProductDtoType = RentInsertDtoType & {
 export type RentUpdateWithProductDtoType = RentUpdateDtoType & {
   rent_products: RentProductType[],
 };
+
+export type RentSummaryDTO = RentType;

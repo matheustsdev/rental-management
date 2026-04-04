@@ -11,11 +11,12 @@ import { api } from "@/services/api";
 import ReceiptView from "@/components/molecules/ReceiptView";
 import { usePDF } from "@react-pdf/renderer";
 import { ButtonMenuItemsType } from "@/components/atoms/ButtonMenu";
-import { MdDelete, MdEdit, MdOutlineRemoveRedEye, MdCheck } from "react-icons/md";
+import { MdDelete, MdEdit, MdOutlineRemoveRedEye, MdCheck, MdInfo } from "react-icons/md";
 import ConfirmationModal from "@/components/molecules/ConfirmationModal";
 import { ErrorResponse } from "@/utils/models/ErrorResponse";
 import { useDebounce } from "@/hooks/useDebounce";
 import RentReturnModal from "@/components/organisms/RentReturnModal";
+import RentSummaryModal from "@/components/organisms/RentSummaryModal";
 import { ERentStatus } from "@prisma/client";
 import { FaWhatsapp } from "react-icons/fa";
 import dynamic from "next/dynamic";
@@ -32,6 +33,11 @@ const RentPage = () => {
     onOpen: onOpenRentReturnModal,
     open: isOpenRentReturnModal,
   } = useDisclosure();
+  const {
+    onClose: onCloseSummaryModal,
+    onOpen: onOpenSummaryModal,
+    open: isOpenSummaryModal,
+  } = useDisclosure();
 
   const [rents, setRents] = useState<RentType[]>([]);
   const [selectedRent, setSelectedRent] = useState<RentType | null>(null);
@@ -44,6 +50,11 @@ const RentPage = () => {
   const { loading: pdfLoading, url: pdfUrl } = instance;
 
   const menuItems: ButtonMenuItemsType<RentType>[] = [
+    {
+      label: "Ver Resumo",
+      action: (rent) => handleOpenSummaryModal(rent),
+      icon: <MdInfo />,
+    },
     {
       label: "Emitir recibo",
       action: (rent) => handleGetReceipt(rent),
@@ -111,6 +122,11 @@ const RentPage = () => {
   const handleCloseModal = () => {
     setSelectedRent(null);
     onClose();
+  };
+
+  const handleOpenSummaryModal = (rent: RentType) => {
+    setSelectedRent(rent);
+    onOpenSummaryModal();
   };
 
   const handleSaveRent = (rent: RentType, isUpdate: boolean) => {
@@ -247,12 +263,19 @@ const RentPage = () => {
 
       <AddRentModal isOpen={open} onClose={handleCloseModal} onSave={handleSaveRent} rentOnEdit={selectedRent} />
       {selectedRent && (
-        <RentReturnModal
-          rentOnEdit={selectedRent}
-          isOpen={isOpenRentReturnModal}
-          onClose={onCloseRentReturnModal}
-          onSave={() => {}}
-        />
+        <>
+          <RentReturnModal
+            rentOnEdit={selectedRent}
+            isOpen={isOpenRentReturnModal}
+            onClose={onCloseRentReturnModal}
+            onSave={() => {}}
+          />
+          <RentSummaryModal
+            rent={selectedRent}
+            isOpen={isOpenSummaryModal}
+            onClose={onCloseSummaryModal}
+          />
+        </>
       )}
       <ConfirmationModal
         actionLabel="Deletar"
