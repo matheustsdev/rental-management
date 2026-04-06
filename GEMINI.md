@@ -11,7 +11,6 @@ This is a **Rental Management System** - a web application designed to help mana
 - **Contact Customers**: Send messages via WhatsApp to rental customers
 - **Search & Filter**: Quickly find products and rentals
 
----
 
 ## 🎯 Main Objective
 
@@ -23,7 +22,6 @@ The primary goal is to provide a complete digital solution to manage a rental bu
 4. Know when items need to be returned
 5. Generate professional receipts for customers
 
----
 
 ## 🏗️ Project Architecture
 
@@ -53,7 +51,6 @@ What users see and interact with:
   - **Molecules**: Combinations of atoms (search bars, cards, tables)
   - **Organisms**: Complex sections (navigation, modals, forms)
 
----
 
 ## 🗄️ Database Structure
 
@@ -89,7 +86,6 @@ Links products to rentals with specific details
 - Real return date (when customer actually returned it)
 - Buffer days before product is available again
 
----
 
 ## 🖥️ User Interface Pages
 
@@ -114,7 +110,6 @@ Manage the inventory of items
 - Pagination to handle many products
 - Edit product details
 
----
 
 ## 🔧 Technology Stack
 
@@ -150,41 +145,15 @@ Manage the inventory of items
 - **React Icons**: Icon library for UI elements
 - **Next Themes**: Light/dark mode support
 
----
 
 ## 📱 Component Structure
 
 Components are organized using **Atomic Design** principles:
 
-### **Atoms** (`src/components/atoms/`)
-Small, reusable elements:
-- `ButtonMenu.tsx` - Button with dropdown options
-- `ComboBox.tsx` - Searchable dropdown
-- `DefaultInput.tsx` - Standard text input
-- `PrimaryButton.tsx` - Main action button
-- `SearchBar.tsx` - Search input with icon
-- `Select.tsx` - Selection dropdown
-- `Tag.tsx` - Label/badge component
-- `Toaster.tsx` - Notifications system
+- **Atoms** (`src/components/atoms/`): Small, reusable elements
+- **Molecules** (`src/components/molecules/`): Combinations of atoms
+- **Organisms** (`src/components/organisms/`): Complex, feature-rich sections
 
-### **Molecules** (`src/components/molecules/`)
-Combinations of atoms:
-- `DataTable.tsx` - Reusable table component
-- `ProductCard.tsx` - Card showing product info
-- `RentCard.tsx` - Card showing rental info
-- `AddProductModal.tsx` - Form to add new product
-- `AddRentModal.tsx` - Form to create new rental
-- `ProductSearchInput.tsx` - Search box for products
-- `ReceiptView.tsx` - PDF receipt display
-
-### **Organisms** (`src/components/organisms/`)
-Complex, feature-rich sections:
-- `AddRentModal.tsx` - Complete rental creation form
-- `RentReturnModal.tsx` - Mark item as returned
-- `AddProductModal.tsx` - Complete product creation form
-- `Navbar.tsx` - Navigation menu
-
----
 
 ## 🚀 API Endpoints
 
@@ -211,7 +180,6 @@ The application provides REST API endpoints for all operations:
 ### **Availability** (`/api/availability`)
 - Checks if a product is available during a specific date range
 
----
 
 ## 📊 Key Features Explained
 
@@ -228,6 +196,7 @@ Each rental can store custom measurements for items (especially important for cl
 
 ### **Rental Status**
 - **SCHEDULED**: Booking is confirmed, customer will pick up items
+- **IN_PROGRESS**: Customer has picked up items
 - **FINISHED**: Customer has returned all items
 
 ### **Discounts**
@@ -244,7 +213,6 @@ After a product is returned, there's a buffer period before it can be rented aga
 ### **Soft Deletes**
 Items aren't permanently deleted - they're marked as deleted with a timestamp, so you can recover them if needed
 
----
 
 ## 🔄 How Data Flows
 
@@ -274,7 +242,6 @@ Items aren't permanently deleted - they're marked as deleted with a timestamp, s
 3. React PDF renders a formatted receipt
 4. User can view or download as PDF
 
----
 
 ## 🛠️ How to Run Locally
 
@@ -293,13 +260,14 @@ npm run dev
 The app runs on `http://localhost:3000`
 
 ### **Available Scripts**
-- `npm run dev` - Start development server
-- `npm run build` - Create production build
-- `npm run start` - Run production build
-- `npm run lint` - Check code quality
-- `npm run typegen` - Generate Supabase types
+- `yarn dev` - Start development server
+- `yarn build` - Create production build
+- `yarn start` - Run production build
+- `yarn lint` - Check code quality
+- `yarn typegen` - Generate Supabase types
+- `yarn lint-fix` - Fix linting errors
+- `yarn test` - Run tests
 
----
 
 ## 📁 Project Structure Summary
 
@@ -331,26 +299,32 @@ rental-management/
 └── tests/                      # Tests files
 ```
 
----
 
 ## 🔐 Key Patterns Used
 
-### **Repository Pattern**
-Database operations are abstracted behind repository interfaces, making it easy to change the data source
+- **Repository Pattern**: Database operations are abstracted behind repository interfaces, making it easy to change the data source
 
-### **Use Cases**
-All business operations are separate classes (CreateRent, ListRent, UpdateRent, etc.) making code organized and testable
+- **Use Cases**: All business operations are separate classes (CreateRent, ListRent, UpdateRent, etc.) making code organized and testable
 
-### **DTOs (Data Transfer Objects)**
-Data is transformed to match what each layer needs, preventing exposure of internal details
+- **DTOs (Data Transfer Objects)**: Data is transformed to match what each layer needs, preventing exposure of internal details
 
-### **Type Safety**
-Everything is written in TypeScript, catching errors during development instead of runtime
+- **Type Safety**: Everything is written in TypeScript, catching errors during development instead of runtime
 
-### **Soft Deletes**
-Items marked as deleted remain in the database (with a deleted_at timestamp) for audit trails and recovery
+- **Soft Deletes**: Items marked as deleted remain in the database (with a deleted_at timestamp) for audit trails and recovery
 
----
+- **Validation**: All data is validated using Zod schemas before being processed
+
+- **Clean Architecture**: The application follows the clean architecture pattern, with separate layers for domain, application, and infrastructure
+
+- **Atomic Design**
+The application follows the atomic design pattern, with separate layers for atoms, molecules, and organisms
+
+- **Testing**: The application follows the testing pattern, with separate layers for unit tests, integration tests, and e2e tests
+
+- **Documentation**: The application follows the documentation pattern, with separate layers for API documentation, component documentation, and usage documentation
+
+- **Strong Typing**: The application follows the strong typing pattern, with separate layers for type definitions, type checking, and type inference (no any or unknown).
+
 
 ## 💡 For AI Agents and Developers
 
@@ -367,7 +341,6 @@ Items marked as deleted remain in the database (with a deleted_at timestamp) for
 9. **Search is debounced** - To improve performance, search waits 300ms before making requests
 10. **Soft deletes** - Check the `deleted` field when querying to exclude deleted items
 
----
 
 ## 🎓 Learning the Codebase
 

@@ -23,6 +23,7 @@ Você opera coordenando as seguintes skills especializadas contidas no `.gemini/
 - **Validation**: Nunca considere uma tarefa pronta sem validar os testes.
 - **Type strong**: NUNCA use `any` nas tipagens. NUNCA.
 - **Code preferences**: Use o arquivo de guia `.gemini/styleguide.md` para regras de preferência de código
+- **Yarn**: Sempre que for necessário executar um comando que utilize o yarn, utilize o comando `yarn` e não `npm`.
 
 ## Ciclo de Vida da Tarefa
 
