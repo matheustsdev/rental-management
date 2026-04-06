@@ -44,14 +44,17 @@ const ProductResumeItem: React.FC<IProductResumeItemProps> = ({ productAvailabil
               Ref: {productAvailability.reference} | {new Currency(productAvailability.price).toString()}
             </Text>
           </Flex>
-          <Status.Root
-            colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}
-          >
-            <Text fontSize="xs">
-              {productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "Disponível" : "Alugado"}
-            </Text>
-            <Status.Indicator />
-          </Status.Root>
+          <Flex align="center" gap="4">
+            <Status.Root
+              colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}
+            >
+              <Text fontSize="xs">
+                {productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "Disponível" : "Alugado"}
+              </Text>
+              <Status.Indicator />
+            </Status.Root>
+            <Accordion.ItemIndicator />
+          </Flex>
         </Flex>
       </Accordion.ItemTrigger>
       <Accordion.ItemContent>

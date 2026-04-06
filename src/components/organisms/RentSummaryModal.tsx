@@ -40,14 +40,12 @@ const RentSummaryModal: React.FC<IRentSummaryModalProps> = ({ isOpen, onClose, r
 
             <Dialog.Footer pt="6">
               <Flex w="full" justify="flex-end">
-                <Dialog.CloseTrigger asChild>
                   <SecondaryButton onClick={onClose}>Fechar</SecondaryButton>
-                </Dialog.CloseTrigger>
               </Flex>
             </Dialog.Footer>
 
             <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" position="absolute" top="4" right="4" />
+              <CloseButton size="2xl" position="absolute" top="2" right="4" _hover={{ bg: "transparent" }} />
             </Dialog.CloseTrigger>
           </Dialog.Content>
         </Dialog.Positioner>

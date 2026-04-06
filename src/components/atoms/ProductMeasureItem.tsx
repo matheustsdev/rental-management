@@ -53,14 +53,17 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
               </Text>
             )}
           </Flex>
-          <Status.Root
-            colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}
-          >
-            <Text fontSize="xs">
-              {productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "Disponível" : "Alugado"}
-            </Text>
-            <Status.Indicator />
-          </Status.Root>
+          <Flex align="center" gap="4">
+            <Status.Root
+              colorPalette={productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "green" : "red"}
+            >
+              <Text fontSize="xs">
+                {productAvailability.availability === EAvailabilityStatus.AVAILABLE ? "Disponível" : "Alugado"}
+              </Text>
+              <Status.Indicator />
+            </Status.Root>
+            {!isNoneMeasure && <Accordion.ItemIndicator />}
+          </Flex>
         </Flex>
       </Accordion.ItemTrigger>
       {!isNoneMeasure && (
