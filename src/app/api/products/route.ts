@@ -5,9 +5,11 @@ import { ErrorResponse } from "@/utils/models/ErrorResponse";
 import { ListProductUseCase, ListProductUseCaseInputType } from "@/core/application/cases/product/ListProductUseCase";
 import { productRepository } from "@/core/infrastructure/repositoriesFactory";
 import { ServerError } from "@/utils/models/ServerError";
-import { ProductInsertDtoType, ProductUpdateDtoType } from "@/types/entities/ProductType";
+import { ProductUpdateDtoType } from "@/types/entities/ProductType";
 import { CreateProductUseCase } from "@/core/application/cases/product/CreateProductUseCase";
 import { UpdateProductUseCase } from "@/core/application/cases/product/UpdateProductUseCase";
+import { ZodError } from "zod";
+import { CreateProductDTO } from "@/core/application/dtos/CreateProductDTO";
 
 export async function GET(request: NextRequest) {
   try {
@@ -80,7 +82,7 @@ export async function PUT(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = (await request.json()) as ProductInsertDtoType;
+    const body = (await request.json()) as CreateProductDTO;
 
     const useCase = new CreateProductUseCase(productRepository);
     const newProduct = await useCase.execute(body);
@@ -89,10 +91,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
+    if (error instanceof ZodError) {
+      const serverError = new ServerError(error.errors[0].message, 400);
+      const errorResponse = new ErrorResponse(serverError);
+
+      return NextResponse.json(errorResponse, { status: 400 });
+    }
+
     if (error instanceof ServerError) {
       const errorResponse = new ErrorResponse(error);
 
-      return NextResponse.json(errorResponse);
+      return NextResponse.json(errorResponse, { status: error.code });
     }
 
     return NextResponse.json(

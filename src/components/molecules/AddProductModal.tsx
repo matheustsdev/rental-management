@@ -9,20 +9,18 @@ import { api } from "@/services/api";
 import { useEffect, useRef, useState } from "react";
 import Select from "@/components/atoms/Select";
 import { CategoryType } from "@/types/entities/CategoryType";
-import {
-  ProductInsertWithCategoryDtoType,
-  ProductType,
-  ProductUpdateWithCategoryDtoType,
-} from "@/types/entities/ProductType";
+import { ProductType, ProductUpdateWithCategoryDtoType } from "@/types/entities/ProductType";
 import PrimaryButton from "@/components/atoms/PrimaryButton";
 import SecondaryButton from "@/components/atoms/SecondaryButton";
+import { CreateProductDTO } from "@/core/application/dtos/CreateProductDTO";
+import { handleFrontendError } from "@/utils/handleFrontendError";
 
 const productSchema = z.object({
-  description: z.string().min(10, "Campo deve possuir, no mínimo, 10 caracteres"),
-  categoryId: z.string().uuid(),
-  price: z.number({ invalid_type_error: "Preço inválido" }).positive("O campo deve ser maior que 0"),
-  receiptDescription: z.string().min(2, "Campo deve possuir, no mínimo, 3 caracteres"),
-  reference: z.string().min(3, "Campo deve possuir, no mínimo, 3 caracteres"),
+  description: z.string().trim().min(2, "A descrição deve possuir no mínimo 2 caracteres"),
+  categoryId: z.string().uuid("Selecione uma categoria"),
+  price: z.number({ invalid_type_error: "Preço inválido" }).positive("O preço deve ser maior que 0"),
+  receiptDescription: z.string().trim().optional().or(z.literal("")),
+  reference: z.string().trim().min(2, "A referência deve possuir no mínimo 2 caracteres"),
 });
 
 type ProductFormType = z.infer<typeof productSchema>;
@@ -48,6 +46,13 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
     formState: { errors },
   } = useForm<ProductFormType>({
     resolver: zodResolver(productSchema),
+    defaultValues: {
+      description: "",
+      categoryId: "",
+      price: undefined,
+      receiptDescription: "",
+      reference: "",
+    },
   });
   const categoryId = useWatch({ control, name: "categoryId" });
   const contentRef = useRef<HTMLDivElement>(null);
@@ -58,7 +63,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
 
       const { categoryId, description, receiptDescription, price, reference } = data;
 
-      const productInsertData: ProductInsertWithCategoryDtoType = {
+      const productInsertData: CreateProductDTO = {
         price,
         reference,
         description,
@@ -66,30 +71,24 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
         receipt_description: receiptDescription,
       };
 
-      if (productOnEdit) {
-        await api.patch(`products/${productOnEdit.id}`, productInsertData);
-      }
-
       const newProductRequest = await api.post("products", productInsertData);
 
-      if (newProductRequest.status !== 201) throw new Error(newProductRequest.statusText);
+      if (newProductRequest.status !== 201)
+        throw new Error(newProductRequest.data?.message ?? newProductRequest.statusText);
 
       toaster.create({
         type: "success",
         title: "Produto cadastrado!",
+        description: newProductRequest.data.message,
       });
 
-      onSave(newProductRequest.data);
+      onSave(newProductRequest.data.data);
 
       reset();
 
       if (!isInfiniteAdd) onClose();
     } catch (e: unknown) {
-      toaster.create({
-        type: "error",
-        title: "Erro ao salvar",
-        description: (e as Error).message,
-      });
+      handleFrontendError(e, "Erro ao salvar");
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +115,8 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
 
       toaster.create({
         type: "success",
-        title: updatedProductRequest.data.message,
+        title: "Produto atualizado!",
+        description: updatedProductRequest.data.message,
       });
 
       onSave(updatedProductRequest.data.data);
@@ -125,11 +125,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
 
       if (!isInfiniteAdd) onClose();
     } catch (e: unknown) {
-      toaster.create({
-        type: "error",
-        title: "Erro ao salvar",
-        description: (e as Error).message,
-      });
+      handleFrontendError(e, "Erro ao salvar");
     } finally {
       setIsLoading(false);
     }
@@ -147,11 +143,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
 
       setCategories(categoriesList);
     } catch (e: unknown) {
-      toaster.create({
-        type: "error",
-        title: "Erro ao buscar categorias",
-        description: (e as Error).message,
-      });
+      handleFrontendError(e, "Erro ao buscar categorias");
     }
   };
 

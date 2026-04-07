@@ -1,9 +1,11 @@
 import { CreateProductUseCase } from "@/core/application/cases/product/CreateProductUseCase";
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { mockDeep, MockProxy } from "jest-mock-extended";
-import { ProductInsertDtoType, ProductType } from "@/types/entities/ProductType";
+import { ProductType } from "@/types/entities/ProductType";
 import { Decimal } from "@prisma/client/runtime/library";
 import { getRandomProductType } from "../../../utils/factories";
+import { CreateProductDTO } from "@/core/application/dtos/CreateProductDTO";
+import { faker } from "@faker-js/faker";
 
 describe("Create product use case", () => {
   let useCase: CreateProductUseCase;
@@ -15,24 +17,38 @@ describe("Create product use case", () => {
   });
 
   it("should create a product with valid fields", async () => {
-    const input: ProductInsertDtoType = {
+    const categoryId = faker.string.uuid();
+    const input: CreateProductDTO = {
       reference: "SUIT-01",
       description: "Elegant Blue Suit",
-      price: new Decimal(150),
+      category_id: categoryId,
+      price: 150,
+      receipt_description: "Elegant Blue Suit Receipt",
     };
 
-    // Fix: Cast input to any or omit incompatible Prisma nested fields before spreading
-    // Since input only contains compatible primitives/Decimals, we can safely cast the override object
     const expectedProduct: ProductType = getRandomProductType({ 
       reference: input.reference,
-      description: input.description as string,
-      price: input.price as Decimal
+      description: input.description,
+      price: new Decimal(input.price),
+      category_id: input.category_id,
+      receipt_description: input.receipt_description
     });
+    
     productRepo.create.mockResolvedValue(expectedProduct);
 
     const result = await useCase.execute(input);
 
     expect(result).toEqual(expectedProduct);
-    expect(productRepo.create).toHaveBeenCalledWith(input);
+    expect(productRepo.create).toHaveBeenCalledWith({
+      reference: input.reference,
+      description: input.description,
+      receipt_description: input.receipt_description,
+      price: input.price,
+      categories: {
+        connect: {
+          id: input.category_id
+        }
+      }
+    });
   });
 });

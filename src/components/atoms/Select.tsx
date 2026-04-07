@@ -41,13 +41,12 @@ const Select: React.FC<IListSelectProps> = ({
     itemToValue: (item) => item.value,
   });
 
-
   return (
     <ChakraSelect.Root
       collection={optionsCollection}
       size={size}
       width={width}
-      value={selectedValue ? [selectedValue] : undefined}
+      value={selectedValue ? [selectedValue] : []}
       onValueChange={(item) => onChange(item.value[0])}
       disabled={isDisabled}
       required={isRequired}
