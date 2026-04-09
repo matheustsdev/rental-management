@@ -9,6 +9,11 @@ export class FindRentUseCase {
   async execute(id: string): Promise<RentType | null> {
     const rent = await this.rentalRepo.find(id);
 
-    return rent;
+    if (!rent) return null;
+
+    return {
+      ...rent,
+      remaining_balance: Number(rent.remaining_value)
+    };
   }
 }

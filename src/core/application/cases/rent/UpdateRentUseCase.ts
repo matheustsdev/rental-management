@@ -77,15 +77,38 @@ export class UpdateRentUseCase {
         }
     }
 
-    // 4. Construir o payload de atualização
+    // 4. Calcular novos valores financeiros
+    let subtotal = 0;
+    const finalProducts = rent_products || existingRent.rent_products;
+    
+    for (const rp of finalProducts) {
+      subtotal += Number(rp.product_price);
+    }
+
+    const discountType = (input.discount_type !== undefined ? input.discount_type : existingRent.discount_type) as string;
+    const discountValue = Number(input.discount_value !== undefined ? input.discount_value : existingRent.discount_value);
+    const signalValue = Number(input.signal_value !== undefined ? input.signal_value : existingRent.signal_value);
+
+    let totalValue = subtotal;
+    if (discountType === "PERCENTAGE") {
+      totalValue = subtotal * (1 - (discountValue / 100));
+    } else if (discountType === "FIXED") {
+      totalValue = Math.max(0, subtotal - discountValue);
+    }
+
+    const remainingValue = Math.max(0, totalValue - signalValue);
+
+    // 5. Construir o payload de atualização
     const updateRentPayload: Prisma.rentsUpdateInput = {
       ...restOfInput,
+      total_value: new Prisma.Decimal(totalValue),
+      remaining_value: new Prisma.Decimal(remainingValue),
       ...(rent_date && { rent_date }),
       ...(return_date && { return_date }),
       ...(status && { status }),
     };
 
-    // 5. Atualizar produtos se necessário
+    // 6. Atualizar produtos se necessário
     if (rent_products) {
       await this.rentRepository.deleteRentProducts(id);
 
@@ -102,6 +125,11 @@ export class UpdateRentUseCase {
       updateRentPayload.rent_products = rentProductsInsertPayload;
     }
     
-    return await this.rentRepository.update(id, updateRentPayload);
+    const updatedRent = await this.rentRepository.update(id, updateRentPayload);
+
+    return {
+      ...updatedRent,
+      remaining_balance: Number(updatedRent.remaining_value)
+    };
   }
 }

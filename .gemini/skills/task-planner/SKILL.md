@@ -1,6 +1,6 @@
 ---
 name: task-planner
-description: Especialista em planejamento de tarefas e arquitetura. Use para analisar novos requisitos e gerar planos detalhados de desenvolvimento, teste e documentação.
+description: Especialista em planejamento de tarefas e arquitetura. Use para analisar novos requisitos, gerar planos detalhados de desenvolvimento, teste e documentação, criar planejamento de tarefas/task.
 ---
 
 # Task Planner Skill

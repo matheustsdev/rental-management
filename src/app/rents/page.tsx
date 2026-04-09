@@ -33,11 +33,7 @@ const RentPage = () => {
     onOpen: onOpenRentReturnModal,
     open: isOpenRentReturnModal,
   } = useDisclosure();
-  const {
-    onClose: onCloseSummaryModal,
-    onOpen: onOpenSummaryModal,
-    open: isOpenSummaryModal,
-  } = useDisclosure();
+  const { onClose: onCloseSummaryModal, onOpen: onOpenSummaryModal, open: isOpenSummaryModal } = useDisclosure();
 
   const [rents, setRents] = useState<RentType[]>([]);
   const [selectedRent, setSelectedRent] = useState<RentType | null>(null);
@@ -47,7 +43,7 @@ const RentPage = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { value: debounce, isLoading: isLoadingDebounce } = useDebounce(searchText, 300);
 
-  const { loading: pdfLoading, url: pdfUrl } = instance;
+  const { loading: pdfLoading, url: pdfUrl, error: pdfError } = instance;
 
   const menuItems: ButtonMenuItemsType<RentType>[] = [
     {
@@ -59,6 +55,7 @@ const RentPage = () => {
       label: "Emitir recibo",
       action: (rent) => handleGetReceipt(rent),
       icon: <MdOutlineRemoveRedEye />,
+      getIsLoading: (rent) => pdfLoading && selectedRent?.id === rent.id,
     },
     {
       label: "Editar",
@@ -122,6 +119,21 @@ const RentPage = () => {
   const handleCloseModal = () => {
     setSelectedRent(null);
     onClose();
+  };
+
+  const handleCloseDeleteConfirmation = () => {
+    setSelectedRent(null);
+    onCloseDeleteConfirmation();
+  };
+
+  const handleCloseRentReturnModal = () => {
+    setSelectedRent(null);
+    onCloseRentReturnModal();
+  };
+
+  const handleCloseSummaryModal = () => {
+    setSelectedRent(null);
+    onCloseSummaryModal();
   };
 
   const handleOpenSummaryModal = (rent: RentType) => {
@@ -216,6 +228,18 @@ const RentPage = () => {
   }, [pdfLoading, pdfUrl, downloadRequested]);
 
   useEffect(() => {
+    if (pdfError && downloadRequested) {
+      toaster.create({
+        type: "error",
+        title: "Erro ao gerar recibo",
+        description: "Não foi possível gerar o recibo no momento. Verifique os dados do aluguel.",
+      });
+      setDownloadRequested(false);
+      setSelectedRent(null);
+    }
+  }, [pdfError]);
+
+  useEffect(() => {
     handleSearchTextChange(debounce);
   }, [debounce, handleSearchTextChange]);
 
@@ -267,20 +291,16 @@ const RentPage = () => {
           <RentReturnModal
             rentOnEdit={selectedRent}
             isOpen={isOpenRentReturnModal}
-            onClose={onCloseRentReturnModal}
+            onClose={handleCloseRentReturnModal}
             onSave={() => {}}
           />
-          <RentSummaryModal
-            rent={selectedRent}
-            isOpen={isOpenSummaryModal}
-            onClose={onCloseSummaryModal}
-          />
+          <RentSummaryModal rent={selectedRent} isOpen={isOpenSummaryModal} onClose={handleCloseSummaryModal} />
         </>
       )}
       <ConfirmationModal
         actionLabel="Deletar"
         isOpen={isOpenDeleteConfirmation}
-        onClose={onCloseDeleteConfirmation}
+        onClose={handleCloseDeleteConfirmation}
         message={`Deseja deletar o aluguel de código ${selectedRent?.code ?? ""}`}
         onClickActionButton={() => deleteRent(selectedRent?.id ?? "")}
       />

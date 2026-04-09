@@ -20,6 +20,8 @@ describe("Create rent use case", () => {
     rentalRepo = mockDeep<IRentalRepository>();
     productRepo = mockDeep<IProductRepository>();
     useCase = new CreateRentUseCase(rentalRepo, productRepo);
+
+    rentalRepo.create.mockImplementation(async (data) => getRandomRent(data as any));
   });
 
   const validRentInput: RentInsertWithProductDtoType = {

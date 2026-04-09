@@ -77,6 +77,9 @@ export class CreateRentUseCase {
     // 4. Criar o aluguel no banco de dados
     const newRent = await this.rentalRepo.create(insertRentPayload);
 
-    return newRent;
+    return {
+      ...newRent,
+      remaining_balance: Number(newRent.remaining_value)
+    };
   }
 }

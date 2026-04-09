@@ -14,6 +14,12 @@ export class ListRentUseCase {
     const count = await this.rentalRepo.count(input);
     const data = await this.rentalRepo.list(input);
 
-    return { data, count };
+    return { 
+      data: data.map(rent => ({
+        ...rent,
+        remaining_balance: Number(rent.remaining_value)
+      })), 
+      count 
+    };
   }
 }

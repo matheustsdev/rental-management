@@ -13,7 +13,9 @@ export type RentType = Prisma.rentsGetPayload<{
       }
     }
   }
-}>;
+}> & {
+  remaining_balance?: number;
+};
 
 export type RentInsertDtoType = Prisma.rentsCreateInput;
 export type RentUpdateDtoType = Prisma.rentsUpdateInput;

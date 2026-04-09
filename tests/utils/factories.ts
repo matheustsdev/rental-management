@@ -43,6 +43,7 @@ export const getRandomRent = (overrides?: Partial<RentType>): RentType => {
     receipt_observations: overrides?.receipt_observations ?? faker.lorem.sentence(),
     real_return_date: overrides?.real_return_date ?? null,
     rent_products: overrides?.rent_products ?? [],
+    remaining_balance: overrides?.remaining_balance ?? Number(overrides?.remaining_value ?? 0),
   } as RentType;
 };
 
