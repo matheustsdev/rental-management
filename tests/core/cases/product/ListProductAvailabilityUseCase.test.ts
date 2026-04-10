@@ -22,6 +22,21 @@ describe("List product availability use case", () => {
     const result = await useCase.execute(searchText, startDate, endDate);
 
     expect(result.data).toEqual([]);
-    expect(productRepo.listWithAvailability).toHaveBeenCalledWith(searchText, startDate, endDate);
+    expect(productRepo.listWithAvailability).toHaveBeenCalledWith(searchText, startDate, endDate, undefined);
+  });
+
+  it("should pass excludeRentId when provided", async () => {
+    const startDate = new Date("2025-03-01");
+    const endDate = new Date("2025-03-10");
+    const searchText = "dress";
+    const excludeRentId = "rent-123";
+
+    productRepo.listWithAvailability.mockResolvedValue([]);
+    productRepo.count.mockResolvedValue(0);
+
+    const result = await useCase.execute(searchText, startDate, endDate, excludeRentId);
+
+    expect(result.data).toEqual([]);
+    expect(productRepo.listWithAvailability).toHaveBeenCalledWith(searchText, startDate, endDate, excludeRentId);
   });
 });

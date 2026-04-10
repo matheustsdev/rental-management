@@ -14,7 +14,7 @@ export type ProductListInput = {
 export interface IProductRepository {
   create(data: Prisma.productsCreateInput): Promise<ProductType>;
   list(params: ProductListInput): Promise<ProductType[]>;
-  listWithAvailability(searchText: string, startDate: Date, endDate: Date): Promise<ProductAvailabilityType[]>;
+  listWithAvailability(searchText: string, startDate: Date, endDate: Date, excludeRentId?: string): Promise<ProductAvailabilityType[]>;
   update(id: string, data: Prisma.productsUpdateInput): Promise<ProductType>;
   findById(id: string): Promise<Product | null>;
   count(where?: Prisma.productsWhereInput): Promise<number>;

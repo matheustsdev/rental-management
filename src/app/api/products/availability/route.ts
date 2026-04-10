@@ -8,11 +8,12 @@ export async function GET(request: NextRequest) {
     const search = params.get("search"); 
     const startDate = params.get("startDate");
     const endDate = params.get("endDate");
+    const excludeRentId = params.get("excludeRentId") ?? undefined;
 
     if (!startDate || !endDate) throw new Error("Informe a data de aluguel e de retorno");
 
     const useCase = new ListProductAvailabilityUseCase(productRepository);
-    const response = await useCase.execute(search ?? "", new Date(startDate), new Date(endDate));
+    const response = await useCase.execute(search ?? "", new Date(startDate), new Date(endDate), excludeRentId);
 
     return NextResponse.json(response, { status: 200 });
   } catch (error) {

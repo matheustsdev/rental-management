@@ -59,7 +59,7 @@ export class PrismaProductRepository implements IProductRepository {
   });
 }
 
-  async listWithAvailability(searchText: string, startDate: Date, endDate: Date): Promise<ProductAvailabilityType[]> {
+  async listWithAvailability(searchText: string, startDate: Date, endDate: Date, excludeRentId?: string): Promise<ProductAvailabilityType[]> {
     const products = await this.prisma.products.findMany({
       where: {
         deleted: false,
@@ -85,7 +85,8 @@ export class PrismaProductRepository implements IProductRepository {
         categories: true,
         rent_products: {
           where: {
-            deleted: false
+            deleted: false,
+            ...(excludeRentId && { rent_id: { not: excludeRentId } })
           },
           include: {
             rent: true,
