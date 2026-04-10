@@ -196,9 +196,9 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
 
   // Financial calculations
   const subtotal = rent_products.reduce((acc, item) => acc + Number(item.product_price), 0);
-  const discount = discount_value ?? 0;
-  const signal = signal_value ?? 0;
-  const remainingBalance = Math.max(0, Number(total_value) - Number(signal));
+  const discount = Number(discount_value) ?? 0;
+  const signal = Number(signal_value) ?? 0;
+  const remainingBalance = Math.max(0, Number(total_value) - signal) - discount;
 
   const currentObservations = isStoreVia ? internal_observations : receipt_observations;
 
