@@ -337,13 +337,17 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
 
   const loadProducts = async () => {
     try {
+      const params: Record<string, string> = {
+        startDate: rentDate,
+        endDate: returnDate,
+      };
+
+      if (rentOnEdit?.id) {
+        params.excludeRentId = rentOnEdit.id;
+      }
+
       const productsListRequest = (
-        await api.get("/products/availability", {
-          params: {
-            startDate: rentDate,
-            endDate: returnDate,
-          },
-        })
+        await api.get("/products/availability", { params })
       ).data;
 
       methods.setValue("allAvailableProducts", productsListRequest.data);
