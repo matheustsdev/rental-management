@@ -166,9 +166,9 @@ describe("Update rent use case", () => {
         waist: new Decimal(70),
         hip: new Decimal(92),
         shoulder: new Decimal(38),
-        sleeve: null,
-        height: null,
-        back: null,
+        sleeve: new Decimal(55),
+        height: new Decimal(170),
+        back: new Decimal(36),
         rent_id: "rent-1",
         created_at: new Date(),
         deleted: false,
@@ -189,6 +189,9 @@ describe("Update rent use case", () => {
         waist: 70,
         hip: 92,
         shoulder: 38,
+        sleeve: 55,
+        height: 170,
+        back: 36,
       }]
     };
 
@@ -205,6 +208,9 @@ describe("Update rent use case", () => {
               waist: new Prisma.Decimal(70),
               hip: new Prisma.Decimal(92),
               shoulder: new Prisma.Decimal(38),
+              sleeve: new Prisma.Decimal(55),
+              height: new Prisma.Decimal(170),
+              back: new Prisma.Decimal(36),
             })])
           })
         })
