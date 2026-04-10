@@ -63,6 +63,13 @@ export class CreateRentUseCase {
           product_price: rp.product_price,
           product_description: rp.product_description,
           measure_type: rp.measure_type,
+          bust: rp.bust != null ? new Prisma.Decimal(rp.bust) : undefined,
+          waist: rp.waist != null ? new Prisma.Decimal(rp.waist) : undefined,
+          hip: rp.hip != null ? new Prisma.Decimal(rp.hip) : undefined,
+          shoulder: rp.shoulder != null ? new Prisma.Decimal(rp.shoulder) : undefined,
+          sleeve: rp.sleeve != null ? new Prisma.Decimal(rp.sleeve) : undefined,
+          height: rp.height != null ? new Prisma.Decimal(rp.height) : undefined,
+          back: rp.back != null ? new Prisma.Decimal(rp.back) : undefined,
         })),
       },
     };

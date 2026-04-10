@@ -2,7 +2,7 @@ import { CreateRentUseCase } from "@/core/application/cases/rent/CreateRentUseCa
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { mockDeep, MockProxy } from "jest-mock-extended";
-import { getRandomProduct, getRandomRent } from "../../../utils/factories";
+import { getRandomProduct, getRandomRent, getRandomProductType, getRandomCategory } from "../../../utils/factories";
 import { RentInsertWithProductDtoType, RentType } from "@/types/entities/RentType";
 import { startOfDay, addDays, subDays } from "date-fns";
 import { Decimal } from "@prisma/client/runtime/library";
@@ -190,5 +190,68 @@ describe("Create rent use case", () => {
     expect(rentalRepo.create).toHaveBeenCalledWith(expect.objectContaining({
       total_value: new Decimal(125),
     }));
+  });
+
+  it("should save product measurements when creating rent", async () => {
+    const mockProduct = getRandomProductType({ id: "product-1", categories: { ...getRandomCategory(), measure_type: measures_type.SUIT } });
+    productRepo.findById.mockResolvedValue(mockProduct);
+    rentalRepo.findActiveByProduct.mockResolvedValue([]);
+    rentalRepo.create.mockResolvedValue(getRandomRent({
+      rent_products: [{
+        id: "rp-1",
+        product_id: "product-1",
+        product_price: new Decimal(100),
+        product_description: "Test",
+        measure_type: measures_type.SUIT,
+        bust: new Decimal(90),
+        waist: new Decimal(80),
+        hip: new Decimal(95),
+        shoulder: new Decimal(40),
+        sleeve: new Decimal(55),
+        height: new Decimal(170),
+        back: new Decimal(38),
+        rent_id: "rent-1",
+        created_at: new Date(),
+        deleted: false,
+        deleted_at: null,
+        real_return_buffer_days: null,
+        real_return_date: null,
+      }]
+    }));
+
+    const input: RentInsertWithProductDtoType = {
+      client_name: "Test",
+      rent_date: "2025-03-01T00:00:00.000Z",
+      return_date: "2025-03-05T00:00:00.000Z",
+      total_value: new Decimal(100),
+      rent_products: [{
+        product_id: "product-1",
+        product_price: new Decimal(100),
+        product_description: "Test",
+        measure_type: measures_type.SUIT,
+        bust: 90,
+        waist: 80,
+        hip: 95,
+        shoulder: 40,
+        sleeve: 55,
+        height: 170,
+        back: 38,
+      }]
+    };
+
+    await useCase.execute(input);
+
+    expect(rentalRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        rent_products: expect.objectContaining({
+          createMany: expect.objectContaining({
+            data: expect.arrayContaining([expect.objectContaining({
+              bust: expect.any(Prisma.Decimal),
+              waist: expect.any(Prisma.Decimal),
+            })])
+          })
+        })
+      })
+    );
   });
 });
