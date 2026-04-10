@@ -248,6 +248,11 @@ describe("Create rent use case", () => {
             data: expect.arrayContaining([expect.objectContaining({
               bust: expect.any(Prisma.Decimal),
               waist: expect.any(Prisma.Decimal),
+              hip: expect.any(Prisma.Decimal),
+              shoulder: expect.any(Prisma.Decimal),
+              sleeve: expect.any(Prisma.Decimal),
+              height: expect.any(Prisma.Decimal),
+              back: expect.any(Prisma.Decimal),
             })])
           })
         })
