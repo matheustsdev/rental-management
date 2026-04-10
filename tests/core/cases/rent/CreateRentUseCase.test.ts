@@ -246,13 +246,13 @@ describe("Create rent use case", () => {
         rent_products: expect.objectContaining({
           createMany: expect.objectContaining({
             data: expect.arrayContaining([expect.objectContaining({
-              bust: expect.any(Prisma.Decimal),
-              waist: expect.any(Prisma.Decimal),
-              hip: expect.any(Prisma.Decimal),
-              shoulder: expect.any(Prisma.Decimal),
-              sleeve: expect.any(Prisma.Decimal),
-              height: expect.any(Prisma.Decimal),
-              back: expect.any(Prisma.Decimal),
+              bust: new Prisma.Decimal(90),
+              waist: new Prisma.Decimal(80),
+              hip: new Prisma.Decimal(95),
+              shoulder: new Prisma.Decimal(40),
+              sleeve: new Prisma.Decimal(55),
+              height: new Prisma.Decimal(170),
+              back: new Prisma.Decimal(38),
             })])
           })
         })
