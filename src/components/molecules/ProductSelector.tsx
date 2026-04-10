@@ -25,6 +25,8 @@ const ProductSelector: React.FC = () => {
   const returnDate = useWatch({ control, name: "returnDate" });
   const availableProducts = useWatch({ control, name: "allAvailableProducts" });
 
+  const forceSelectedIds = products?.map((rp) => rp.product_id) ?? [];
+
   const toggleProductSelection = (productAvailability: ProductAvailabilityType) => {
     const newFormProduct: RentProductInsertWithProductDtoType = {
       id: productAvailability.id,
@@ -115,6 +117,7 @@ const ProductSelector: React.FC = () => {
             key={productAvailability.id}
             productAvailability={productAvailability}
             isSelected={products.some((item) => item.id === productAvailability.id)}
+            forceSelected={forceSelectedIds.includes(productAvailability.id)}
             onChangeSelection={toggleProductSelection}
           />
         ))}

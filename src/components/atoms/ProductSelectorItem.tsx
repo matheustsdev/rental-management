@@ -1,6 +1,6 @@
 "use client";
 
-import { Flex, Text, Checkbox, Status } from "@chakra-ui/react";
+import { Flex, Text, Checkbox } from "@chakra-ui/react";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import Currency from "@/utils/models/Currency";
@@ -10,14 +10,17 @@ interface IProductSelectorItemProps {
   productAvailability: ProductAvailabilityType;
   isSelected: boolean;
   onChangeSelection: (product: ProductAvailabilityType) => void;
+  forceSelected?: boolean;
 }
 
 const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
   productAvailability,
   isSelected,
   onChangeSelection,
+  forceSelected,
 }) => {
-  const getAvailabilityText = (availability: availability_status) => {
+  const getAvailabilityText = (availability: availability_status, forceSelected?: boolean) => {
+    if (forceSelected) return "Selecionado";
     if (availability === EAvailabilityStatus.AVAILABLE) return "Disponível";
     if (availability === EAvailabilityStatus.UNAVAILABLE) return "Alugado";
     if (availability === EAvailabilityStatus.BUFFER_OCCUPIED) return "Em limpeza";
@@ -25,13 +28,7 @@ const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
     return "";
   };
 
-  const getAvailabilityColor = (availability: availability_status) => {
-    if (availability === EAvailabilityStatus.AVAILABLE) return "green";
-    if (availability === EAvailabilityStatus.UNAVAILABLE) return "red";
-    if (availability === EAvailabilityStatus.BUFFER_OCCUPIED) return "orange";
-
-    return "";
-  };
+  const isDisabled = !forceSelected && productAvailability.availability !== EAvailabilityStatus.AVAILABLE;
 
   return (
     <Flex
@@ -40,14 +37,15 @@ const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
       borderWidth={1}
       p={2}
       borderRadius="md"
-      bg={isSelected ? "green.50" : "white"}
+      bg={isSelected || forceSelected ? "green.50" : "white"}
+      opacity={isDisabled ? 0.6 : 1}
     >
       <Checkbox.Root
         variant="outline"
-        checked={isSelected}
-        onChange={() => onChangeSelection(productAvailability)}
+        checked={isSelected || forceSelected}
+        onChange={() => !isDisabled && onChangeSelection(productAvailability)}
         w="full"
-        disabled={productAvailability.availability !== EAvailabilityStatus.AVAILABLE}
+        disabled={isDisabled}
       >
         <Checkbox.HiddenInput />
         <Checkbox.Control />
@@ -59,10 +57,7 @@ const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
                 Ref: {productAvailability.reference} | {new Currency(productAvailability.price).toString()}
               </Text>
             </Flex>
-            <Status.Root colorPalette={getAvailabilityColor(productAvailability.availability)}>
-              <Text fontSize="xs">{getAvailabilityText(productAvailability.availability)}</Text>
-              <Status.Indicator />
-            </Status.Root>
+            <Text fontSize="xs">{getAvailabilityText(productAvailability.availability, forceSelected)}</Text>
           </Flex>
         </Checkbox.Label>
       </Checkbox.Root>
