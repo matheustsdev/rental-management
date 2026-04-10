@@ -386,7 +386,18 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     setValue("discountType", rentOnEdit.discount_type ?? EDiscountTypes.FIXED);
     setValue("discountValue", Number(rentOnEdit.discount_value ?? 0));
     setValue("totalValue", Number(rentOnEdit.total_value));
-    setValue("finalTotalValue", Number(rentOnEdit.total_value) - Number(rentOnEdit.discount_value ?? 0));
+    const discountType = rentOnEdit.discount_type ?? EDiscountTypes.FIXED;
+    const discountValue = Number(rentOnEdit.discount_value ?? 0);
+    const total = Number(rentOnEdit.total_value);
+    let finalTotal = total;
+
+    if (discountType === EDiscountTypes.PERCENTAGE) {
+      finalTotal = total - (total * discountValue / 100);
+    } else {
+      finalTotal = total - discountValue;
+    }
+
+    setValue("finalTotalValue", Math.max(0, finalTotal));
     setValue("internalObservations", rentOnEdit.internal_observations ?? "");
     setValue("receiptObservations", rentOnEdit.receipt_observations ?? "");
     setValue("signal", Number(rentOnEdit.signal_value ?? 0));
