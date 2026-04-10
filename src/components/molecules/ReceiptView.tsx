@@ -183,6 +183,7 @@ interface IReceiptTicketProps {
 const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, isLast }) => {
   const {
     client_name,
+    created_at,
     rent_date,
     return_date,
     rent_products,
@@ -216,6 +217,12 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
         <View style={styles.infoRow}>
           <Text style={styles.label}>Cliente:</Text>
           <Text style={styles.value}>{client_name}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.label}>Data do aluguel:</Text>
+          <Text style={styles.value}>
+            {created_at ? formatDate(new Date(created_at), "dd 'de' MMMM 'de' yyyy") : "Não informada"}
+          </Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Retirada:</Text>
