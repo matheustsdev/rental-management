@@ -385,13 +385,14 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     setValue("clientName", rentOnEdit.client_name ?? "");
     setValue("discountType", rentOnEdit.discount_type ?? EDiscountTypes.FIXED);
     setValue("discountValue", Number(rentOnEdit.discount_value ?? 0));
+    setValue("totalValue", Number(rentOnEdit.total_value));
     setValue("finalTotalValue", Number(rentOnEdit.total_value) - Number(rentOnEdit.discount_value ?? 0));
     setValue("internalObservations", rentOnEdit.internal_observations ?? "");
     setValue("receiptObservations", rentOnEdit.receipt_observations ?? "");
     setValue("signal", Number(rentOnEdit.signal_value ?? 0));
     setValue("remainingValue", Number(rentOnEdit.remaining_value ?? 0));
-    setValue("rentDate", rentOnEdit.rent_date);
-    setValue("returnDate", rentOnEdit.return_date ?? "");
+    setValue("rentDate", getUTCDateFromInput(rentOnEdit.rent_date));
+    setValue("returnDate", rentOnEdit.return_date ? getUTCDateFromInput(rentOnEdit.return_date) : "");
     setValue("rentProducts", rentOnEdit.rent_products);
 
     const selectedRentProductIds = rentOnEdit.rent_products.map((rentProduct) => rentProduct.product_id);
