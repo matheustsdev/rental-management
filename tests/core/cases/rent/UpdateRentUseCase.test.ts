@@ -2,9 +2,10 @@ import { UpdateRentUseCase } from "@/core/application/cases/rent/UpdateRentUseCa
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { mockDeep, MockProxy } from "jest-mock-extended";
-import { getRandomProduct, getRandomRent } from "../../../utils/factories";
+import { getRandomProduct, getRandomRent, getRandomProductType, getRandomCategory } from "../../../utils/factories";
 import { RentUpdateWithProductDtoType, RentType } from "@/types/entities/RentType";
-import { ERentStatus } from "@prisma/client";
+import { ERentStatus, measures_type, Prisma } from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime/library";
 
 describe("Update rent use case", () => {
   let useCase: UpdateRentUseCase;
@@ -140,5 +141,74 @@ describe("Update rent use case", () => {
 
     // Valida se erro de aluguel não encontrado é lançado
     await expect(useCase.execute(input)).rejects.toThrow("Aluguel não encontrado ou já excluído.");
+  });
+
+  it("should save product measurements when updating rent", async () => {
+    const existingRent = getRandomRent({
+      id: "rent-1",
+      status: ERentStatus.SCHEDULED,
+      rent_products: []
+    });
+    rentalRepo.find.mockResolvedValue(existingRent);
+    
+    const mockProduct = getRandomProductType({ id: "product-1", categories: { ...getRandomCategory(), measure_type: measures_type.DRESS } });
+    productRepo.findById.mockResolvedValue(mockProduct);
+    rentalRepo.findActiveByProduct.mockResolvedValue([]);
+    rentalRepo.deleteRentProducts.mockResolvedValue();
+    rentalRepo.update.mockResolvedValue(getRandomRent({
+      rent_products: [{
+        id: "rp-1",
+        product_id: "product-1",
+        product_price: new Decimal(100),
+        product_description: "Test",
+        measure_type: measures_type.DRESS,
+        bust: new Decimal(88),
+        waist: new Decimal(70),
+        hip: new Decimal(92),
+        shoulder: new Decimal(38),
+        sleeve: null,
+        height: null,
+        back: null,
+        rent_id: "rent-1",
+        created_at: new Date(),
+        deleted: false,
+        deleted_at: null,
+        real_return_buffer_days: null,
+        real_return_date: null,
+      }]
+    }));
+
+    const input: RentUpdateWithProductDtoType = {
+      id: "rent-1",
+      rent_products: [{
+        product_id: "product-1",
+        product_price: new Decimal(100),
+        product_description: "Test",
+        measure_type: measures_type.DRESS,
+        bust: 88,
+        waist: 70,
+        hip: 92,
+        shoulder: 38,
+      }]
+    };
+
+    await useCase.execute(input);
+
+    expect(rentalRepo.deleteRentProducts).toHaveBeenCalledWith("rent-1");
+    expect(rentalRepo.update).toHaveBeenCalledWith(
+      "rent-1",
+      expect.objectContaining({
+        rent_products: expect.objectContaining({
+          createMany: expect.objectContaining({
+            data: expect.arrayContaining([expect.objectContaining({
+              bust: new Prisma.Decimal(88),
+              waist: new Prisma.Decimal(70),
+              hip: new Prisma.Decimal(92),
+              shoulder: new Prisma.Decimal(38),
+            })])
+          })
+        })
+      })
+    );
   });
 });
