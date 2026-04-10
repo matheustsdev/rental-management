@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
 import { RentType } from "@/types/entities/RentType";
 import Currency from "@/utils/models/Currency";
 import { formatDate } from "@/utils/formatDate";
@@ -35,16 +35,49 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
     marginBottom: 20,
     borderBottomWidth: 2,
     borderBottomColor: COLORS.primary,
     paddingBottom: 10,
   },
-  title: {
+  shopInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  logoPlaceholder: {
+    width: 40,
+    height: 40,
+    backgroundColor: COLORS.primary,
+    borderRadius: 20,
+    marginRight: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  logoText: {
+    color: COLORS.white,
     fontSize: 18,
     fontWeight: "bold",
+  },
+  shopDetails: {
+    flexDirection: "column",
+  },
+  shopName: {
+    fontSize: 14,
+    fontWeight: "bold",
     color: COLORS.primary,
+  },
+  shopContact: {
+    fontSize: 8,
+    color: COLORS.lightText,
+  },
+  receiptIdentification: {
+    alignItems: "flex-end",
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: COLORS.text,
   },
   viaLabel: {
     fontSize: 10,
@@ -183,6 +216,8 @@ interface IReceiptTicketProps {
 const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, isLast }) => {
   const {
     client_name,
+    address,
+    phone,
     created_at,
     rent_date,
     return_date,
@@ -206,7 +241,19 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
   return (
     <View style={[styles.halfPage, !isLast ? styles.leftHalf : {}]}>
       <View style={styles.header}>
-        <View>
+        <View style={styles.shopInfo}>
+          {/* Logo Placeholder - Can be replaced with <Image src="/path/to/logo.png" /> */}
+          <View style={styles.logoPlaceholder}>
+            <Text style={styles.logoText}>RM</Text>
+          </View>
+          <View style={styles.shopDetails}>
+            <Text style={styles.shopName}>Rose Noivas</Text>
+            <Text style={styles.shopContact}>Telefone: (85) 2138-8542</Text>
+            <Text style={styles.shopContact}>Rua Cel. Manoel Paula, 206 - Centro</Text>
+            <Text style={styles.shopContact}>Maranguape - CE</Text>
+          </View>
+        </View>
+        <View style={styles.receiptIdentification}>
           <Text style={styles.title}>RECIBO {`#${code}`}</Text>
           <Text style={styles.viaLabel}>{via}</Text>
         </View>
@@ -218,6 +265,18 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
           <Text style={styles.label}>Cliente:</Text>
           <Text style={styles.value}>{client_name}</Text>
         </View>
+        {phone && (
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Telefone:</Text>
+            <Text style={styles.value}>{phone}</Text>
+          </View>
+        )}
+        {address && (
+          <View style={styles.infoRow}>
+            <Text style={styles.label}>Endereço:</Text>
+            <Text style={styles.value}>{address}</Text>
+          </View>
+        )}
         <View style={styles.infoRow}>
           <Text style={styles.label}>Data do aluguel:</Text>
           <Text style={styles.value}>

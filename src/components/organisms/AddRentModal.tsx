@@ -255,7 +255,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
 
       if (rentRequest.status !== 201) throw new Error(rentRequest.statusText);
 
-      if (onSave) onSave(rentRequest.data, !!rentOnEdit);
+      if (onSave) onSave(rentRequest.data.data, !!rentOnEdit);
 
       toaster.create({
         type: "success",
@@ -368,10 +368,10 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
   }, [rentDate, returnDate]);
 
   useEffect(() => {
-    const { setValue } = methods;
+    const { setValue, reset } = methods;
 
     if (!rentOnEdit) {
-      setValue("rentProducts", []);
+      reset();
 
       return;
     }
