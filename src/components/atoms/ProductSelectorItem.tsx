@@ -1,6 +1,6 @@
 "use client";
 
-import { Flex, Text, Checkbox } from "@chakra-ui/react";
+import { Flex, Text, Checkbox, Status } from "@chakra-ui/react";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import Currency from "@/utils/models/Currency";
@@ -24,6 +24,15 @@ const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
     if (availability === EAvailabilityStatus.AVAILABLE) return "Disponível";
     if (availability === EAvailabilityStatus.UNAVAILABLE) return "Alugado";
     if (availability === EAvailabilityStatus.BUFFER_OCCUPIED) return "Em limpeza";
+
+    return "";
+  };
+
+  const getAvailabilityColor = (availability: availability_status, forceSelected?: boolean) => {
+    if (forceSelected) return "green";
+    if (availability === EAvailabilityStatus.AVAILABLE) return "green";
+    if (availability === EAvailabilityStatus.UNAVAILABLE) return "red";
+    if (availability === EAvailabilityStatus.BUFFER_OCCUPIED) return "orange";
 
     return "";
   };
@@ -57,7 +66,10 @@ const ProductSelectorItem: React.FC<IProductSelectorItemProps> = ({
                 Ref: {productAvailability.reference} | {new Currency(productAvailability.price).toString()}
               </Text>
             </Flex>
-            <Text fontSize="xs">{getAvailabilityText(productAvailability.availability, forceSelected)}</Text>
+            <Status.Root colorPalette={getAvailabilityColor(productAvailability.availability, forceSelected)}>
+              <Text fontSize="xs">{getAvailabilityText(productAvailability.availability, forceSelected)}</Text>
+              <Status.Indicator />
+            </Status.Root>
           </Flex>
         </Checkbox.Label>
       </Checkbox.Root>

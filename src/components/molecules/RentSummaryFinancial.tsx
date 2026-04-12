@@ -10,9 +10,18 @@ interface IRentSummaryFinancialProps {
 }
 
 const RentSummaryFinancial: React.FC<IRentSummaryFinancialProps> = ({ rent }) => {
-  const subtotal = rent.rent_products.reduce((acc, rp) => acc + Number(rp.product_price), 0);
-  const totalValue = Number(rent.total_value);
-  const discountAmount = subtotal - totalValue;
+  const subtotal = Number(rent.total_value);
+  const discountValue = Number(rent.discount_value ?? 0);
+  const discountType = rent.discount_type;
+  
+  let finalTotal = subtotal;
+  if (discountType === "PERCENTAGE") {
+    finalTotal = subtotal - (subtotal * discountValue / 100);
+  } else {
+    finalTotal = subtotal - discountValue;
+  }
+  
+  const discountAmount = subtotal - finalTotal;
   const signalValue = Number(rent.signal_value);
   const remainingValue = Number(rent.remaining_value);
 
@@ -31,9 +40,9 @@ const RentSummaryFinancial: React.FC<IRentSummaryFinancialProps> = ({ rent }) =>
             <Text color="gray.600">Desconto</Text>
             <Text color="gray.500" fontSize="sm">
               (
-              {rent.discount_type === "PERCENTAGE"
-                ? `${Number(rent.discount_value)}%`
-                : new Currency(Number(rent.discount_value)).toString()}
+              {discountType === "PERCENTAGE"
+                ? `${discountValue}%`
+                : new Currency(discountValue).toString()}
               )
             </Text>
           </Flex>
@@ -44,12 +53,12 @@ const RentSummaryFinancial: React.FC<IRentSummaryFinancialProps> = ({ rent }) =>
             Subtotal após desconto
           </Text>
           <Text fontSize="sm" fontWeight="medium">
-            {new Currency(totalValue).toString()}
+            {new Currency(finalTotal).toString()}
           </Text>
         </Flex>
         <Flex justify="space-between" pt="2" borderTopWidth="1px" mt="2">
           <Text fontWeight="bold">Total do Aluguel</Text>
-          <Text fontWeight="bold">{new Currency(totalValue).toString()}</Text>
+          <Text fontWeight="bold">{new Currency(finalTotal).toString()}</Text>
         </Flex>
         <Flex justify="space-between" mt="2">
           <Text color="gray.600">Sinal Recebido</Text>

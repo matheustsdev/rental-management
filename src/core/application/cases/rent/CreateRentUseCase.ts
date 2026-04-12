@@ -63,20 +63,20 @@ export class CreateRentUseCase {
           product_price: rp.product_price,
           product_description: rp.product_description,
           measure_type: rp.measure_type,
-          bust: rp.bust != null ? new Prisma.Decimal(rp.bust) : undefined,
-          waist: rp.waist != null ? new Prisma.Decimal(rp.waist) : undefined,
-          hip: rp.hip != null ? new Prisma.Decimal(rp.hip) : undefined,
-          shoulder: rp.shoulder != null ? new Prisma.Decimal(rp.shoulder) : undefined,
-          sleeve: rp.sleeve != null ? new Prisma.Decimal(rp.sleeve) : undefined,
-          height: rp.height != null ? new Prisma.Decimal(rp.height) : undefined,
-          back: rp.back != null ? new Prisma.Decimal(rp.back) : undefined,
+          bust: rp.bust != null ? new Prisma.Decimal(rp.bust.toString()) : undefined,
+          waist: rp.waist != null ? new Prisma.Decimal(rp.waist.toString()) : undefined,
+          hip: rp.hip != null ? new Prisma.Decimal(rp.hip.toString()) : undefined,
+          shoulder: rp.shoulder != null ? new Prisma.Decimal(rp.shoulder.toString()) : undefined,
+          sleeve: rp.sleeve != null ? new Prisma.Decimal(rp.sleeve.toString()) : undefined,
+          height: rp.height != null ? new Prisma.Decimal(rp.height.toString()) : undefined,
+          back: rp.back != null ? new Prisma.Decimal(rp.back.toString()) : undefined,
         })),
       },
     };
 
     const insertRentPayload: Prisma.rentsCreateInput = {
       ...input,
-      total_value: new Prisma.Decimal(totalValue),
+      total_value: new Prisma.Decimal(subtotal),
       remaining_value: new Prisma.Decimal(remainingValue),
       rent_products: rentProductsInsertPayload,
     };

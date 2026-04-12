@@ -78,9 +78,10 @@ describe("Create rent use case", () => {
 
     await useCase.execute(inputWithDiscount);
 
-    // Valida se o valor total foi calculado corretamente com 10% de desconto (50 - 10% = 45)
+    // Valida se o valor total foi calculado corretamente como subtotal (50) e restante (45)
     expect(rentalRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      total_value: new Decimal(45),
+      total_value: new Decimal(50),
+      remaining_value: new Decimal(45),
     }));
   });
 
@@ -96,14 +97,15 @@ describe("Create rent use case", () => {
     rentalRepo.findActiveByProduct.mockResolvedValue([]);
     
     rentalRepo.create.mockImplementation(async (data) => {
-        return getRandomRent({ ...data as unknown as RentType, total_value: new Decimal(30) });
+        return getRandomRent({ ...data as unknown as RentType, total_value: new Decimal(50), remaining_value: new Decimal(30) });
     });
 
     await useCase.execute(inputWithDiscount);
 
-    // Valida se o valor total foi calculado corretamente com desconto fixo de 20 (50 - 20 = 30)
+    // Valida se o valor total foi calculado corretamente como subtotal (50) e restante (30)
     expect(rentalRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      total_value: new Decimal(30),
+      total_value: new Decimal(50),
+      remaining_value: new Decimal(30),
     }));
   });
 

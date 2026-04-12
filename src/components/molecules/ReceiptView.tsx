@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
+import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { RentType } from "@/types/entities/RentType";
 import Currency from "@/utils/models/Currency";
 import { formatDate } from "@/utils/formatDate";
@@ -234,7 +234,15 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
   const subtotal = rent_products.reduce((acc, item) => acc + Number(item.product_price), 0);
   const discount = Number(discount_value) ?? 0;
   const signal = Number(signal_value) ?? 0;
-  const remainingBalance = Math.max(0, Number(total_value) - signal) - discount;
+  
+  let finalTotal = subtotal;
+  if (rent.discount_type === "PERCENTAGE") {
+    finalTotal = subtotal - (subtotal * discount / 100);
+  } else {
+    finalTotal = subtotal - discount;
+  }
+  
+  const remainingBalance = Math.max(0, finalTotal - signal);
 
   const currentObservations = isStoreVia ? internal_observations : receipt_observations;
 

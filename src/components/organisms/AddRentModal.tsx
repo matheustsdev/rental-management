@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { toaster } from "@/components/atoms/Toaster";
 import { api } from "@/services/api";
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { ReactElement, useCallback, useEffect, useRef, useState } from "react";
 import PrimaryButton from "@/components/atoms/PrimaryButton";
 import SecondaryButton from "@/components/atoms/SecondaryButton";
 import { RentInsertWithProductDtoType, RentType, RentUpdateWithProductDtoType } from "@/types/entities/RentType";
@@ -335,11 +335,11 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     return handlePreviousStep(stepIndex);
   };
 
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     try {
       const params: Record<string, string> = {
-        startDate: rentDate,
-        endDate: returnDate,
+        startDate: new Date(rentDate).toISOString(),
+        endDate: new Date(returnDate).toISOString(),
       };
 
       if (rentOnEdit?.id) {
@@ -358,7 +358,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
         description: (e as Error).message,
       });
     }
-  };
+  }, [rentDate, returnDate, rentOnEdit?.id, methods]);
 
   const handleOnClose = () => {
     methods.reset();
@@ -369,7 +369,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
 
   useEffect(() => {
     if (rentDate && returnDate) loadProducts();
-  }, [rentDate, returnDate]);
+  }, [rentDate, returnDate, loadProducts]);
 
   useEffect(() => {
     const { setValue, reset } = methods;
@@ -385,16 +385,18 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     setValue("clientName", rentOnEdit.client_name ?? "");
     setValue("discountType", rentOnEdit.discount_type ?? EDiscountTypes.FIXED);
     setValue("discountValue", Number(rentOnEdit.discount_value ?? 0));
-    setValue("totalValue", Number(rentOnEdit.total_value));
+
+    const subtotal = rentOnEdit.rent_products.reduce((acc, rp) => acc + Number(rp.product_price), 0);
+    setValue("totalValue", subtotal);
+
     const discountType = rentOnEdit.discount_type ?? EDiscountTypes.FIXED;
     const discountValue = Number(rentOnEdit.discount_value ?? 0);
-    const total = Number(rentOnEdit.total_value);
-    let finalTotal = total;
+    let finalTotal = subtotal;
 
     if (discountType === EDiscountTypes.PERCENTAGE) {
-      finalTotal = total - (total * discountValue / 100);
+      finalTotal = subtotal - (subtotal * discountValue / 100);
     } else {
-      finalTotal = total - discountValue;
+      finalTotal = subtotal - discountValue;
     }
 
     setValue("finalTotalValue", Math.max(0, finalTotal));
@@ -408,7 +410,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
 
     const selectedRentProductIds = rentOnEdit.rent_products.map((rentProduct) => rentProduct.product_id);
     setValue("productIds", selectedRentProductIds);
-  }, [rentOnEdit]);
+  }, [rentOnEdit, methods]);
 
   return (
     <BaseFormModal

@@ -5,7 +5,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { api } from "@/services/api";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { RentType } from "@/types/entities/RentType";
 import BaseFormModal from "../molecules/BaseFormModal";
 import InputField from "../atoms/InputField";
@@ -67,7 +67,7 @@ const RentReturnModal: React.FC<IRentReturnModalProps> = ({ isOpen, onClose, onS
 
   const contentRef = useRef<HTMLDivElement>(null);
 
-  const loadRent = async (id: string) => {
+  const loadRent = useCallback(async (id: string) => {
     try {
       setIsLoading(true);
 
@@ -90,7 +90,7 @@ const RentReturnModal: React.FC<IRentReturnModalProps> = ({ isOpen, onClose, onS
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [methods]);
 
   const submitRentReturn = async (data: RentReturnDTO) => {
     try {
@@ -133,7 +133,7 @@ const RentReturnModal: React.FC<IRentReturnModalProps> = ({ isOpen, onClose, onS
 
   useEffect(() => {
     if (rentOnEdit) loadRent(rentOnEdit.id).then();
-  }, [rentOnEdit]);
+  }, [rentOnEdit, loadRent]);
 
   return (
     <BaseFormModal
@@ -151,7 +151,17 @@ const RentReturnModal: React.FC<IRentReturnModalProps> = ({ isOpen, onClose, onS
           <TextRow label="Cliente" value={rentOnEdit.client_name} />
           <TextRow label="Valor total" value={new Currency(rentOnEdit.total_value).toString()} />
           <TextRow label="Desconto" value={new Currency(rentOnEdit.discount_value).toString()} />
-          <TextRow label="Valor a pagar" value={new Currency(rentOnEdit.total_value).toString()} />
+          {(() => {
+            const subtotal = Number(rentOnEdit.total_value);
+            const discountValue = Number(rentOnEdit.discount_value ?? 0);
+            let finalTotal = subtotal;
+            if (rentOnEdit.discount_type === "PERCENTAGE") {
+              finalTotal = subtotal - (subtotal * discountValue / 100);
+            } else {
+              finalTotal = subtotal - discountValue;
+            }
+            return <TextRow label="Valor a pagar" value={new Currency(Math.max(0, finalTotal)).toString()} />;
+          })()}
           <TextRow label="Sinal" value={new Currency(rentOnEdit.signal_value).toString()} />
           <TextRow label="Restante" value={new Currency(rentOnEdit.remaining_value).toString()} />
           <TextRow label="Observação interna" value={rentOnEdit?.internal_observations ?? ""} />

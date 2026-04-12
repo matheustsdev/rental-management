@@ -237,7 +237,7 @@ const RentPage = () => {
       setDownloadRequested(false);
       setSelectedRent(null);
     }
-  }, [pdfError]);
+  }, [pdfError, downloadRequested]);
 
   useEffect(() => {
     handleSearchTextChange(debounce);

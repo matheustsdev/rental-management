@@ -48,10 +48,22 @@ const RentCard: React.FC<IRentCardProps> = ({ rent, menuItens }) => {
           </Card.Header>
           <Card.Body fontSize="sm" pb="4">
             <Flex flexDir="column" gap="1">
-              <TextRow
-                icon={<MdOutlineAttachMoney />}
-                value={`${new Currency(rent.total_value).toString()} (${new Currency(rent.signal_value).toString()})`}
-              />
+              {(() => {
+                const subtotal = Number(rent.total_value);
+                const discountValue = Number(rent.discount_value ?? 0);
+                let finalTotal = subtotal;
+                if (rent.discount_type === "PERCENTAGE") {
+                  finalTotal = subtotal - (subtotal * discountValue / 100);
+                } else {
+                  finalTotal = subtotal - discountValue;
+                }
+                return (
+                  <TextRow
+                    icon={<MdOutlineAttachMoney />}
+                    value={`${new Currency(Math.max(0, finalTotal)).toString()} (${new Currency(rent.signal_value).toString()})`}
+                  />
+                );
+              })()}
               <TextRow icon={<MdPhone />} value={rent?.phone ?? undefined} />
             </Flex>
           </Card.Body>

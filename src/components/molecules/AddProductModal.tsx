@@ -163,7 +163,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
     setValue("price", Number(productOnEdit.price));
     setValue("receiptDescription", productOnEdit.receipt_description ?? "");
     setValue("reference", productOnEdit.reference);
-  }, [productOnEdit]);
+  }, [productOnEdit, reset, setValue]);
 
   return (
     <Dialog.Root lazyMount open={isOpen} onOpenChange={onClose} placement="center">
