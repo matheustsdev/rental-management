@@ -1,6 +1,6 @@
 ---
 name: clean-backend
-description: Especialista em Clean Architecture e Prisma no Node.js. Use para criar Use Cases, Repositórios, DTOs e rotas de API seguindo os padrões de camadas do projeto.
+description: Especialista em Clean Architecture e Prisma no Node.js. Use para criar/atualizar Use Cases, Repositórios, DTOs e rotas de API seguindo os padrões de camadas do projeto.
 ---
 
 # Clean Backend Skill
@@ -28,6 +28,8 @@ Focado na manutenção e expansão da lógica de negócio e infraestrutura de da
 4.  **Create Use Case**: Implemente a lógica de negócio na camada de aplicação.
 5.  **Register Repository**: Garanta que o novo repositório está exportado em `repositoriesFactory.ts`.
 6.  **Expose API**: Crie ou atualize a rota na camada de apresentação (`src/app/api/`).
+7. **Code Review**: Após cada etapa, solicite revisão para garantir aderência às regras e qualidade do código.
+8. **Step done**: Após a revisão, marque a etapa como concluída com um ✅ e avance para a próxima
 
 ## References
 

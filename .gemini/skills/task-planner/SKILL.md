@@ -51,29 +51,64 @@ A divisão técnica deve ser extremamente minuciosa, apontando o que fazer e ond
 ```md
 ## Frontend
 ### [Nome da Subtarefa - ex: Adicionar campo de telefone na tabela]
-Adicione na tabela contida no componente `src/components/RentTable/index.tsx` a informação contida na propriedade *phone* da entidade Rent.
+Adicione na tabela contida no componente `src/components/RentTable/index.tsx` a informação contida na propriedade *phone* da entidade Rent. Essa informação deve ser exibida em uma nova coluna chamada "Telefone" e deve ser estilizada de acordo com o padrão do projeto.
 
-**Arquivos a serem alterados:**
+#### Arquivos a serem alterados:
 - `src/components/RentTable/index.tsx`
+    ```tsx
+// [Comentário explicando o que deve ser feito, por exemplo: Adicionar a coluna "Telefone" na tabela e preencher com rent.phone]
+
+[Código de exemplo, se necessário, para ilustrar a mudança]
+    ```
+
 - `src/components/RentTable/styles.module.css`
+
+    ```css
+// [Comentário explicando o que deve ser feito, por exemplo: Adicionar estilo para a nova coluna "Telefone"]
+
+[Código de exemplo, se necessário, para ilustrar a mudança]
+    ```
 
 ### [Outra Subtarefa Frontend]
 ...
 
 ## Backend
 ### [Nome da Subtarefa - ex: Atualizar schema e criar migration]
-Atualizar o schema do banco de dados para incluir o novo campo e gerar a migration correspondente.
+Atualizar o schema do banco de dados para incluir o novo campo e gerar a migration correspondente. Certifique-se de que o campo seja do tipo string e permita valores nulos, para manter a compatibilidade com os dados existentes.
 
-**Arquivos a serem alterados:**
+#### Arquivos a serem alterados:
 - `prisma/schema.prisma`
+    ```prisma
+// [Comentário explicando o que deve ser feito, por exemplo: Adicionar o campo "phone" do tipo string na entidade Rent, permitindo valores nulos]
+
+[Código de exemplo, se necessário, para ilustrar a mudança]
+    ```
 
 ### [Nome da Subtarefa - ex: Atualizar caso de uso]
 Garantir que o caso de uso de criação receba e persista o novo dado, passando por todas as camadas da Clean Architecture.
 
-**Arquivos a serem alterados:**
+#### Arquivos a serem alterados:
 - `src/domain/entities/Rent.ts`
+    ```ts
+// [Comentário explicando o que deve ser feito, por exemplo: Adicionar a propriedade "phone" do tipo string na entidade Rent]
+
+[Código de exemplo, se necessário, para ilustrar a mudança]
+    ```
 - `src/application/use-cases/CreateRent.ts`
+    ```ts
+// [Comentário explicando o que deve ser feito, por exemplo: Atualizar o caso de uso para receber o novo campo "phone" e garantir que ele seja passado para a camada de infraestrutura]
+
+[Código de exemplo, se necessário, para ilustrar a mudança]
+    ```
 - `src/infrastructure/repositories/PrismaRentRepository.ts`
+    ```ts
+// [Comentário explicando o que deve ser feito, por exemplo: Atualizar o repositório para persistir o novo campo "phone" no banco de dados]
+[Código de exemplo, se necessário, para ilustrar a mudança]
+
+    ```
+
+### [Outra Subtarefa Backend]
+...
 ```
 
 ## References

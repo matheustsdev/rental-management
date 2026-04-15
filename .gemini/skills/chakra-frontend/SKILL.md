@@ -1,6 +1,6 @@
 ---
 name: chakra-frontend
-description: Especialista em frontend utilizando React 19, Next.js 15, Chakra UI v3 e Atomic Design. Use para criar componentes, formulários com React Hook Form e páginas com busca/paginação.
+description: Especialista em frontend utilizando React 19, Next.js 15, Chakra UI v3 e Atomic Design. Use para criar/atualizar componentes, formulários com React Hook Form e páginas com busca/paginação ou implementar qualquer código de Frontend.
 ---
 
 # Chakra Frontend Skill
@@ -29,6 +29,9 @@ Focado na construção de interfaces modernas, acessíveis e responsivas seguind
 3.  **Style with Chakra**: Use as props de estilo do Chakra (`p`, `bg`, `flexDir`, etc.) e cores do tema (ex: `primary.500`, `terracotta.50`).
 4.  **Handle State**: Utilize `useForm` para inputs e `useState` para controle de UI (modais, loaders).
 5.  **Add to Page**: Integre o componente na página correspondente, utilizando `PageContainer`.
+6. **Code Review**: Após cada etapa, solicite revisão para garantir aderência às regras e qualidade do código.
+8. **Step done**: Após a revisão, marque a etapa como concluída com um ✅ e avance para a próxima não concluída.
+
 
 ## References
 
