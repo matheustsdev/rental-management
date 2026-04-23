@@ -1,6 +1,5 @@
 import { ERentStatus, Prisma } from "@prisma/client";
-import { Rental } from "../entities/Rental";
-import { RentType } from "@/types/entities/RentType";
+import { Rent } from "../entities/Rent";
 import { RentReturnDTO } from "@/core/application/cases/rent/RentReturnUseCase";
 
 export type RentalListInput = {
@@ -15,14 +14,14 @@ export type RentalListInput = {
 };
 
 export interface IRentalRepository {
-  findActiveByProduct(productId: string, excludeRentId?: string): Promise<Rental[]>;
-  create(data: Prisma.rentsCreateInput): Promise<RentType>;
-  update(id: string, data: Prisma.rentsUpdateInput): Promise<RentType>;
+  findActiveByProduct(productId: string, excludeRentId?: string): Promise<Rent[]>;
+  create(data: Rent): Promise<Rent>;
+  update(id: string, data: Rent): Promise<Rent>;
   deleteRentProducts(rentId: string): Promise<void>;
   count(where?: Prisma.rentsWhereInput): Promise<number>;
-  list(params: RentalListInput): Promise<RentType[]>;
+  list(params: RentalListInput): Promise<Rent[]>;
   delete(id: string): Promise<void>;
-  find(id: string): Promise<RentType | null>;
-  returnRent(rentReturn: RentReturnDTO): Promise<RentType>;
-  findOverlappingRents(productId: string, startDate: Date, endDate: Date): Promise<RentType[]>;
+  find(id: string): Promise<Rent | null>;
+  returnRent(rentReturn: RentReturnDTO): Promise<Rent>;
+  findOverlappingRents(productId: string, startDate: Date, endDate: Date): Promise<Rent[]>;
 }

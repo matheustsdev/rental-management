@@ -1,8 +1,9 @@
 import { ListRentUseCase } from "@/core/application/cases/rent/ListRentUseCase";
 import { IRentalRepository, RentalListInput } from "@/core/domain/repositories/IRentalRepository";
 import { mockDeep, MockProxy } from "jest-mock-extended";
-import { getRandomRent } from "../../../utils/factories";
+import { getRandomRentalEntity } from "../../../utils/factories";
 import { ERentStatus } from "@prisma/client";
+import { RentMapper } from "@/core/application/mappers/RentMapper";
 
 describe("List rents use case", () => {
   let useCase: ListRentUseCase;
@@ -14,14 +15,14 @@ describe("List rents use case", () => {
   });
 
   it("should return a list of rents and count", async () => {
-    const rents = [getRandomRent(), getRandomRent()];
+    const rents = [getRandomRentalEntity(), getRandomRentalEntity()];
     rentalRepo.list.mockResolvedValue(rents);
     rentalRepo.count.mockResolvedValue(2);
 
     const result = await useCase.execute({});
 
-    // Valida se os dados retornados correspondem aos mocks do repositório
-    expect(result.data).toEqual(rents);
+    // Valida se os dados retornados correspondem aos mocks do repositório (via Mapper)
+    expect(result.data).toEqual(rents.map(r => RentMapper.toDto(r)));
     // Valida se o contador total de registros está correto
     expect(result.count).toBe(2);
     // Garante que o repositório foi consultado

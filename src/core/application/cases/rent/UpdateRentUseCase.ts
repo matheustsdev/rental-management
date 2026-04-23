@@ -1,13 +1,16 @@
-import { IRentalRepository as IRentRepository } from "@/core/domain/repositories/IRentalRepository";
+import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { RentUpdateWithProductDtoType, RentType } from "@/types/entities/RentType";
-import { ERentStatus, Prisma } from "@prisma/client";
+import { ERentStatus, discount_type_enum as DiscountType } from "@prisma/client";
 import { ServerError } from "@/utils/models/ServerError";
-import { isBefore } from "date-fns";
+import { Rent } from "@/core/domain/entities/Rent";
+import { RentProduct } from "@/core/domain/entities/RentProduct";
+import { v4 as uuidv4 } from "uuid";
+import { RentMapper } from "../../mappers/RentMapper";
 
 export class UpdateRentUseCase {
   constructor(
-    private rentRepository: IRentRepository,
+    private rentRepository: IRentalRepository,
     private productRepo: IProductRepository
   ) {}
 
@@ -18,125 +21,104 @@ export class UpdateRentUseCase {
       throw new ServerError("É obrigatório informar o ID do aluguel para atualizar.", 400);
     }
 
-    // 0. Verificar se o aluguel existe e não está deletado
+    // 0. Verificar se o aluguel existe
     const existingRent = await this.rentRepository.find(id);
     if (!existingRent) {
       throw new ServerError("Aluguel não encontrado ou já excluído.", 404);
     }
 
-    // 1. Validar transição de status
-    if (status && status !== existingRent.status) {
-        if (existingRent.status === ERentStatus.FINISHED) {
-            throw new ServerError("Não é possível alterar um aluguel já finalizado.", 400);
-        }
-        if (existingRent.status === ERentStatus.IN_PROGRESS && status === ERentStatus.SCHEDULED) {
-            throw new ServerError("Não é possível voltar um aluguel em andamento para agendado.", 400);
-        }
+    // 1. Validar datas e disponibilidade
+    const startDate = rent_date ? new Date(rent_date as string) : existingRent.rentDate;
+    const endDate = return_date ? new Date(return_date as string) : existingRent.returnDate;
+
+    // Normalizar lista de IDs de produtos para validar disponibilidade
+    const productIdsToValidate = rent_products 
+      ? rent_products.map(rp => rp.product_id)
+      : existingRent.items.map(item => item.productId);
+
+    for (const productId of productIdsToValidate) {
+      const product = await this.productRepo.findById(productId);
+      if (!product) {
+        throw new ServerError(`Produto com ID ${productId} não encontrado.`, 404);
+      }
+
+      const activeRentals = await this.rentRepository.findActiveByProduct(productId, id);
+      
+      const hasConflict = activeRentals.some(r =>
+        r.conflictsWith(startDate, endDate, product.bufferDays)
+      );
+
+      if (hasConflict) {
+        throw new ServerError(`Produto "${product.description}" indisponível entre as datas selecionadas.`);
+      }
     }
 
-    // 2. Validar datas
-    const startDate = rent_date ? new Date(rent_date as string) : new Date(existingRent.rent_date);
-    const endDate = return_date ? new Date(return_date as string) : new Date(existingRent.return_date);
-
-    if (isBefore(endDate, startDate) || endDate.getTime() === startDate.getTime()) {
-        throw new ServerError("A data de devolução deve ser posterior à data de aluguel.", 400);
-    }
-
-    // 3. Validar disponibilidade para cada produto, excluindo o próprio aluguel da verificação
+    // 2. Preparar novos itens se fornecidos
+    let domainItems = existingRent.items;
     if (rent_products) {
-        for (const rentProduct of rent_products) {
-            const product = await this.productRepo.findById(rentProduct.product_id as string);
-            if (!product) {
-                throw new ServerError(`Produto com ID ${rentProduct.product_id} não encontrado.`, 404);
-            }
-
-            const activeRentals = await this.rentRepository.findActiveByProduct(rentProduct.product_id as string, id);
-            
-            const hasConflict = activeRentals.some(rental =>
-                rental.conflictsWith(startDate, endDate, product.bufferDays)
-            );
-
-            if (hasConflict) {
-                throw new ServerError(`Produto "${product.description}" indisponível entre as datas selecionadas (considerando período de limpeza).`);
-            }
-        }
-    } else if (rent_date || return_date) {
-        // Se mudou apenas a data, validar disponibilidade dos produtos atuais
-        for (const rentProduct of existingRent.rent_products) {
-            const product = await this.productRepo.findById(rentProduct.product_id);
-            if (!product) continue;
-
-            const activeRentals = await this.rentRepository.findActiveByProduct(rentProduct.product_id, id);
-            const hasConflict = activeRentals.some(rental =>
-                rental.conflictsWith(startDate, endDate, product.bufferDays)
-            );
-
-            if (hasConflict) {
-                throw new ServerError(`Produto "${product.description}" indisponível nas novas datas selecionadas.`);
-            }
-        }
+      const itemsWithProduct: RentProduct[] = [];
+      for (const rp of rent_products) {
+        const product = await this.productRepo.findById(rp.product_id);
+        itemsWithProduct.push(new RentProduct({
+          id: uuidv4(),
+          productId: rp.product_id,
+          productPrice: Number(rp.product_price),
+          productDescription: rp.product_description,
+          measureType: rp.measure_type,
+          bust: rp.bust ? Number(rp.bust) : null,
+          waist: rp.waist ? Number(rp.waist) : null,
+          hip: rp.hip ? Number(rp.hip) : null,
+          shoulder: rp.shoulder ? Number(rp.shoulder) : null,
+          sleeve: rp.sleeve ? Number(rp.sleeve) : null,
+          height: rp.height ? Number(rp.height) : null,
+          back: rp.back ? Number(rp.back) : null,
+          product: product ? {
+            reference: product.reference,
+            categories: product.categoryName ? {
+              name: product.categoryName
+            } : null
+          } : null
+        }));
+      }
+      domainItems = itemsWithProduct;
     }
 
-    // 4. Calcular novos valores financeiros
-    let subtotal = 0;
-    const finalProducts = rent_products || existingRent.rent_products;
-    
-    for (const rp of finalProducts) {
-      subtotal += Number(rp.product_price);
+    // 3. Atualizar a entidade Rent
+    const updatedRentEntity = new Rent({
+      id: existingRent.id,
+      code: existingRent.code,
+      status: existingRent.status, // Começa com o atual para validar transição
+      rentDate: existingRent.rentDate,
+      returnDate: existingRent.returnDate,
+      clientName: restOfInput.client_name ? restOfInput.client_name.toString() : existingRent.clientName,
+      address: restOfInput.address !== undefined ? (restOfInput.address as string | null) : existingRent.address,
+      phone: restOfInput.phone !== undefined ? (restOfInput.phone as string | null) : existingRent.phone,
+      discountType: restOfInput.discount_type !== undefined ? (restOfInput.discount_type as DiscountType | null) : existingRent.discountType,
+      discountValue: restOfInput.discount_value !== undefined ? Number(restOfInput.discount_value) : existingRent.discountValue,
+      signalValue: restOfInput.signal_value !== undefined ? Number(restOfInput.signal_value) : existingRent.signalValue,
+      internalObservations: restOfInput.internal_observations !== undefined ? (restOfInput.internal_observations as string | null) : existingRent.internalObservations,
+      receiptObservations: restOfInput.receipt_observations !== undefined ? (restOfInput.receipt_observations as string | null) : existingRent.receiptObservations,
+      items: domainItems,
+      createdAt: existingRent.createdAt,
+      realReturnDate: restOfInput.real_return_date !== undefined ? (restOfInput.real_return_date as Date | null) : existingRent.realReturnDate
+    });
+
+    // Aplicar mudanças que exigem validação
+    if (rent_date || return_date) {
+      updatedRentEntity.updateDates(startDate, endDate);
     }
 
-    const discountType = (input.discount_type !== undefined ? input.discount_type : existingRent.discount_type) as string;
-    const discountValue = Number(input.discount_value !== undefined ? input.discount_value : existingRent.discount_value);
-    const signalValue = Number(input.signal_value !== undefined ? input.signal_value : existingRent.signal_value);
-
-    let totalValue = subtotal;
-    if (discountType === "PERCENTAGE") {
-      totalValue = subtotal * (1 - (discountValue / 100));
-    } else if (discountType === "FIXED") {
-      totalValue = Math.max(0, subtotal - discountValue);
+    if (status && status !== existingRent.status) {
+      updatedRentEntity.updateStatus(status as ERentStatus);
     }
 
-    const remainingValue = Math.max(0, totalValue - signalValue);
-
-    // 5. Construir o payload de atualização
-    const updateRentPayload: Prisma.rentsUpdateInput = {
-      ...restOfInput,
-      total_value: new Prisma.Decimal(subtotal),
-      remaining_value: new Prisma.Decimal(remainingValue),
-      ...(rent_date && { rent_date }),
-      ...(return_date && { return_date }),
-      ...(status && { status }),
-    };
-
-    // 6. Atualizar produtos se necessário
+    // 4. Persistir
     if (rent_products) {
       await this.rentRepository.deleteRentProducts(id);
-
-      const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentInput = {
-        createMany: {
-          data: rent_products.map((rp) => ({
-            product_id: rp.product_id,
-            product_price: rp.product_price,
-            product_description: rp.product_description,
-            measure_type: rp.measure_type,
-            bust: rp.bust != null ? new Prisma.Decimal(rp.bust.toString()) : undefined,
-            waist: rp.waist != null ? new Prisma.Decimal(rp.waist.toString()) : undefined,
-            hip: rp.hip != null ? new Prisma.Decimal(rp.hip.toString()) : undefined,
-            shoulder: rp.shoulder != null ? new Prisma.Decimal(rp.shoulder.toString()) : undefined,
-            sleeve: rp.sleeve != null ? new Prisma.Decimal(rp.sleeve.toString()) : undefined,
-            height: rp.height != null ? new Prisma.Decimal(rp.height.toString()) : undefined,
-            back: rp.back != null ? new Prisma.Decimal(rp.back.toString()) : undefined,
-          })),
-        },
-      };
-      updateRentPayload.rent_products = rentProductsInsertPayload;
     }
-    
-    const updatedRent = await this.rentRepository.update(id, updateRentPayload);
 
-    return {
-      ...updatedRent,
-      remaining_balance: Number(updatedRent.remaining_value)
-    };
+    const savedRent = await this.rentRepository.update(id, updatedRentEntity);
+
+    return RentMapper.toDto(savedRent);
   }
 }

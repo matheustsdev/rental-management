@@ -1,8 +1,8 @@
 import { FindRentUseCase } from "@/core/application/cases/rent/FindRentUseCase";
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { mockDeep, MockProxy } from "jest-mock-extended";
-import { getRandomRent } from "../../../utils/factories";
-import { RentType } from "@/types/entities/RentType";
+import { getRandomRentalEntity } from "../../../utils/factories";
+import { RentMapper } from "@/core/application/mappers/RentMapper";
 
 describe("Find rent use case", () => {
   let useCase: FindRentUseCase;
@@ -14,13 +14,13 @@ describe("Find rent use case", () => {
   });
 
   it("should return a rent if it exists", async () => {
-    const rent: RentType = getRandomRent({ id: "rent-1" });
+    const rent = getRandomRentalEntity({ id: "rent-1" });
     rentalRepo.find.mockResolvedValue(rent);
 
     const result = await useCase.execute("rent-1");
 
-    // Valida se os dados do aluguel encontrado correspondem ao esperado
-    expect(result).toEqual(rent);
+    // Valida se os dados do aluguel encontrado correspondem ao esperado (via Mapper)
+    expect(result).toEqual(RentMapper.toDto(rent));
     // Garante que a busca foi feita com o ID correto
     expect(rentalRepo.find).toHaveBeenCalledWith("rent-1");
   });

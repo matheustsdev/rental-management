@@ -2,7 +2,7 @@ import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository"
 import { RentType } from "@/types/entities/RentType";
 import { ERentStatus } from "@prisma/client";
 import { ServerError } from "@/utils/models/ServerError";
-import { differenceInDays, isAfter } from "date-fns";
+import { RentMapper } from "../../mappers/RentMapper";
 
 export type RentReturnDTO = {
   id: string;
@@ -20,7 +20,6 @@ export class RentReturnUseCase {
   async execute(rentReturnData: RentReturnDTO): Promise<RentType | null> {
     const { id } = rentReturnData;
 
-    // 1. Verificar se o aluguel existe e não está finalizado
     const existingRent = await this.rentalRepo.find(id);
     
     if (!existingRent) {
@@ -31,19 +30,13 @@ export class RentReturnUseCase {
       throw new ServerError("Este aluguel já foi finalizado anteriormente.", 400);
     }
 
-    // 2. Lógica de cálculo de atraso (opcional, dependendo de como o sistema cobra taxas)
-    const today = new Date();
-    const plannedReturn = new Date(existingRent.return_date);
-    
-    if (isAfter(today, plannedReturn)) {
-        const lateDays = differenceInDays(today, plannedReturn);
-        // Aqui poderíamos calcular uma taxa de atraso se necessário
+    if (existingRent.isLate()) {
+        const lateDays = existingRent.getLateDays();
         console.log(`Aluguel com ${lateDays} dias de atraso.`);
     }
 
-    // 3. Processar devolução no repositório
-    const rent = await this.rentalRepo.returnRent(rentReturnData);
+    const savedRent = await this.rentalRepo.returnRent(rentReturnData);
 
-    return rent;
+    return RentMapper.toDto(savedRent);
   }
 }

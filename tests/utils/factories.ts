@@ -1,11 +1,12 @@
 import { faker } from "@faker-js/faker";
 import { Product } from "@/core/domain/entities/Product";
-import { Rental } from "@/core/domain/entities/Rental";
+import { Rent, RentProps } from "@/core/domain/entities/Rent";
 import { RentType } from "@/types/entities/RentType";
 import { ProductType } from "@/types/entities/ProductType";
 import { CategoryType } from "@/types/entities/CategoryType";
 import { Decimal } from "@prisma/client/runtime/library";
 import { ERentStatus, measures_type } from "@prisma/client";
+import { addDays, subDays } from "date-fns";
 
 export const getRandomProduct = (overrides?: Partial<Product>): Product => {
   return new Product(
@@ -13,7 +14,8 @@ export const getRandomProduct = (overrides?: Partial<Product>): Product => {
     overrides?.reference ?? faker.string.alphanumeric(10).toUpperCase(),
     overrides?.description ?? faker.lorem.sentence(),
     overrides?.price ?? Number(faker.commerce.price({ min: 10, max: 200 })),
-    overrides?.bufferDays ?? faker.number.int({ min: 0, max: 2 })
+    overrides?.bufferDays ?? faker.number.int({ min: 0, max: 2 }),
+    overrides?.categoryName ?? faker.commerce.department()
   );
 };
 
@@ -72,18 +74,28 @@ export const getRandomProductType = (overrides?: Partial<ProductType>): ProductT
   } as ProductType;
 };
 
-export const getRandomRentalEntity = (overrides?: Partial<Rental>): Rental => {
-  const startDate = overrides?.startDate ?? faker.date.future();
-  const endDate = overrides?.endDate ?? faker.date.soon({ days: 7, refDate: startDate });
+export const getRandomRentalEntity = (overrides?: Partial<RentProps>): Rent => {
+  const returnDate = overrides?.returnDate ?? (overrides?.rentDate ? addDays(overrides.rentDate, 7) : faker.date.future());
+  const rentDate = overrides?.rentDate ?? subDays(returnDate, 7);
 
-  return new Rental(
-    overrides?.id ?? faker.string.uuid(),
-    overrides?.productId ?? faker.string.uuid(),
-    startDate,
-    endDate,
-    overrides?.status ?? 'ACTIVE',
-    overrides?.realReturnDate ?? null
-  );
+  return new Rent({
+    id: overrides?.id ?? faker.string.uuid(),
+    status: overrides?.status ?? ERentStatus.SCHEDULED,
+    rentDate,
+    returnDate,
+    clientName: overrides?.clientName ?? faker.person.fullName(),
+    address: overrides?.address ?? faker.location.streetAddress(),
+    phone: overrides?.phone ?? faker.phone.number(),
+    discountType: overrides?.discountType ?? null,
+    discountValue: overrides?.discountValue ?? 0,
+    signalValue: overrides?.signalValue ?? 0,
+    items: overrides?.items ?? [],
+    code: overrides?.code ?? faker.number.int({ min: 1, max: 1000 }),
+    internalObservations: overrides?.internalObservations ?? faker.lorem.sentence(),
+    receiptObservations: overrides?.receiptObservations ?? faker.lorem.sentence(),
+    realReturnDate: overrides?.realReturnDate ?? null,
+    createdAt: overrides?.createdAt ?? new Date(),
+  });
 };
 
 export const getRandomCategory = (overrides?: Partial<CategoryType>): CategoryType => {

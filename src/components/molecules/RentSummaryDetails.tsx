@@ -2,13 +2,13 @@
 
 import React from "react";
 import { Flex, Text, Accordion } from "@chakra-ui/react";
-import { RentSummaryDTO } from "@/types/entities/RentType";
 import RentSummaryProductItem from "@/components/atoms/RentSummaryProductItem";
 import RentSummaryClientData from "@/components/atoms/RentSummaryClientData";
 import RentSummaryFinancial from "@/components/molecules/RentSummaryFinancial";
+import { RentType } from "@/types/entities/RentType";
 
 interface IRentSummaryDetailsProps {
-  rent: RentSummaryDTO;
+  rent: RentType;
 }
 
 const RentSummaryDetails: React.FC<IRentSummaryDetailsProps> = ({ rent }) => {
@@ -29,12 +29,7 @@ const RentSummaryDetails: React.FC<IRentSummaryDetailsProps> = ({ rent }) => {
           <Accordion.ItemContent>
             <Flex direction="column" gap="4">
               {rent.rent_products.map((rp) => (
-                <RentSummaryProductItem 
-                  key={rp.id} 
-                  rentProduct={rp} 
-                  discountType={rent.discount_type}
-                  discountValue={Number(rent.discount_value)}
-                />
+                <RentSummaryProductItem key={rp.id} rentProduct={rp} />
               ))}
             </Flex>
           </Accordion.ItemContent>

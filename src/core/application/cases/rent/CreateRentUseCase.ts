@@ -1,9 +1,12 @@
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { RentInsertWithProductDtoType, RentType } from "@/types/entities/RentType";
-import { Prisma } from "@prisma/client";
+import { Rent } from "@/core/domain/entities/Rent";
+import { RentProduct } from "@/core/domain/entities/RentProduct";
 import { ServerError } from "@/utils/models/ServerError";
-import { isBefore } from "date-fns";
+import { v4 as uuidv4 } from "uuid";
+import { ERentStatus } from "@prisma/client";
+import { RentMapper } from "../../mappers/RentMapper";
 
 export class CreateRentUseCase {
   constructor(
@@ -12,81 +15,70 @@ export class CreateRentUseCase {
   ) {}
 
   async execute(input: RentInsertWithProductDtoType): Promise<RentType> {
-    const { rent_products, rent_date, return_date, discount_type, discount_value = 0, signal_value = 0 } = input;
+    const { rent_products, rent_date, return_date, discount_type, discount_value = 0, signal_value = 0, ...rest } = input;
 
-    const startDate = new Date(rent_date);
-    const endDate = new Date(return_date);
+    const startDate = new Date(rent_date as string);
+    const endDate = new Date(return_date as string);
 
-    // 0. Validar datas
-    if (isBefore(endDate, startDate) || endDate.getTime() === startDate.getTime()) {
-      throw new ServerError("A data de devolução deve ser posterior à data de aluguel.", 400);
-    }
+    const rentProducts: RentProduct[] = [];
 
-    let subtotal = 0;
-
-    // 1. Validar disponibilidade para cada produto e calcular subtotal
-    for (const rentProduct of rent_products) {
-      const product = await this.productRepo.findById(rentProduct.product_id);
+    for (const itemInput of rent_products) {
+      const product = await this.productRepo.findById(itemInput.product_id);
 
       if (!product) {
-        throw new ServerError(`Produto com ID ${rentProduct.product_id} não encontrado.`, 404);
+        throw new ServerError(`Produto com ID ${itemInput.product_id} não encontrado.`, 404);
       }
 
-      const activeRentals = await this.rentalRepo.findActiveByProduct(rentProduct.product_id);
+      const activeRentals = await this.rentalRepo.findActiveByProduct(itemInput.product_id);
       
-      const hasConflict = activeRentals.some(rental =>
-        rental.conflictsWith(startDate, endDate, product.bufferDays)
+      const hasConflict = activeRentals.some(existingRent =>
+        existingRent.conflictsWith(startDate, endDate, product.bufferDays)
       );
 
       if (hasConflict) {
         throw new ServerError(`Produto "${product.description}" indisponível entre as datas selecionadas (considerando período de limpeza).`);
       }
 
-      subtotal += Number(rentProduct.product_price);
+      rentProducts.push(new RentProduct({
+        id: uuidv4(),
+        productId: itemInput.product_id,
+        productPrice: Number(itemInput.product_price),
+        productDescription: itemInput.product_description,
+        measureType: itemInput.measure_type,
+        bust: itemInput.bust ? Number(itemInput.bust) : null,
+        waist: itemInput.waist ? Number(itemInput.waist) : null,
+        hip: itemInput.hip ? Number(itemInput.hip) : null,
+        shoulder: itemInput.shoulder ? Number(itemInput.shoulder) : null,
+        sleeve: itemInput.sleeve ? Number(itemInput.sleeve) : null,
+        height: itemInput.height ? Number(itemInput.height) : null,
+        back: itemInput.back ? Number(itemInput.back) : null,
+        product: {
+          reference: product.reference,
+          categories: product.categoryName ? {
+            name: product.categoryName
+          } : null
+        }
+      }));
     }
 
-    // 2. Calcular total com desconto
-    let totalValue = subtotal;
-    if (discount_type === "PERCENTAGE") {
-      totalValue = subtotal * (1 - (Number(discount_value) / 100));
-    } else if (discount_type === "FIXED") {
-      totalValue = Math.max(0, subtotal - Number(discount_value));
-    }
+    const rent = new Rent({
+      id: uuidv4(),
+      status: ERentStatus.SCHEDULED,
+      rentDate: startDate,
+      returnDate: endDate,
+      clientName: rest.client_name,
+      address: rest.address ?? null,
+      phone: rest.phone ?? null,
+      discountType: discount_type ?? null,
+      discountValue: Number(discount_value),
+      signalValue: Number(signal_value),
+      internalObservations: rest.internal_observations ?? null,
+      receiptObservations: rest.receipt_observations ?? null,
+      items: rentProducts,
+    });
 
-    const remainingValue = Math.max(0, totalValue - Number(signal_value));
+    const savedRent = await this.rentalRepo.create(rent);
 
-    // 3. Construir o payload de inserção para o Prisma
-    const rentProductsInsertPayload: Prisma.rent_productsCreateNestedManyWithoutRentInput = {
-      createMany: {
-        data: rent_products.map((rp) => ({
-          product_id: rp.product_id,
-          product_price: rp.product_price,
-          product_description: rp.product_description,
-          measure_type: rp.measure_type,
-          bust: rp.bust != null ? new Prisma.Decimal(rp.bust.toString()) : undefined,
-          waist: rp.waist != null ? new Prisma.Decimal(rp.waist.toString()) : undefined,
-          hip: rp.hip != null ? new Prisma.Decimal(rp.hip.toString()) : undefined,
-          shoulder: rp.shoulder != null ? new Prisma.Decimal(rp.shoulder.toString()) : undefined,
-          sleeve: rp.sleeve != null ? new Prisma.Decimal(rp.sleeve.toString()) : undefined,
-          height: rp.height != null ? new Prisma.Decimal(rp.height.toString()) : undefined,
-          back: rp.back != null ? new Prisma.Decimal(rp.back.toString()) : undefined,
-        })),
-      },
-    };
-
-    const insertRentPayload: Prisma.rentsCreateInput = {
-      ...input,
-      total_value: new Prisma.Decimal(subtotal),
-      remaining_value: new Prisma.Decimal(remainingValue),
-      rent_products: rentProductsInsertPayload,
-    };
-
-    // 4. Criar o aluguel no banco de dados
-    const newRent = await this.rentalRepo.create(insertRentPayload);
-
-    return {
-      ...newRent,
-      remaining_balance: Number(newRent.remaining_value)
-    };
+    return RentMapper.toDto(savedRent);
   }
 }

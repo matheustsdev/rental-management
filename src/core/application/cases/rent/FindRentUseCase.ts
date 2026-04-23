@@ -1,5 +1,6 @@
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { RentType } from "@/types/entities/RentType";
+import { RentMapper } from "../../mappers/RentMapper";
 
 export class FindRentUseCase {
   constructor(
@@ -11,9 +12,6 @@ export class FindRentUseCase {
 
     if (!rent) return null;
 
-    return {
-      ...rent,
-      remaining_balance: Number(rent.remaining_value)
-    };
+    return RentMapper.toDto(rent);
   }
 }

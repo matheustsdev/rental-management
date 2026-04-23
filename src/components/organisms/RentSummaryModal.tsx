@@ -2,14 +2,14 @@
 
 import React from "react";
 import { Dialog, Portal, CloseButton, Flex } from "@chakra-ui/react";
-import { RentSummaryDTO } from "@/types/entities/RentType";
+import { RentType } from "@/types/entities/RentType";
 import RentSummaryDetails from "../molecules/RentSummaryDetails";
 import SecondaryButton from "../atoms/SecondaryButton";
 
 interface IRentSummaryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  rent: RentSummaryDTO | null;
+  rent: RentType;
 }
 
 const RentSummaryModal: React.FC<IRentSummaryModalProps> = ({ isOpen, onClose, rent }) => {
@@ -20,14 +20,7 @@ const RentSummaryModal: React.FC<IRentSummaryModalProps> = ({ isOpen, onClose, r
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner p="4">
-          <Dialog.Content
-            p="6"
-            bg="white"
-            color="black"
-            maxH="90vh"
-            overflowY="auto"
-            borderRadius="xl"
-          >
+          <Dialog.Content p="6" bg="white" color="black" maxH="90vh" overflowY="auto" borderRadius="xl">
             <Dialog.Header pb="4">
               <Dialog.Title fontSize="2xl" fontWeight="bold">
                 Resumo do Aluguel
@@ -40,7 +33,7 @@ const RentSummaryModal: React.FC<IRentSummaryModalProps> = ({ isOpen, onClose, r
 
             <Dialog.Footer pt="6">
               <Flex w="full" justify="flex-end">
-                  <SecondaryButton onClick={onClose}>Fechar</SecondaryButton>
+                <SecondaryButton onClick={onClose}>Fechar</SecondaryButton>
               </Flex>
             </Dialog.Footer>
 

@@ -2,6 +2,7 @@ import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository"
 import { CheckAvailabilityResponseDTO } from "../../dtos/CheckAvailabilityResponseDTO";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import { addDays, areIntervalsOverlapping } from "date-fns";
+import { RentMapper } from "../../mappers/RentMapper";
 
 export class CheckProductAvailabilityUseCase {
   constructor(private rentalRepository: IRentalRepository) {}
@@ -19,25 +20,24 @@ export class CheckProductAvailabilityUseCase {
 
     for (const rent of overlappingRents) {
       // Find the specific product entry in this rent
-      const rentProduct = rent.rent_products.find(
-        (rp) => rp.product_id === productId && !rp.deleted
+      const rentProduct = rent.items.find(
+        (rp) => rp.productId === productId
       );
 
       if (!rentProduct) continue;
 
       // Determine buffer days: from rent_product if finished, otherwise from category
       const bufferDays =
-        rentProduct.real_return_buffer_days ??
-        rentProduct.products?.categories?.post_return_buffer_days ??
-        0;
+        rentProduct.realReturnBufferDays ??
+        rentProduct.product?.categories?.name ? 2 : 0; // Fallback logic if needed, but RentProduct usually has info
 
       // Determine base return date (real if finished, otherwise scheduled)
-      const baseReturnDate = rent.real_return_date ?? rent.return_date;
+      const baseReturnDate = rent.realReturnDate ?? rent.returnDate;
       const effectiveEndDateWithBuffer = addDays(baseReturnDate, bufferDays);
 
       // Check for direct overlap with the rental period (excludes buffer)
       const hasDirectOverlap = areIntervalsOverlapping(
-        { start: rent.rent_date, end: baseReturnDate },
+        { start: rent.rentDate, end: baseReturnDate },
         { start: startDate, end: endDate },
         { inclusive: true }
       );
@@ -45,7 +45,7 @@ export class CheckProductAvailabilityUseCase {
       if (hasDirectOverlap) {
         return {
           status: EAvailabilityStatus.UNAVAILABLE,
-          conflictingRent: rent,
+          conflictingRent: RentMapper.toDto(rent),
           message: "Este produto já está alugado para este período.",
         };
       }
@@ -61,7 +61,7 @@ export class CheckProductAvailabilityUseCase {
       if (hasBufferOverlap) {
         return {
           status: EAvailabilityStatus.BUFFER_OCCUPIED,
-          conflictingRent: rent,
+          conflictingRent: RentMapper.toDto(rent),
           message: "Este produto estará em período de higienização/preparo.",
         };
       }

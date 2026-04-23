@@ -2,10 +2,12 @@ import { UpdateRentUseCase } from "@/core/application/cases/rent/UpdateRentUseCa
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { mockDeep, MockProxy } from "jest-mock-extended";
-import { getRandomProduct, getRandomRent, getRandomProductType, getRandomCategory } from "../../../utils/factories";
-import { RentUpdateWithProductDtoType, RentType } from "@/types/entities/RentType";
-import { ERentStatus, measures_type, Prisma } from "@prisma/client";
+import { getRandomProduct, getRandomProductType, getRandomCategory, getRandomRentalEntity } from "../../../utils/factories";
+import { RentUpdateWithProductDtoType } from "@/types/entities/RentType";
+import { ERentStatus, measures_type } from "@prisma/client";
 import { Decimal } from "@prisma/client/runtime/library";
+import { Product } from "@/core/domain/entities/Product";
+import { RentProduct } from "@/core/domain/entities/RentProduct";
 
 describe("Update rent use case", () => {
   let useCase: UpdateRentUseCase;
@@ -19,11 +21,11 @@ describe("Update rent use case", () => {
   });
 
   const existingRentId = "rent-1";
-  const mockExistingRent: RentType = getRandomRent({
+  const mockExistingRent = getRandomRentalEntity({
     id: existingRentId,
     status: ERentStatus.SCHEDULED,
-    rent_date: new Date("2025-03-01"),
-    return_date: new Date("2025-03-05"),
+    rentDate: new Date("2025-03-01"),
+    returnDate: new Date("2025-03-05"),
   });
 
   it("should update rent status SCHEDULED → IN_PROGRESS", async () => {
@@ -35,18 +37,20 @@ describe("Update rent use case", () => {
       rent_products: []
     };
 
-    rentalRepo.update.mockResolvedValue({ ...mockExistingRent, status: ERentStatus.IN_PROGRESS });
+    rentalRepo.update.mockResolvedValue(getRandomRentalEntity({ ...mockExistingRent.toJSON(), status: ERentStatus.IN_PROGRESS }));
 
     const result = await useCase.execute(input);
 
     // Valida se o status foi alterado para IN_PROGRESS
     expect(result.status).toBe(ERentStatus.IN_PROGRESS);
     // Valida se o repositório foi chamado com o novo status
-    expect(rentalRepo.update).toHaveBeenCalledWith(existingRentId, expect.objectContaining({ status: ERentStatus.IN_PROGRESS }));
+    expect(rentalRepo.update).toHaveBeenCalledWith(existingRentId, expect.objectContaining({ 
+      status: ERentStatus.IN_PROGRESS 
+    }));
   });
 
   it("should update rent status IN_PROGRESS → FINISHED", async () => {
-    const inProgressRent = { ...mockExistingRent, status: ERentStatus.IN_PROGRESS };
+    const inProgressRent = getRandomRentalEntity({ ...mockExistingRent.toJSON(), status: ERentStatus.IN_PROGRESS });
     rentalRepo.find.mockResolvedValue(inProgressRent);
     
     const input: RentUpdateWithProductDtoType = {
@@ -55,7 +59,7 @@ describe("Update rent use case", () => {
       rent_products: []
     };
 
-    rentalRepo.update.mockResolvedValue({ ...inProgressRent, status: ERentStatus.FINISHED });
+    rentalRepo.update.mockResolvedValue(getRandomRentalEntity({ ...inProgressRent.toJSON(), status: ERentStatus.FINISHED }));
 
     const result = await useCase.execute(input);
 
@@ -64,7 +68,7 @@ describe("Update rent use case", () => {
   });
 
   it("should reject invalid status transition (FINISHED → SCHEDULED)", async () => {
-    const finishedRent = { ...mockExistingRent, status: ERentStatus.FINISHED };
+    const finishedRent = getRandomRentalEntity({ ...mockExistingRent.toJSON(), status: ERentStatus.FINISHED });
     rentalRepo.find.mockResolvedValue(finishedRent);
     
     const input: RentUpdateWithProductDtoType = {
@@ -87,7 +91,7 @@ describe("Update rent use case", () => {
       rent_products: []
     };
 
-    rentalRepo.update.mockResolvedValue({ ...mockExistingRent, return_date: newReturnDate });
+    rentalRepo.update.mockResolvedValue(getRandomRentalEntity({ ...mockExistingRent.toJSON(), returnDate: newReturnDate }));
     // Mock product availability check
     productRepo.findById.mockResolvedValue(getRandomProduct());
     rentalRepo.findActiveByProduct.mockResolvedValue([]);
@@ -108,7 +112,7 @@ describe("Update rent use case", () => {
       rent_products: []
     };
 
-    rentalRepo.update.mockResolvedValue({ ...mockExistingRent, real_return_date: actualReturnDate });
+    rentalRepo.update.mockResolvedValue(getRandomRentalEntity({ ...mockExistingRent.toJSON(), realReturnDate: actualReturnDate }));
 
     const result = await useCase.execute(input);
 
@@ -144,39 +148,44 @@ describe("Update rent use case", () => {
   });
 
   it("should save product measurements when updating rent", async () => {
-    const existingRent = getRandomRent({
+    const existingRent = getRandomRentalEntity({
       id: "rent-1",
       status: ERentStatus.SCHEDULED,
-      rent_products: []
+      items: []
     });
     rentalRepo.find.mockResolvedValue(existingRent);
     
     const mockProduct = getRandomProductType({ id: "product-1", categories: { ...getRandomCategory(), measure_type: measures_type.DRESS } });
-    productRepo.findById.mockResolvedValue(mockProduct);
+    const domainProduct = new Product(
+      mockProduct.id, 
+      mockProduct.reference, 
+      mockProduct.description!, 
+      Number(mockProduct.price), 
+      mockProduct.categories!.post_return_buffer_days!,
+      mockProduct.categories!.name
+    );
+    productRepo.findById.mockResolvedValue(domainProduct);
     rentalRepo.findActiveByProduct.mockResolvedValue([]);
     rentalRepo.deleteRentProducts.mockResolvedValue();
-    rentalRepo.update.mockResolvedValue(getRandomRent({
-      rent_products: [{
+    
+    const updatedRentEntity = getRandomRentalEntity({
+      id: "rent-1",
+      items: [new RentProduct({
         id: "rp-1",
-        product_id: "product-1",
-        product_price: new Decimal(100),
-        product_description: "Test",
-        measure_type: measures_type.DRESS,
-        bust: new Decimal(88),
-        waist: new Decimal(70),
-        hip: new Decimal(92),
-        shoulder: new Decimal(38),
-        sleeve: new Decimal(55),
-        height: new Decimal(170),
-        back: new Decimal(36),
-        rent_id: "rent-1",
-        created_at: new Date(),
-        deleted: false,
-        deleted_at: null,
-        real_return_buffer_days: null,
-        real_return_date: null,
-      }]
-    }));
+        productId: "product-1",
+        productPrice: 100,
+        productDescription: "Test",
+        measureType: measures_type.DRESS,
+        bust: 88,
+        waist: 70,
+        hip: 92,
+        shoulder: 38,
+        sleeve: 55,
+        height: 170,
+        back: 36,
+      })]
+    });
+    rentalRepo.update.mockResolvedValue(updatedRentEntity);
 
     const input: RentUpdateWithProductDtoType = {
       id: "rent-1",
@@ -201,19 +210,15 @@ describe("Update rent use case", () => {
     expect(rentalRepo.update).toHaveBeenCalledWith(
       "rent-1",
       expect.objectContaining({
-        rent_products: expect.objectContaining({
-          createMany: expect.objectContaining({
-            data: expect.arrayContaining([expect.objectContaining({
-              bust: new Prisma.Decimal(88),
-              waist: new Prisma.Decimal(70),
-              hip: new Prisma.Decimal(92),
-              shoulder: new Prisma.Decimal(38),
-              sleeve: new Prisma.Decimal(55),
-              height: new Prisma.Decimal(170),
-              back: new Prisma.Decimal(36),
-            })])
-          })
-        })
+        items: expect.arrayContaining([expect.objectContaining({
+          bust: 88,
+          waist: 70,
+          hip: 92,
+          shoulder: 38,
+          sleeve: 55,
+          height: 170,
+          back: 36,
+        })])
       })
     );
   });

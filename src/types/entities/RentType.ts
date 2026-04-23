@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client"
-import { RentProductType } from "./RentProductType";
+import { RentProductUpdateWithProductDtoType } from "./RentProductType";
 
 export type RentType = Prisma.rentsGetPayload<{
   include: {
@@ -25,7 +25,5 @@ export type RentInsertWithProductDtoType = RentInsertDtoType & {
 };
 
 export type RentUpdateWithProductDtoType = RentUpdateDtoType & {
-  rent_products: RentProductType[],
+  rent_products?: RentProductUpdateWithProductDtoType[],
 };
-
-export type RentSummaryDTO = RentType;

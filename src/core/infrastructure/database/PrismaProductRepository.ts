@@ -158,6 +158,7 @@ export class PrismaProductRepository implements IProductRepository {
     // O banco tem tabelas separadas, mas a Entidade é um objeto único.
     // Se a categoria for nula ou o buffer for nulo, assumimos 0.
     const bufferDays = prismaProduct.categories?.post_return_buffer_days ?? 0;
+    const categoryName = prismaProduct.categories?.name ?? null;
 
     // 3. Retorna a Entidade de Domínio
     return new Product(
@@ -165,7 +166,8 @@ export class PrismaProductRepository implements IProductRepository {
       prismaProduct.reference,
       prismaProduct.description,
       Number(prismaProduct.price), // Prisma Decimal -> JS Number
-      bufferDays
+      bufferDays,
+      categoryName
     );
   }
 

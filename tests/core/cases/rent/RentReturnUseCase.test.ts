@@ -1,10 +1,9 @@
 import { RentReturnUseCase, RentReturnDTO } from "@/core/application/cases/rent/RentReturnUseCase";
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { mockDeep, MockProxy } from "jest-mock-extended";
-import { getRandomRent } from "../../../utils/factories";
+import { getRandomRentalEntity } from "../../../utils/factories";
 import { ERentStatus } from "@prisma/client";
 import { addDays, subDays } from "date-fns";
-import { RentType } from "@/types/entities/RentType";
 
 describe("Rent return use case", () => {
   let useCase: RentReturnUseCase;
@@ -16,10 +15,11 @@ describe("Rent return use case", () => {
   });
 
   const existingRentId = "rent-1";
-  const mockExistingRent: RentType = getRandomRent({
+  const mockExistingRent = getRandomRentalEntity({
     id: existingRentId,
     status: ERentStatus.SCHEDULED,
-    return_date: addDays(new Date(), 2),
+    rentDate: new Date(),
+    returnDate: addDays(new Date(), 2),
   });
 
   const returnData: RentReturnDTO = {
@@ -31,7 +31,7 @@ describe("Rent return use case", () => {
 
   it("should mark rent as returned", async () => {
     rentalRepo.find.mockResolvedValue(mockExistingRent);
-    const finishedRent: RentType = { ...mockExistingRent, status: ERentStatus.FINISHED };
+    const finishedRent = getRandomRentalEntity({ ...mockExistingRent.toJSON(), status: ERentStatus.FINISHED });
     rentalRepo.returnRent.mockResolvedValue(finishedRent);
 
     const result = await useCase.execute(returnData);
@@ -43,15 +43,15 @@ describe("Rent return use case", () => {
   });
 
   it("should detect late return", async () => {
-    const lateRent: RentType = getRandomRent({
+    const lateRent = getRandomRentalEntity({
       id: existingRentId,
       status: ERentStatus.SCHEDULED,
-      return_date: subDays(new Date(), 2),
+      returnDate: subDays(new Date(), 2),
     });
     rentalRepo.find.mockResolvedValue(lateRent);
     
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    rentalRepo.returnRent.mockResolvedValue({ ...lateRent, status: ERentStatus.FINISHED });
+    rentalRepo.returnRent.mockResolvedValue(getRandomRentalEntity({ ...lateRent.toJSON(), status: ERentStatus.FINISHED }));
 
     await useCase.execute(returnData);
 
@@ -68,7 +68,7 @@ describe("Rent return use case", () => {
   });
 
   it("should throw error if rent is already finished", async () => {
-    const finishedRent: RentType = getRandomRent({
+    const finishedRent = getRandomRentalEntity({
       id: existingRentId,
       status: ERentStatus.FINISHED,
     });
@@ -79,13 +79,13 @@ describe("Rent return use case", () => {
   });
 
   it("should handle same-day return", async () => {
-    const sameDayRent: RentType = getRandomRent({
+    const sameDayRent = getRandomRentalEntity({
       id: existingRentId,
       status: ERentStatus.SCHEDULED,
-      return_date: new Date(),
+      returnDate: new Date(),
     });
     rentalRepo.find.mockResolvedValue(sameDayRent);
-    rentalRepo.returnRent.mockResolvedValue({ ...sameDayRent, status: ERentStatus.FINISHED });
+    rentalRepo.returnRent.mockResolvedValue(getRandomRentalEntity({ ...sameDayRent.toJSON(), status: ERentStatus.FINISHED }));
 
     const result = await useCase.execute(returnData);
 

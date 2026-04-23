@@ -13,32 +13,22 @@ type RentProductType = RentType["rent_products"][number];
 
 interface IRentSummaryProductItemProps {
   rentProduct: RentProductType;
-  discountType?: "PERCENTAGE" | "FIXED" | null;
-  discountValue?: number | null;
 }
 
-const RentSummaryProductItem: React.FC<IRentSummaryProductItemProps> = ({
-  rentProduct,
-  discountType,
-  discountValue,
-}) => {
+const RentSummaryProductItem: React.FC<IRentSummaryProductItemProps> = ({ rentProduct }) => {
   const mType = (rentProduct.measure_type as MeasureType) ?? EMeasureType.NONE;
-  const labelsMap = (measureFieldsLabels[mType] ?? {}) as Record<
-    string,
-    string
-  >;
+  const labelsMap = (measureFieldsLabels[mType] ?? {}) as Record<string, string>;
   const measureKeys = Helper.getObjectKeys(labelsMap);
 
   const productPrice = Number(rentProduct.product_price);
-  
-  // Note: Discount is global to the rent, but we show it here as information if passed
-  const hasDiscount = discountValue !== undefined && discountValue !== null && discountValue > 0;
 
   return (
     <Box p="4" borderWidth="1px" borderRadius="md" bg="white" boxShadow="sm">
       <Flex justify="space-between" align="flex-start" mb="2">
         <Box>
-          <Text fontWeight="bold" fontSize="md">{rentProduct.product_description}</Text>
+          <Text fontWeight="bold" fontSize="md">
+            {rentProduct.product_description}
+          </Text>
           {rentProduct.products?.reference && (
             <Text fontSize="sm" color="gray.600">
               Ref: {rentProduct.products.reference} | {rentProduct.products.categories?.name}
@@ -49,32 +39,32 @@ const RentSummaryProductItem: React.FC<IRentSummaryProductItemProps> = ({
           <Text fontWeight="bold" fontSize="md">
             {new Currency(productPrice).toString()}
           </Text>
-          <Text fontSize="xs" color="gray.500">Subtotal</Text>
+          <Text fontSize="xs" color="gray.500">
+            Subtotal
+          </Text>
         </Flex>
       </Flex>
 
       {rentProduct.real_return_date && (
         <Flex mt="2" align="center" gap="2">
-          <Badge colorPalette="green" variant="subtle">Devolvido em</Badge>
-          <Text fontSize="sm">
-            {formatDate(new Date(rentProduct.real_return_date), "dd/MM/yyyy")}
-          </Text>
-        </Flex>
-      )}
-
-      {hasDiscount && (
-        <Flex mt="2" justify="flex-end" align="center" gap="2">
-           <Text fontSize="xs" color="gray.500">Desconto Global aplicado:</Text>
-           <Badge colorPalette="orange" variant="outline">
-             {discountType === "PERCENTAGE" ? `${discountValue}%` : new Currency(Number(discountValue)).toString()}
-           </Badge>
+          <Badge colorPalette="green" variant="subtle">
+            Devolvido em
+          </Badge>
+          <Text fontSize="sm">{formatDate(new Date(rentProduct.real_return_date), "dd/MM/yyyy")}</Text>
         </Flex>
       )}
 
       {measureKeys.length > 0 && (
         <Box mt="4">
           <Separator mb="3" />
-          <Text fontSize="xs" fontWeight="bold" mb="2" color="primary.500" textTransform="uppercase" letterSpacing="wider">
+          <Text
+            fontSize="xs"
+            fontWeight="bold"
+            mb="2"
+            color="primary.500"
+            textTransform="uppercase"
+            letterSpacing="wider"
+          >
             Medidas Ajustadas
           </Text>
           <Grid

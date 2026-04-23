@@ -1,9 +1,8 @@
 import { DeleteRentUseCase } from "@/core/application/cases/rent/DeleteRentUseCase";
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { mockDeep, MockProxy } from "jest-mock-extended";
-import { getRandomRent } from "../../../utils/factories";
+import { getRandomRentalEntity } from "../../../utils/factories";
 import { ServerError } from "@/utils/models/ServerError";
-import { RentType } from "@/types/entities/RentType";
 
 describe("Delete rent use case", () => {
   let useCase: DeleteRentUseCase;
@@ -15,7 +14,7 @@ describe("Delete rent use case", () => {
   });
 
   it("should soft delete a rent", async () => {
-    const rent: RentType = getRandomRent({ id: "rent-1" });
+    const rent = getRandomRentalEntity({ id: "rent-1" });
     rentalRepo.find.mockResolvedValue(rent);
     rentalRepo.delete.mockResolvedValue(undefined);
 
