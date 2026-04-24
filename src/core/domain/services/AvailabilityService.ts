@@ -1,10 +1,10 @@
-import { Rent } from "../entities/Rent";
+import { RentEntity } from "../entities/RentEntity";
 
 export class AvailabilityService {
   static isAvailable(
     newStart: Date,
     newEnd: Date,
-    existingRentals: Rent[],
+    existingRentals: RentEntity[],
     cleaningDays: number = 2
   ): boolean {
      const hasConflict = existingRentals.some(rental => 

@@ -3,8 +3,7 @@
 import React from "react";
 import { Flex, Text, Box } from "@chakra-ui/react";
 import Currency from "@/utils/models/Currency";
-import { Rent, RentProps } from "@/core/domain/entities/Rent";
-import { RentProduct } from "@/core/domain/entities/RentProduct";
+import { RentEntity } from "@/core/domain/entities/RentEntity";
 import { RentType } from "@/types/entities/RentType";
 
 interface IRentSummaryFinancialProps {
@@ -12,40 +11,7 @@ interface IRentSummaryFinancialProps {
 }
 
 const RentSummaryFinancial: React.FC<IRentSummaryFinancialProps> = ({ rent }) => {
-  const rentPayload: RentProps = {
-    id: rent.id,
-    code: Number(rent.code),
-    status: rent.status,
-    rentDate: rent.rent_date,
-    returnDate: rent.return_date,
-    clientName: rent.client_name,
-    address: rent.address,
-    phone: rent.phone,
-    discountType: rent.discount_type,
-    discountValue: Number(rent.discount_value ?? 0),
-    signalValue: Number(rent.signal_value),
-    items: rent.rent_products.map(
-      (rp) =>
-        new RentProduct({
-          id: rp.id,
-          productId: rp.product_id,
-          productPrice: Number(rp.product_price),
-          productDescription: rp.product_description ?? "",
-          measureType: rp.measure_type,
-          bust: rp.bust ? Number(rp.bust) : 0,
-          waist: rp.waist ? Number(rp.waist) : 0,
-          hip: rp.hip ? Number(rp.hip) : 0,
-          shoulder: rp.shoulder ? Number(rp.shoulder) : 0,
-          sleeve: rp.sleeve ? Number(rp.sleeve) : 0,
-          height: rp.height ? Number(rp.height) : 0,
-          back: rp.back ? Number(rp.back) : 0,
-        }),
-    ),
-    createdAt: rent.created_at,
-    realReturnDate: rent.real_return_date,
-  };
-
-  const rentEntity = new Rent(rentPayload);
+  const rentEntity = new RentEntity(rent);
 
   console.log("Rent Entity >> ", rentEntity, rent);
 

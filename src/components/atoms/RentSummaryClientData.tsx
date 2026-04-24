@@ -2,13 +2,13 @@
 
 import React from "react";
 import { Flex, Text, Box, Grid, GridItem } from "@chakra-ui/react";
-import { RentSummaryDTO } from "@/types/entities/RentType";
 import TextRow from "@/components/atoms/TextRow";
 import Tag from "@/components/atoms/Tag";
 import { formatDate } from "@/utils/formatDate";
+import { RentType } from "@/types/entities/RentType";
 
 interface IRentSummaryClientDataProps {
-  rent: RentSummaryDTO;
+  rent: RentType;
 }
 
 const RentSummaryClientData: React.FC<IRentSummaryClientDataProps> = ({ rent }) => {
@@ -20,11 +20,7 @@ const RentSummaryClientData: React.FC<IRentSummaryClientDataProps> = ({ rent }) 
         <Text fontWeight="bold" fontSize="lg">
           Pedido #{rent.code.toString()}
         </Text>
-        <Tag 
-          label={isFinished ? "Finalizado" : "Agendado"} 
-          bg={isFinished ? "green.500" : "blue.500"}
-          p="2"
-        />
+        <Tag label={isFinished ? "Finalizado" : "Agendado"} bg={isFinished ? "green.500" : "blue.500"} p="2" />
       </Flex>
       <Grid templateColumns={{ base: "1fr", md: "1fr 1fr" }} gap="4">
         <GridItem>

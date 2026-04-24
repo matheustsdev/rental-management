@@ -3,12 +3,12 @@ import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository"
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { mockDeep, MockProxy } from "jest-mock-extended";
 import { getRandomProduct, getRandomProductType, getRandomCategory } from "../../../utils/factories";
-import { RentInsertWithProductDtoType } from "@/types/entities/RentType";
+import { RentInsertWithProductDtoType, RentType } from "@/types/entities/RentType";
 import { startOfDay, addDays } from "date-fns";
 import { Decimal } from "@prisma/client/runtime/library";
 import { measures_type, EDiscountType, ERentStatus } from "@prisma/client";
 import { faker } from "@faker-js/faker";
-import { Rent } from "@/core/domain/entities/Rent";
+import { RentEntity } from "@/core/domain/entities/RentEntity";
 import { RentProduct } from "@/core/domain/entities/RentProduct";
 import { v4 as uuidv4 } from "uuid";
 import { ServerError } from "@/utils/models/ServerError";
@@ -24,7 +24,7 @@ describe("Create rent use case", () => {
     productRepo = mockDeep<IProductRepository>();
     useCase = new CreateRentUseCase(rentalRepo, productRepo);
 
-    rentalRepo.create.mockImplementation(async (data) => data as Rent);
+    rentalRepo.create.mockImplementation(async (data) => data as RentEntity);
   });
 
   const validRentInput: RentInsertWithProductDtoType = {
@@ -70,8 +70,10 @@ describe("Create rent use case", () => {
 
     // Valida se o valor total foi calculado corretamente como subtotal (50) e restante (45)
     expect(rentalRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      discountValue: 10,
-      discountType: EDiscountType.PERCENTAGE,
+      props: expect.objectContaining({
+        discountValue: 10,
+        discountType: EDiscountType.PERCENTAGE,
+      })
     }));
   });
 
@@ -89,8 +91,10 @@ describe("Create rent use case", () => {
     await useCase.execute(inputWithDiscount);
 
     expect(rentalRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      discountValue: 20,
-      discountType: EDiscountType.FIXED,
+      props: expect.objectContaining({
+        discountValue: 20,
+        discountType: EDiscountType.FIXED,
+      })
     }));
   });
 
@@ -99,28 +103,43 @@ describe("Create rent use case", () => {
     const product = getRandomProduct({ id: productId, bufferDays: 1 });
     productRepo.findById.mockResolvedValue(product);
     
-    const existingRental = new Rent({
+    const existingRental = new RentEntity({
       id: "rent-existing",
+      code: new Decimal(1),
       status: ERentStatus.SCHEDULED,
-      rentDate: new Date(validRentInput.rent_date),
-      returnDate: new Date(validRentInput.return_date),
-      clientName: "Existing Client",
+      rent_date: new Date(validRentInput.rent_date),
+      return_date: new Date(validRentInput.return_date),
+      client_name: "Existing Client",
       address: null,
       phone: null,
-      discountType: null,
-      discountValue: 0,
-      signalValue: 0,
-      items: [
-        new RentProduct({
+      discount_type: null,
+      discount_value: new Decimal(0),
+      signal_value: new Decimal(0),
+      total_value: new Decimal(50),
+      remaining_value: new Decimal(50),
+      rent_products: [
+        {
           id: uuidv4(),
-          productId: productId,
-          productPrice: 50,
-          productDescription: "Product 1",
-          measureType: measures_type.DRESS,
+          rent_id: "rent-existing",
+          product_id: productId,
+          product_price: new Decimal(50),
+          product_description: "Product 1",
+          measure_type: measures_type.DRESS,
           bust: null, waist: null, hip: null, shoulder: null, sleeve: null, height: null, back: null,
-        })
+          real_return_date: null,
+          real_return_buffer_days: null,
+          deleted: false,
+          deleted_at: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        }
       ],
-    });
+      created_at: new Date(),
+      updated_at: new Date(),
+      deleted: false,
+      deleted_at: null,
+      real_return_date: null,
+    } as any);
     rentalRepo.findActiveByProduct.mockResolvedValue([existingRental]);
 
     // Valida se erro de indisponibilidade é lançado
@@ -156,7 +175,9 @@ describe("Create rent use case", () => {
     await useCase.execute(inputWithSignal);
 
     expect(rentalRepo.create).toHaveBeenCalledWith(expect.objectContaining({
-      signalValue: 20,
+      props: expect.objectContaining({
+        signalValue: 20,
+      })
     }));
   });
 

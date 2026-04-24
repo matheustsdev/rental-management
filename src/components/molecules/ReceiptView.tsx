@@ -3,6 +3,7 @@ import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { RentType } from "@/types/entities/RentType";
 import Currency from "@/utils/models/Currency";
 import { formatDate } from "@/utils/formatDate";
+import { RentEntity } from "@/core/domain/entities/RentEntity";
 
 // Register fonts if needed, but we'll use standard ones for compatibility
 // Using colors from theme.ts
@@ -222,27 +223,12 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
     rent_date,
     return_date,
     rent_products,
-    total_value,
-    discount_value,
-    signal_value,
     receipt_observations,
     internal_observations,
     code,
   } = rent;
 
-  // Financial calculations
-  const subtotal = rent_products.reduce((acc, item) => acc + Number(item.product_price), 0);
-  const discount = Number(discount_value) ?? 0;
-  const signal = Number(signal_value) ?? 0;
-  
-  let finalTotal = subtotal;
-  if (rent.discount_type === "PERCENTAGE") {
-    finalTotal = subtotal - (subtotal * discount / 100);
-  } else {
-    finalTotal = subtotal - discount;
-  }
-  
-  const remainingBalance = Math.max(0, finalTotal - signal);
+  const rentEntity = new RentEntity(rent);
 
   const currentObservations = isStoreVia ? internal_observations : receipt_observations;
 
@@ -321,19 +307,23 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
       <View style={styles.summaryContainer}>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Subtotal:</Text>
-          <Text style={styles.summaryValue}>{new Currency(subtotal).toString()}</Text>
+          <Text style={styles.summaryValue}>{new Currency(rentEntity.getSubtotal()).toString()}</Text>
         </View>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Desconto:</Text>
-          <Text style={styles.summaryValue}>- {new Currency(discount).toString()}</Text>
+          <Text style={styles.summaryValue}>- {new Currency(rentEntity.getTotalDiscount()).toString()}</Text>
+        </View>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Total:</Text>
+          <Text style={styles.summaryValue}>{new Currency(rentEntity.getTotalValue()).toString()}</Text>
         </View>
         <View style={styles.summaryRow}>
           <Text style={styles.summaryLabel}>Sinal pago:</Text>
-          <Text style={styles.summaryValue}>{new Currency(signal).toString()}</Text>
+          <Text style={styles.summaryValue}>{new Currency(rentEntity.signalValue).toString()}</Text>
         </View>
         <View style={[styles.summaryRow, styles.totalRow]}>
           <Text style={styles.totalLabel}>Valor Restante:</Text>
-          <Text style={styles.totalValue}>{new Currency(remainingBalance).toString()}</Text>
+          <Text style={styles.totalValue}>{new Currency(rentEntity.getRemainingValue()).toString()}</Text>
         </View>
       </View>
       <View style={styles.observations} wrap={false}>

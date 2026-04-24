@@ -1,9 +1,9 @@
 import { IRentalRepository } from "@/core/domain/repositories/IRentalRepository";
 import { IProductRepository } from "@/core/domain/repositories/IProductRepository";
 import { RentUpdateWithProductDtoType, RentType } from "@/types/entities/RentType";
-import { ERentStatus, discount_type_enum as DiscountType } from "@prisma/client";
+import { ERentStatus, discount_type_enum as DiscountType, Prisma } from "@prisma/client";
 import { ServerError } from "@/utils/models/ServerError";
-import { Rent } from "@/core/domain/entities/Rent";
+import { RentEntity } from "@/core/domain/entities/RentEntity";
 import { RentProduct } from "@/core/domain/entities/RentProduct";
 import { v4 as uuidv4 } from "uuid";
 import { RentMapper } from "../../mappers/RentMapper";
@@ -84,24 +84,66 @@ export class UpdateRentUseCase {
     }
 
     // 3. Atualizar a entidade Rent
-    const updatedRentEntity = new Rent({
-      id: existingRent.id,
-      code: existingRent.code,
-      status: existingRent.status, // Começa com o atual para validar transição
-      rentDate: existingRent.rentDate,
-      returnDate: existingRent.returnDate,
-      clientName: restOfInput.client_name ? restOfInput.client_name.toString() : existingRent.clientName,
-      address: restOfInput.address !== undefined ? (restOfInput.address as string | null) : existingRent.address,
-      phone: restOfInput.phone !== undefined ? (restOfInput.phone as string | null) : existingRent.phone,
-      discountType: restOfInput.discount_type !== undefined ? (restOfInput.discount_type as DiscountType | null) : existingRent.discountType,
-      discountValue: restOfInput.discount_value !== undefined ? Number(restOfInput.discount_value) : existingRent.discountValue,
-      signalValue: restOfInput.signal_value !== undefined ? Number(restOfInput.signal_value) : existingRent.signalValue,
-      internalObservations: restOfInput.internal_observations !== undefined ? (restOfInput.internal_observations as string | null) : existingRent.internalObservations,
-      receiptObservations: restOfInput.receipt_observations !== undefined ? (restOfInput.receipt_observations as string | null) : existingRent.receiptObservations,
-      items: domainItems,
-      createdAt: existingRent.createdAt,
-      realReturnDate: restOfInput.real_return_date !== undefined ? (restOfInput.real_return_date as Date | null) : existingRent.realReturnDate
-    });
+    const currentDto = RentMapper.toDto(existingRent);
+    const updatedRentEntity = new RentEntity({
+      ...currentDto,
+      client_name: restOfInput.client_name ? restOfInput.client_name.toString() : currentDto.client_name,
+      address: restOfInput.address !== undefined ? (restOfInput.address as string | null) : currentDto.address,
+      phone: restOfInput.phone !== undefined ? (restOfInput.phone as string | null) : currentDto.phone,
+      discount_type: restOfInput.discount_type !== undefined ? (restOfInput.discount_type as DiscountType | null) : currentDto.discount_type,
+      discount_value: restOfInput.discount_value !== undefined ? new Prisma.Decimal(restOfInput.discount_value as number) : currentDto.discount_value,
+      signal_value: restOfInput.signal_value !== undefined ? new Prisma.Decimal(restOfInput.signal_value as number) : currentDto.signal_value,
+      internal_observations: restOfInput.internal_observations !== undefined ? (restOfInput.internal_observations as string | null) : currentDto.internal_observations,
+      receipt_observations: restOfInput.receipt_observations !== undefined ? (restOfInput.receipt_observations as string | null) : currentDto.receipt_observations,
+      rent_products: domainItems.map(item => {
+        const itemJson = item.toJSON();
+        return {
+          id: itemJson.id,
+          rent_id: id,
+          product_id: itemJson.productId,
+          product_price: new Prisma.Decimal(itemJson.productPrice),
+          product_description: itemJson.productDescription,
+          measure_type: itemJson.measureType,
+          bust: itemJson.bust !== null ? new Prisma.Decimal(itemJson.bust) : null,
+          waist: itemJson.waist !== null ? new Prisma.Decimal(itemJson.waist) : null,
+          hip: itemJson.hip !== null ? new Prisma.Decimal(itemJson.hip) : null,
+          shoulder: itemJson.shoulder !== null ? new Prisma.Decimal(itemJson.shoulder) : null,
+          sleeve: itemJson.sleeve !== null ? new Prisma.Decimal(itemJson.sleeve) : null,
+          height: itemJson.height !== null ? new Prisma.Decimal(itemJson.height) : null,
+          back: itemJson.back !== null ? new Prisma.Decimal(itemJson.back) : null,
+          real_return_date: itemJson.realReturnDate ?? null,
+          real_return_buffer_days: itemJson.realReturnBufferDays ?? null,
+          deleted: false,
+          deleted_at: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+          products: itemJson.product ? {
+            id: itemJson.productId,
+            reference: itemJson.product.reference,
+            description: itemJson.productDescription,
+            price: new Prisma.Decimal(itemJson.productPrice),
+            category_id: "",
+            buffer_days: 0,
+            receipt_description: "",
+            deleted: false,
+            deleted_at: null,
+            created_at: new Date(),
+            updated_at: new Date(),
+            categories: itemJson.product.categories ? {
+              id: "",
+              name: itemJson.product.categories.name,
+              measure_type: itemJson.measureType,
+              buffer_days: 0,
+              deleted: false,
+              deleted_at: null,
+              created_at: new Date(),
+              updated_at: new Date(),
+            } : null
+          } : null
+        };
+      }),
+      real_return_date: restOfInput.real_return_date !== undefined ? (restOfInput.real_return_date as Date | null) : currentDto.real_return_date
+    } as unknown as RentType);
 
     // Aplicar mudanças que exigem validação
     if (rent_date || return_date) {

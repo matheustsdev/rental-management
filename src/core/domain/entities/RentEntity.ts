@@ -2,6 +2,7 @@ import { ERentStatus, discount_type_enum as DiscountType } from "@prisma/client"
 import { RentProduct } from "./RentProduct";
 import { isBefore, addDays, isAfter, differenceInDays } from "date-fns";
 import { ServerError } from "@/utils/models/ServerError";
+import { RentType } from "@/types/entities/RentType";
 
 export interface RentProps {
   id: string;
@@ -22,13 +23,56 @@ export interface RentProps {
   realReturnDate?: Date | null;
 }
 
-export class Rent {
+export class RentEntity {
   private props: RentProps;
 
-  constructor(props: RentProps) {
-    this.props = props;
+  constructor(rent: RentType) {
+    const rentPayload: RentProps = {
+      id: rent.id,
+      code: Number(rent.code),
+      status: rent.status,
+      rentDate: rent.rent_date,
+      returnDate: rent.return_date,
+      clientName: rent.client_name,
+      address: rent.address,
+      phone: rent.phone,
+      discountType: rent.discount_type,
+      discountValue: Number(rent.discount_value ?? 0),
+      signalValue: Number(rent.signal_value),
+      internalObservations: rent.internal_observations,
+      receiptObservations: rent.receipt_observations,
+      items: rent.rent_products.map(
+        (rp) =>
+          new RentProduct({
+            id: rp.id,
+            productId: rp.product_id,
+            productPrice: Number(rp.product_price),
+            productDescription: rp.product_description ?? "",
+            measureType: rp.measure_type,
+            bust: rp.bust ? Number(rp.bust) : null,
+            waist: rp.waist ? Number(rp.waist) : null,
+            hip: rp.hip ? Number(rp.hip) : null,
+            shoulder: rp.shoulder ? Number(rp.shoulder) : null,
+            sleeve: rp.sleeve ? Number(rp.sleeve) : null,
+            height: rp.height ? Number(rp.height) : null,
+            back: rp.back ? Number(rp.back) : null,
+            realReturnDate: rp.real_return_date,
+            realReturnBufferDays: rp.real_return_buffer_days,
+            product: rp.products ? {
+              reference: rp.products.reference,
+              categories: rp.products.categories ? {
+                name: rp.products.categories.name
+              } : null
+            } : null
+          }),
+      ),
+      createdAt: rent.created_at,
+      realReturnDate: rent.real_return_date,
+    };
 
-    this.validateDates(props.rentDate, props.returnDate);
+    this.props = rentPayload;
+
+    this.validateDates(this.props.rentDate, this.props.returnDate);
   }
 
   // Getters

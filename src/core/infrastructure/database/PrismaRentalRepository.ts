@@ -3,9 +3,8 @@ import { IRentalRepository, RentalListInput } from "@/core/domain/repositories/I
 import { RentReturnDTO } from "@/core/application/cases/rent/RentReturnUseCase";
 import { getUTCDateFromInput } from "@/utils/getUTCDateFromInput";
 import { subDays } from "date-fns";
-import { MeasureType } from "@/constants/EMeasureType";
-import { Rent } from "@/core/domain/entities/Rent";
-import { RentProduct } from "@/core/domain/entities/RentProduct";
+import { RentEntity } from "@/core/domain/entities/RentEntity";
+import { RentType } from "@/types/entities/RentType";
 
 type PrismaRentWithRelations = Prisma.rentsGetPayload<{
   include: {
@@ -24,51 +23,11 @@ type PrismaRentWithRelations = Prisma.rentsGetPayload<{
 export class PrismaRentalRepository implements IRentalRepository {
   constructor(private prisma: PrismaClient) { }
 
-  private mapToEntity(prismaRent: PrismaRentWithRelations): Rent {
-    const items = prismaRent.rent_products.map(rp => new RentProduct({
-      id: rp.id,
-      productId: rp.product_id,
-      productPrice: Number(rp.product_price),
-      productDescription: rp.product_description,
-      measureType: rp.measure_type as MeasureType,
-      bust: rp.bust ? Number(rp.bust) : null,
-      waist: rp.waist ? Number(rp.waist) : null,
-      hip: rp.hip ? Number(rp.hip) : null,
-      shoulder: rp.shoulder ? Number(rp.shoulder) : null,
-      sleeve: rp.sleeve ? Number(rp.sleeve) : null,
-      height: rp.height ? Number(rp.height) : null,
-      back: rp.back ? Number(rp.back) : null,
-      realReturnDate: rp.real_return_date,
-      realReturnBufferDays: rp.real_return_buffer_days,
-      product: rp.products ? {
-        reference: rp.products.reference,
-        categories: rp.products.categories ? {
-          name: rp.products.categories.name
-        } : null
-      } : null
-    }));
-
-    return new Rent({
-      id: prismaRent.id,
-      code: Number(prismaRent.code),
-      status: prismaRent.status,
-      rentDate: prismaRent.rent_date,
-      returnDate: prismaRent.return_date,
-      clientName: prismaRent.client_name,
-      address: prismaRent.address,
-      phone: prismaRent.phone,
-      discountType: prismaRent.discount_type,
-      discountValue: Number(prismaRent.discount_value),
-      signalValue: Number(prismaRent.signal_value),
-      internalObservations: prismaRent.internal_observations,
-      receiptObservations: prismaRent.receipt_observations,
-      items,
-      createdAt: prismaRent.created_at,
-      realReturnDate: prismaRent.real_return_date
-    });
+  private mapToEntity(prismaRent: PrismaRentWithRelations): RentEntity {
+    return new RentEntity(prismaRent as RentType);
   }
 
-  async create(rent: Rent): Promise<Rent> {
+  async create(rent: RentEntity): Promise<RentEntity> {
     const data = rent.toJSON();
     
     const newRent = await this.prisma.rents.create({
@@ -122,7 +81,7 @@ export class PrismaRentalRepository implements IRentalRepository {
     return this.mapToEntity(newRent as PrismaRentWithRelations);
   }
 
-  async list(params: RentalListInput): Promise<Rent[]> {
+  async list(params: RentalListInput): Promise<RentEntity[]> {
     const { search, status, startDate, endDate, orderBy, ascending, page = 1, pageSize = 10 } = params;
     const skip = (page - 1) * pageSize;
     const orderDirection = ascending ? "asc" : "desc";
@@ -183,7 +142,7 @@ export class PrismaRentalRepository implements IRentalRepository {
     return rents.map(r => this.mapToEntity(r as PrismaRentWithRelations));
   }
 
-  async update(id: string, rent: Rent): Promise<Rent> {
+  async update(id: string, rent: RentEntity): Promise<RentEntity> {
     const data = rent.toJSON();
 
     const updatedRent = await this.prisma.rents.update({
@@ -258,7 +217,7 @@ export class PrismaRentalRepository implements IRentalRepository {
     ]);
   }
 
-  async find(id: string): Promise<Rent | null> {
+  async find(id: string): Promise<RentEntity | null> {
     const rent = await this.prisma.rents.findUnique({
       where: { id, deleted: false },
       include: {
@@ -289,7 +248,7 @@ export class PrismaRentalRepository implements IRentalRepository {
     });
   }
 
-  async findActiveByProduct(productId: string, excludeRentId?: string): Promise<Rent[]> {
+  async findActiveByProduct(productId: string, excludeRentId?: string): Promise<RentEntity[]> {
     const where: Prisma.rentsWhereInput = {
       rent_products: {
         some: {
@@ -372,7 +331,7 @@ export class PrismaRentalRepository implements IRentalRepository {
     });
   }
 
-  async returnRent(rentReturn: RentReturnDTO): Promise<Rent> {
+  async returnRent(rentReturn: RentReturnDTO): Promise<RentEntity> {
     const { id, rentProducts } = rentReturn;
     const returnDate = getUTCDateFromInput(new Date());
 
@@ -413,7 +372,7 @@ export class PrismaRentalRepository implements IRentalRepository {
     return this.mapToEntity(results[results.length - 1] as PrismaRentWithRelations);
   }
 
-  async findOverlappingRents(productId: string, startDate: Date, endDate: Date): Promise<Rent[]> {
+  async findOverlappingRents(productId: string, startDate: Date, endDate: Date): Promise<RentEntity[]> {
     const marginStartDate = subDays(startDate, 30);
 
     const rents = await this.prisma.rents.findMany({

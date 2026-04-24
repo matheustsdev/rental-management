@@ -1,4 +1,4 @@
-import { Rent } from "@/core/domain/entities/Rent";
+import { RentEntity } from "@/core/domain/entities/RentEntity";
 import { RentType } from "@/types/entities/RentType";
 import { Prisma, measures_type as PrismaMeasureType } from "@prisma/client";
 
@@ -21,7 +21,7 @@ export class RentMapper {
    * Converte a entidade de domínio Rent para o DTO RentType esperado pela camada de apresentação.
    * Lida com a conversão de tipos (number para Decimal) e estruturas de dados de forma estrita (sem 'any').
    */
-  public static toDto(rent: Rent): RentType {
+  public static toDto(rent: RentEntity): RentType {
     const json = rent.toJSON();
     
     // Mapeamento tipado dos produtos do aluguel

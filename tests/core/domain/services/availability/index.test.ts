@@ -1,42 +1,56 @@
 import { AvailabilityService } from "@/core/domain/services/AvailabilityService";
-import { Rent } from "@/core/domain/entities/Rent";
+import { RentEntity } from "@/core/domain/entities/RentEntity";
 import { RentProduct } from "@/core/domain/entities/RentProduct";
 import { ERentStatus, measures_type } from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime/library";
 
 describe("AvailabilityService", () => {
   const productId = "prod-1";
 
   const createMockRent = (rentDate: Date, returnDate: Date, realReturnDate: Date | null = null) => {
-    return new Rent({
+    return new RentEntity({
       id: "rent-1",
+      code: new Decimal(1),
       status: ERentStatus.SCHEDULED,
-      rentDate,
-      returnDate,
-      clientName: "Test",
+      rent_date: rentDate,
+      return_date: returnDate,
+      client_name: "Test",
       address: null,
       phone: null,
-      discountType: null,
-      discountValue: 0,
-      signalValue: 0,
-      items: [
-        new RentProduct({
+      discount_type: null,
+      discount_value: new Decimal(0),
+      signal_value: new Decimal(0),
+      total_value: new Decimal(100),
+      remaining_value: new Decimal(100),
+      rent_products: [
+        {
           id: "rp-1",
-          productId,
-          productPrice: 100,
-          productDescription: "Test",
-          measureType: measures_type.DRESS,
+          rent_id: "rent-1",
+          product_id: productId,
+          product_price: new Decimal(100),
+          product_description: "Test",
+          measure_type: measures_type.DRESS,
           bust: null, waist: null, hip: null, shoulder: null, sleeve: null, height: null, back: null,
-          realReturnDate
-        })
+          real_return_date: realReturnDate,
+          real_return_buffer_days: null,
+          deleted: false,
+          deleted_at: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+        }
       ],
-      realReturnDate
-    });
+      real_return_date: realReturnDate,
+      created_at: new Date(),
+      updated_at: new Date(),
+      deleted: false,
+      deleted_at: null,
+    } as any);
   };
 
   it("should return true when product is available (no conflicts)", () => {
     const rentDate = new Date("2025-03-01");
     const returnDate = new Date("2025-03-05");
-    const existingRentals: Rent[] = [];
+    const existingRentals: RentEntity[] = [];
 
     const result = AvailabilityService.isAvailable(rentDate, returnDate, existingRentals, 2);
 

@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Product } from "@/core/domain/entities/Product";
-import { Rent, RentProps } from "@/core/domain/entities/Rent";
+import { RentEntity, RentProps } from "@/core/domain/entities/RentEntity";
 import { RentType } from "@/types/entities/RentType";
 import { ProductType } from "@/types/entities/ProductType";
 import { CategoryType } from "@/types/entities/CategoryType";
@@ -74,28 +74,58 @@ export const getRandomProductType = (overrides?: Partial<ProductType>): ProductT
   } as ProductType;
 };
 
-export const getRandomRentalEntity = (overrides?: Partial<RentProps>): Rent => {
+export const getRandomRentalEntity = (overrides?: Partial<RentProps>): RentEntity => {
   const returnDate = overrides?.returnDate ?? (overrides?.rentDate ? addDays(overrides.rentDate, 7) : faker.date.future());
   const rentDate = overrides?.rentDate ?? subDays(returnDate, 7);
 
-  return new Rent({
-    id: overrides?.id ?? faker.string.uuid(),
-    status: overrides?.status ?? ERentStatus.SCHEDULED,
-    rentDate,
-    returnDate,
-    clientName: overrides?.clientName ?? faker.person.fullName(),
-    address: overrides?.address ?? faker.location.streetAddress(),
-    phone: overrides?.phone ?? faker.phone.number(),
-    discountType: overrides?.discountType ?? null,
-    discountValue: overrides?.discountValue ?? 0,
-    signalValue: overrides?.signalValue ?? 0,
-    items: overrides?.items ?? [],
-    code: overrides?.code ?? faker.number.int({ min: 1, max: 1000 }),
-    internalObservations: overrides?.internalObservations ?? faker.lorem.sentence(),
-    receiptObservations: overrides?.receiptObservations ?? faker.lorem.sentence(),
-    realReturnDate: overrides?.realReturnDate ?? null,
-    createdAt: overrides?.createdAt ?? new Date(),
+  const rentType = getRandomRent({
+    id: overrides?.id,
+    client_name: overrides?.clientName,
+    address: overrides?.address,
+    phone: overrides?.phone,
+    rent_date: rentDate,
+    return_date: returnDate,
+    status: overrides?.status,
+    discount_type: overrides?.discountType,
+    discount_value: overrides?.discountValue !== undefined ? new Decimal(overrides.discountValue) : undefined,
+    signal_value: overrides?.signalValue !== undefined ? new Decimal(overrides.signalValue) : undefined,
+    code: overrides?.code && overrides.code ? new Decimal(overrides.code) : undefined,
+    internal_observations: overrides?.internalObservations,
+    receipt_observations: overrides?.receiptObservations,
+    real_return_date: overrides?.realReturnDate,
+    created_at: overrides?.createdAt,
   });
+
+  if (overrides?.items) {
+    rentType.rent_products = overrides.items.map(item => {
+      const json = item.toJSON();
+      return {
+        id: json.id,
+        rent_id: rentType.id,
+        product_id: json.productId,
+        product_price: new Decimal(json.productPrice),
+        product_description: json.productDescription,
+        measure_type: json.measureType,
+        bust: json.bust !== null ? new Decimal(json.bust) : null,
+        waist: json.waist !== null ? new Decimal(json.waist) : null,
+        hip: json.hip !== null ? new Decimal(json.hip) : null,
+        shoulder: json.shoulder !== null ? new Decimal(json.shoulder) : null,
+        sleeve: json.sleeve !== null ? new Decimal(json.sleeve) : null,
+        height: json.height !== null ? new Decimal(json.height) : null,
+        back: json.back !== null ? new Decimal(json.back) : null,
+        real_return_date: json.realReturnDate ?? null,
+        real_return_buffer_days: json.realReturnBufferDays ?? null,
+        products: json.product ? {
+          reference: json.product.reference,
+          categories: json.product.categories ? {
+            name: json.product.categories.name
+          } : null
+        } : null
+      } as any;
+    });
+  }
+
+  return new RentEntity(rentType);
 };
 
 export const getRandomCategory = (overrides?: Partial<CategoryType>): CategoryType => {
