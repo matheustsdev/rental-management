@@ -18,6 +18,8 @@ export async function GET(request: NextRequest) {
     const pageSize = Number(searchParams.get("pageSize") || 10);
     const orderBy = searchParams.get("orderBy") as keyof RentType | undefined;
     const ascending = searchParams.get("ascending") !== "false";
+    const startDate = searchParams.get("startDate") ? new Date(searchParams.get("startDate")!) : undefined;
+    const endDate = searchParams.get("endDate") ? new Date(searchParams.get("endDate")!) : undefined;
 
     const useCase = new ListRentUseCase(rentalRepository);
     const { data, count } = await useCase.execute({
@@ -25,7 +27,9 @@ export async function GET(request: NextRequest) {
       page,
       pageSize,
       orderBy,
-      ascending
+      ascending,
+      startDate,
+      endDate
     });
 
     const response = new DefaultResponse(data, "Busca de alugueis concluída.", page, pageSize, count);
