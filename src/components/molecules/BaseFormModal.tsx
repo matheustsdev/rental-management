@@ -33,7 +33,7 @@ const BaseFormModal = <T extends FieldValues>({
               onSubmit={onSubmit}
               ref={contentRef}
               h={{ base: "90vh", lg: "75vh" }}
-              overflowY="auto"
+              overflowY="hidden"
             >
               {children}
               <Dialog.CloseTrigger asChild>

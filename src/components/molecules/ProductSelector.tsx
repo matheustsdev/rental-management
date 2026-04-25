@@ -74,7 +74,7 @@ const ProductSelector: React.FC = () => {
   }, [availableProducts, searchText]);
 
   return (
-    <Flex flexDir="column" gap={2} align="center" w="full">
+    <Flex flexDir="column" align="center" w="full" h="full">
       <Flex w="full" align="center" justify="space-between" gap="12">
         <InputField type="date" label="Data de saída" error={errors.rentDate} registerProps={register("rentDate")} />
         <InputField
@@ -94,7 +94,7 @@ const ProductSelector: React.FC = () => {
         <Field.ErrorText>{errors.productIds?.message}</Field.ErrorText>
       </Field.Root>
 
-      <Flex align="flex-start" gap="4" flexDir="column" overflowY="auto" w="full">
+      <Flex align="flex-start" gap="4" flexDir="column" overflowY="auto" w="full" h="full" pr="2">
         {rentDate && returnDate && availableProducts.length === 0 && (
           <Flex align="center" justify="center" w="full">
             <Text>Buscando...</Text>

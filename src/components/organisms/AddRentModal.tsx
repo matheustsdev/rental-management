@@ -346,9 +346,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
         params.excludeRentId = rentOnEdit.id;
       }
 
-      const productsListRequest = (
-        await api.get("/products/availability", { params })
-      ).data;
+      const productsListRequest = (await api.get("/products/availability", { params })).data;
 
       methods.setValue("allAvailableProducts", productsListRequest.data);
     } catch (e: unknown) {
@@ -394,7 +392,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     let finalTotal = subtotal;
 
     if (discountType === EDiscountTypes.PERCENTAGE) {
-      finalTotal = subtotal - (subtotal * discountValue / 100);
+      finalTotal = subtotal - (subtotal * discountValue) / 100;
     } else {
       finalTotal = subtotal - discountValue;
     }
@@ -423,8 +421,8 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       <Dialog.Header py="4">
         <Dialog.Title>Adicionar aluguel</Dialog.Title>
       </Dialog.Header>
-      <Dialog.Body>
-        <Steps.Root step={currentStep} onStepChange={(e) => handleUpdateStep(e.step)} count={steps.length}>
+      <Dialog.Body h="full" overflow="hidden">
+        <Steps.Root step={currentStep} onStepChange={(e) => handleUpdateStep(e.step)} count={steps.length} h="full">
           <Steps.List>
             {steps.map((step, index) => (
               <Steps.Item key={index} index={index} title={step.title}>
@@ -438,7 +436,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
           </Steps.List>
 
           {steps.map((step, index) => (
-            <Steps.Content key={index} index={index}>
+            <Steps.Content key={index} index={index} h="full">
               {step.description}
             </Steps.Content>
           ))}
