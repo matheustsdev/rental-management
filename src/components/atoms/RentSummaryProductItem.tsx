@@ -39,15 +39,12 @@ const RentSummaryProductItem: React.FC<IRentSummaryProductItemProps> = ({ rentPr
           <Text fontWeight="bold" fontSize="md">
             {new Currency(productPrice).toString()}
           </Text>
-          <Text fontSize="xs" color="gray.500">
-            Subtotal
-          </Text>
         </Flex>
       </Flex>
 
       {rentProduct.real_return_date && (
-        <Flex mt="2" align="center" gap="2">
-          <Badge colorPalette="green" variant="subtle">
+        <Flex mt="2" align="center" gap="1">
+          <Badge colorPalette="green" variant="subtle" px="2">
             Devolvido em
           </Badge>
           <Text fontSize="sm">{formatDate(new Date(rentProduct.real_return_date), "dd/MM/yyyy")}</Text>
@@ -65,7 +62,7 @@ const RentSummaryProductItem: React.FC<IRentSummaryProductItemProps> = ({ rentPr
             textTransform="uppercase"
             letterSpacing="wider"
           >
-            Medidas Ajustadas
+            Medidas:
           </Text>
           <Grid
             templateColumns={{ base: "1fr 1fr", md: "repeat(4, 1fr)" }}

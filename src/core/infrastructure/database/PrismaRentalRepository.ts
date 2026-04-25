@@ -29,42 +29,44 @@ export class PrismaRentalRepository implements IRentalRepository {
 
   async create(rent: RentEntity): Promise<RentEntity> {
     const data = rent.toJSON();
-    
-    const newRent = await this.prisma.rents.create({
-      data: {
-        id: data.id,
-        status: data.status,
-        rent_date: data.rentDate,
-        return_date: data.returnDate,
-        client_name: data.clientName,
-        address: data.address,
-        phone: data.phone,
-        discount_type: data.discountType,
-        discount_value: new Prisma.Decimal(data.discountValue),
-        signal_value: new Prisma.Decimal(data.signalValue),
-        internal_observations: data.internalObservations,
-        receipt_observations: data.receiptObservations,
-        total_value: new Prisma.Decimal(rent.getTotalValue()),
-        remaining_value: new Prisma.Decimal(rent.getRemainingValue()),
-        real_return_date: data.realReturnDate,
-        rent_products: {
-          createMany: {
-            data: data.items.map(item => ({
-              product_id: item.productId,
-              product_price: new Prisma.Decimal(item.productPrice),
-              product_description: item.productDescription,
-              measure_type: item.measureType,
-              bust: item.bust != null ? new Prisma.Decimal(item.bust) : null,
-              waist: item.waist != null ? new Prisma.Decimal(item.waist) : null,
-              hip: item.hip != null ? new Prisma.Decimal(item.hip) : null,
-              shoulder: item.shoulder != null ? new Prisma.Decimal(item.shoulder) : null,
-              sleeve: item.sleeve != null ? new Prisma.Decimal(item.sleeve) : null,
-              height: item.height != null ? new Prisma.Decimal(item.height) : null,
-              back: item.back != null ? new Prisma.Decimal(item.back) : null,
-            }))
-          }
+
+    const payload: Prisma.rentsCreateInput = {
+      id: data.id,
+      status: data.status,
+      rent_date: data.rentDate,
+      return_date: data.returnDate,
+      client_name: data.clientName,
+      address: data.address,
+      phone: data.phone,
+      discount_type: data.discountType,
+      discount_value: new Prisma.Decimal(data.discountValue),
+      signal_value: new Prisma.Decimal(data.signalValue),
+      internal_observations: data.internalObservations,
+      receipt_observations: data.receiptObservations,
+      total_value: new Prisma.Decimal(rent.getTotalValue()),
+      remaining_value: new Prisma.Decimal(rent.getRemainingValue()),
+      real_return_date: data.realReturnDate,
+      rent_products: {
+        createMany: {
+          data: data.items.map(item => ({
+            product_id: item.productId,
+            product_price: new Prisma.Decimal(item.productPrice),
+            product_description: item.productDescription,
+            measure_type: item.measureType,
+            bust: item.bust != null ? new Prisma.Decimal(item.bust) : null,
+            waist: item.waist != null ? new Prisma.Decimal(item.waist) : null,
+            hip: item.hip != null ? new Prisma.Decimal(item.hip) : null,
+            shoulder: item.shoulder != null ? new Prisma.Decimal(item.shoulder) : null,
+            sleeve: item.sleeve != null ? new Prisma.Decimal(item.sleeve) : null,
+            height: item.height != null ? new Prisma.Decimal(item.height) : null,
+            back: item.back != null ? new Prisma.Decimal(item.back) : null,
+          }))
         }
-      },
+      }
+    };
+  
+    const newRent = await this.prisma.rents.create({
+      data: payload,
       include: {
         rent_products: {
           include: {

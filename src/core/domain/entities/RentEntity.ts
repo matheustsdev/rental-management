@@ -3,6 +3,7 @@ import { RentProduct } from "./RentProduct";
 import { isBefore, addDays, isAfter, differenceInDays } from "date-fns";
 import { ServerError } from "@/utils/models/ServerError";
 import { RentType } from "@/types/entities/RentType";
+import { getDateFromUtcDate } from "@/utils/getDateFromUtcDate";
 
 export interface RentProps {
   id: string;
@@ -19,7 +20,7 @@ export interface RentProps {
   internalObservations?: string | null;
   receiptObservations?: string | null;
   items: RentProduct[];
-  createdAt?: Date | null;
+  createdAt: Date | null;
   realReturnDate?: Date | null;
 }
 
@@ -31,8 +32,8 @@ export class RentEntity {
       id: rent.id,
       code: Number(rent.code),
       status: rent.status,
-      rentDate: rent.rent_date,
-      returnDate: rent.return_date,
+      rentDate: getDateFromUtcDate(rent.rent_date)!,
+      returnDate: getDateFromUtcDate(rent.return_date)!,
       clientName: rent.client_name,
       address: rent.address,
       phone: rent.phone,
@@ -56,7 +57,7 @@ export class RentEntity {
             sleeve: rp.sleeve ? Number(rp.sleeve) : null,
             height: rp.height ? Number(rp.height) : null,
             back: rp.back ? Number(rp.back) : null,
-            realReturnDate: rp.real_return_date,
+            realReturnDate: getDateFromUtcDate(rp.real_return_date),
             realReturnBufferDays: rp.real_return_buffer_days,
             product: rp.products ? {
               reference: rp.products.reference,
@@ -67,7 +68,7 @@ export class RentEntity {
           }),
       ),
       createdAt: rent.created_at,
-      realReturnDate: rent.real_return_date,
+      realReturnDate: getDateFromUtcDate(rent.real_return_date),
     };
 
     this.props = rentPayload;
@@ -90,7 +91,7 @@ export class RentEntity {
   get internalObservations(): string | null | undefined { return this.props.internalObservations; }
   get receiptObservations(): string | null | undefined { return this.props.receiptObservations; }
   get items(): RentProduct[] { return this.props.items; }
-  get createdAt(): Date | null | undefined { return this.props.createdAt; }
+  get createdAt(): Date | null { return this.props.createdAt; }
   get realReturnDate(): Date | null | undefined { return this.props.realReturnDate; }
 
   /**

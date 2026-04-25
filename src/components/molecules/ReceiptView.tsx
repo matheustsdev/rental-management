@@ -215,22 +215,11 @@ interface IReceiptTicketProps {
 }
 
 const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, isLast }) => {
-  const {
-    client_name,
-    address,
-    phone,
-    created_at,
-    rent_date,
-    return_date,
-    rent_products,
-    receipt_observations,
-    internal_observations,
-    code,
-  } = rent;
-
   const rentEntity = new RentEntity(rent);
 
-  const currentObservations = isStoreVia ? internal_observations : receipt_observations;
+  const { code, phone, address, clientName, items, internalObservations, receiptObservations } = rentEntity;
+
+  const currentObservations = isStoreVia ? internalObservations : receiptObservations;
 
   return (
     <View style={[styles.halfPage, !isLast ? styles.leftHalf : {}]}>
@@ -238,7 +227,7 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
         <View style={styles.shopInfo}>
           {/* Logo Placeholder - Can be replaced with <Image src="/path/to/logo.png" /> */}
           <View style={styles.logoPlaceholder}>
-            <Text style={styles.logoText}>RM</Text>
+            <Text style={styles.logoText}>RN</Text>
           </View>
           <View style={styles.shopDetails}>
             <Text style={styles.shopName}>Rose Noivas</Text>
@@ -257,7 +246,7 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
         <Text style={styles.sectionTitle}>Informações do Cliente</Text>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Cliente:</Text>
-          <Text style={styles.value}>{client_name}</Text>
+          <Text style={styles.value}>{clientName}</Text>
         </View>
         {phone && (
           <View style={styles.infoRow}>
@@ -274,17 +263,17 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
         <View style={styles.infoRow}>
           <Text style={styles.label}>Data do aluguel:</Text>
           <Text style={styles.value}>
-            {created_at ? formatDate(new Date(created_at), "dd 'de' MMMM 'de' yyyy") : "Não informada"}
+            {rentEntity.createdAt ? formatDate(rentEntity.createdAt, "dd 'de' MMMM 'de' yyyy") : "Não informada"}
           </Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Retirada:</Text>
-          <Text style={styles.value}>{formatDate(new Date(rent_date), "dd 'de' MMMM 'de' yyyy")}</Text>
+          <Text style={styles.value}>{formatDate(rentEntity.rentDate, "dd 'de' MMMM 'de' yyyy")}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.label}>Devolução:</Text>
           <Text style={styles.value}>
-            {return_date ? formatDate(new Date(return_date), "dd 'de' MMMM 'de' yyyy") : "Não informada"}
+            {rentEntity.returnDate ? formatDate(rentEntity.returnDate, "dd 'de' MMMM 'de' yyyy") : "Não informada"}
           </Text>
         </View>
       </View>
@@ -295,11 +284,11 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
           <Text style={[styles.colItem, styles.bold]}>Item</Text>
           <Text style={[styles.colValue, styles.bold]}>Preço</Text>
         </View>
-        {rent_products.map((item, index) => (
+        {items.map((item, index) => (
           <View style={styles.tableRow} key={index} wrap={false}>
             <Text style={styles.colIndex}>{index + 1}</Text>
-            <Text style={styles.colItem}>{item.product_description}</Text>
-            <Text style={styles.colValue}>{new Currency(item.product_price).toString()}</Text>
+            <Text style={styles.colItem}>{item.productDescription}</Text>
+            <Text style={styles.colValue}>{new Currency(item.productPrice).toString()}</Text>
           </View>
         ))}
       </View>
