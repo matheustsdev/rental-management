@@ -37,7 +37,7 @@ const RentPage = () => {
 
   const [rents, setRents] = useState<RentType[]>([]);
   const [selectedRent, setSelectedRent] = useState<RentType | null>(null);
-  const [instance, updateInstance] = usePDF({ document: <></> });
+  const [instance, updateInstance] = usePDF();
   const [downloadRequested, setDownloadRequested] = useState(false);
   const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
