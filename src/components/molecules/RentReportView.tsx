@@ -106,6 +106,25 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: COLORS.secondary,
   },
+  observations: {
+    marginTop: 10,
+    padding: 6,
+    backgroundColor: COLORS.background,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  obsLabel: {
+    fontSize: 8,
+    fontWeight: "bold",
+    color: COLORS.secondary,
+    marginBottom: 2,
+  },
+  obsText: {
+    fontSize: 8,
+    color: COLORS.lightText,
+    lineHeight: 1.2,
+  },
   footer: {
     position: "absolute",
     bottom: 30,
@@ -120,13 +139,13 @@ const styles = StyleSheet.create({
   },
 });
 
-interface IDailyReportViewProps {
+interface IRentReportViewProps {
   rents: RentType[];
   startDate: string;
   endDate: string;
 }
 
-const DailyReportView: React.FC<IDailyReportViewProps> = ({ rents, startDate, endDate }) => {
+const RentReportView: React.FC<IRentReportViewProps> = ({ rents, startDate, endDate }) => {
   const formattedPeriod = `${formatDate(parseISO(startDate), "dd/MM/yyyy")} até ${formatDate(parseISO(endDate), "dd/MM/yyyy")}`;
 
   return (
@@ -139,7 +158,7 @@ const DailyReportView: React.FC<IDailyReportViewProps> = ({ rents, startDate, en
 
         {rents.map((rent) => {
           const rentEntity = new RentEntity(rent);
-          const { code, clientName, rentDate, returnDate, phone, createdAt, items } = rentEntity;
+          const { code, clientName, rentDate, returnDate, phone, createdAt, items, internalObservations } = rentEntity;
 
           return (
             <View key={rent.id} style={styles.rentContainer} wrap={false}>
@@ -148,12 +167,8 @@ const DailyReportView: React.FC<IDailyReportViewProps> = ({ rents, startDate, en
                   #{code} - {clientName}
                 </Text>
                 <View>
-                    <Text style={styles.rentDate}>
-                    Saída: {formatDate(rentDate, "dd/MM/yyyy")}
-                    </Text>
-                    <Text style={styles.rentDate}>
-                    Retorno: {formatDate(returnDate, "dd/MM/yyyy")}
-                    </Text>
+                  <Text style={styles.rentDate}>Saída: {formatDate(rentDate, "dd/MM/yyyy")}</Text>
+                  <Text style={styles.rentDate}>Retorno: {formatDate(returnDate, "dd/MM/yyyy")}</Text>
                 </View>
               </View>
 
@@ -171,7 +186,7 @@ const DailyReportView: React.FC<IDailyReportViewProps> = ({ rents, startDate, en
                 </View>
                 {items.map((item, index) => {
                   const labels = measureFieldsLabels[item.measureType as keyof typeof measureFieldsLabels] || {};
-                  
+
                   const activeMeasures = Object.entries(labels)
                     .map(([key, label]) => {
                       const value = (item as unknown as RentProductProps)[key as keyof RentProductProps];
@@ -189,6 +204,13 @@ const DailyReportView: React.FC<IDailyReportViewProps> = ({ rents, startDate, en
                   );
                 })}
               </View>
+
+              {internalObservations && (
+                <View style={styles.observations} wrap={false}>
+                  <Text style={styles.obsLabel}>Observação Interna:</Text>
+                  <Text style={styles.obsText}>{internalObservations}</Text>
+                </View>
+              )}
             </View>
           );
         })}
@@ -205,4 +227,4 @@ const DailyReportView: React.FC<IDailyReportViewProps> = ({ rents, startDate, en
   );
 };
 
-export default DailyReportView;
+export default RentReportView;

@@ -5,7 +5,7 @@ import { Button, Card, Field, HStack, Input, Stack, Text, Icon, Grid, GridItem, 
 import { useState, useEffect } from "react";
 import { format, differenceInDays, parseISO, addDays } from "date-fns";
 import { usePDF } from "@react-pdf/renderer";
-import DailyReportView from "@/components/molecules/DailyReportView";
+import DailyReportView from "@/components/molecules/RentReportView";
 import { api } from "@/services/api";
 import { RentType } from "@/types/entities/RentType";
 import { FaFilePdf } from "react-icons/fa";

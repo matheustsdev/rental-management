@@ -10,6 +10,7 @@ import { MdDateRange, MdOutlineAttachMoney, MdPhone } from "react-icons/md";
 import { IoChevronForward } from "react-icons/io5";
 import Tag from "../atoms/Tag";
 import { RentHelper } from "@/utils/models/RentHelper";
+import { RentEntity } from "@/core/domain/entities/RentEntity";
 
 interface IRentCardProps {
   rent: RentType;
@@ -17,6 +18,8 @@ interface IRentCardProps {
 }
 
 const RentCard: React.FC<IRentCardProps> = ({ rent, menuItens }) => {
+  const rentEntity = new RentEntity(rent);
+
   return (
     <Card.Root
       display="flex"
@@ -48,22 +51,10 @@ const RentCard: React.FC<IRentCardProps> = ({ rent, menuItens }) => {
           </Card.Header>
           <Card.Body fontSize="sm" pb="4">
             <Flex flexDir="column" gap="1">
-              {(() => {
-                const subtotal = Number(rent.total_value);
-                const discountValue = Number(rent.discount_value ?? 0);
-                let finalTotal = subtotal;
-                if (rent.discount_type === "PERCENTAGE") {
-                  finalTotal = subtotal - (subtotal * discountValue / 100);
-                } else {
-                  finalTotal = subtotal - discountValue;
-                }
-                return (
-                  <TextRow
-                    icon={<MdOutlineAttachMoney />}
-                    value={`${new Currency(Math.max(0, finalTotal)).toString()} (${new Currency(rent.signal_value).toString()})`}
-                  />
-                );
-              })()}
+              <TextRow
+                icon={<MdOutlineAttachMoney />}
+                value={`${new Currency(rentEntity.getTotalValue()).toString()} (${new Currency(rentEntity.signalValue).toString()})`}
+              />
               <TextRow icon={<MdPhone />} value={rent?.phone ?? undefined} />
             </Flex>
           </Card.Body>
