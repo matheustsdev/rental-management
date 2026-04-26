@@ -10,8 +10,9 @@ import { api } from "@/services/api";
 import { RentType } from "@/types/entities/RentType";
 import { FaFilePdf } from "react-icons/fa";
 import { toaster } from "@/components/atoms/Toaster";
+import dynamic from "next/dynamic";
 
-export default function ReportsPage() {
+function ReportsContent() {
   const [startDate, setStartDate] = useState(format(addDays(new Date(), -7), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -151,3 +152,7 @@ export default function ReportsPage() {
     </PageContainer>
   );
 }
+
+export default dynamic(() => Promise.resolve(ReportsContent), {
+  ssr: false,
+});
