@@ -20,6 +20,7 @@ import RentSummaryModal from "@/components/organisms/RentSummaryModal";
 import { ERentStatus } from "@prisma/client";
 import { FaWhatsapp } from "react-icons/fa";
 import dynamic from "next/dynamic";
+import { printPdf } from "@/utils/printPdf";
 
 const RentPage = () => {
   const { onClose, onOpen, open } = useDisclosure();
@@ -38,7 +39,7 @@ const RentPage = () => {
   const [rents, setRents] = useState<RentType[]>([]);
   const [selectedRent, setSelectedRent] = useState<RentType | null>(null);
   const [instance, updateInstance] = usePDF();
-  const [downloadRequested, setDownloadRequested] = useState(false);
+  const [printRequested, setPrintRequested] = useState(false);
   const [searchText, setSearchText] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { value: debounce, isLoading: isLoadingDebounce } = useDebounce(searchText, 300);
@@ -152,7 +153,7 @@ const RentPage = () => {
   const handleGetReceipt = (rent: RentType) => {
     setSelectedRent(rent);
     updateInstance(<ReceiptView rent={rent} />);
-    setDownloadRequested(true);
+    setPrintRequested(true);
   };
 
   const handleOpenDeleteConfirmation = (rent: RentType) => {
@@ -213,31 +214,25 @@ const RentPage = () => {
   }, []);
 
   useEffect(() => {
-    if (downloadRequested && !pdfLoading && pdfUrl) {
-      const link = document.createElement("a");
-      link.href = pdfUrl;
-      link.download = `Recibo ${selectedRent?.code} - ${selectedRent?.client_name}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    if (printRequested && !pdfLoading && pdfUrl) {
+      printPdf(pdfUrl);
 
-      setDownloadRequested(false);
+      setPrintRequested(false);
       setSelectedRent(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pdfLoading, pdfUrl, downloadRequested]);
+  }, [pdfLoading, pdfUrl, printRequested]);
 
   useEffect(() => {
-    if (pdfError && downloadRequested) {
+    if (pdfError && printRequested) {
       toaster.create({
         type: "error",
         title: "Erro ao gerar recibo",
         description: "Não foi possível gerar o recibo no momento. Verifique os dados do aluguel.",
       });
-      setDownloadRequested(false);
+      setPrintRequested(false);
       setSelectedRent(null);
     }
-  }, [pdfError, downloadRequested]);
+  }, [pdfError, printRequested]);
 
   useEffect(() => {
     handleSearchTextChange(debounce);

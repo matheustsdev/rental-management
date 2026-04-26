@@ -11,12 +11,13 @@ import { RentType } from "@/types/entities/RentType";
 import { FaFilePdf } from "react-icons/fa";
 import { toaster } from "@/components/atoms/Toaster";
 import dynamic from "next/dynamic";
+import { printPdf } from "@/utils/printPdf";
 
 function ReportsContent() {
   const [startDate, setStartDate] = useState(format(addDays(new Date(), -7), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [isLoadingData, setIsLoadingData] = useState(false);
-  const [shouldDownload, setShouldDownload] = useState(false);
+  const [shouldPrint, setShouldPrint] = useState(false);
 
   const [instance, updateInstance] = usePDF({
     document: <DailyReportView rents={[]} startDate={startDate} endDate={endDate} />,
@@ -52,7 +53,7 @@ function ReportsContent() {
       }
 
       updateInstance(<DailyReportView rents={data} startDate={startDate} endDate={endDate} />);
-      setShouldDownload(true);
+      setShouldPrint(true);
     } catch {
       toaster.create({
         title: "Erro ao buscar dados",
@@ -65,22 +66,11 @@ function ReportsContent() {
   };
 
   useEffect(() => {
-    if (shouldDownload && !instance.loading && instance.url) {
-      const link = document.createElement("a");
-      link.href = instance.url;
-      link.download = `Relatorio_Alugueis_${startDate}_a_${endDate}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      setShouldDownload(false);
-
-      toaster.create({
-        title: "Relatório gerado",
-        description: "O download do PDF deve iniciar automaticamente.",
-        type: "success",
-      });
+    if (shouldPrint && !instance.loading && instance.url) {
+      printPdf(instance.url);
+      setShouldPrint(false);
     }
-  }, [instance.loading, instance.url, shouldDownload, startDate, endDate]);
+  }, [instance.loading, instance.url, shouldPrint]);
 
   return (
     <PageContainer title="Relatórios" flexDir="column">
@@ -136,7 +126,7 @@ function ReportsContent() {
                     alignSelf="flex-end"
                     colorPalette="primary"
                     onClick={handleGenerateReport}
-                    loading={isLoadingData || (instance.loading && shouldDownload)}
+                    loading={isLoadingData || (instance.loading && shouldPrint)}
                     disabled={isInvalidRange}
                     size="sm"
                     width="1/4"
