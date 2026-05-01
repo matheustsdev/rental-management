@@ -6,6 +6,7 @@ import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import { EMeasureType } from "@/constants/EMeasureType";
 import { measureFieldsLabels } from "@/constants/MeasureFields";
 import InputField from "./InputField";
+import InputAreaField from "./InputAreaField";
 import { Path, useFormContext, useWatch } from "react-hook-form";
 import Currency from "@/utils/models/Currency";
 import { RentFormType } from "../organisms/AddRentModal";
@@ -27,6 +28,7 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
   const labels = mType ? measureFieldsLabels[mType] : measureFieldsLabels.DRESS;
 
   const rentProducts = useWatch({ control, name: "rentProducts" }) || [];
+  const productIndex = rentProducts.findIndex((item) => productAvailability.id === item.product_id);
 
   return (
     <Accordion.Item
@@ -38,9 +40,8 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
       p={2}
       borderRadius="md"
       bg={hasError ? "red.50" : "green.50"}
-      disabled={isNoneMeasure}
     >
-      <Accordion.ItemTrigger cursor={isNoneMeasure ? "default" : "pointer"}>
+      <Accordion.ItemTrigger cursor="pointer">
         <Flex align="flex-start" justify="space-between" w="full">
           <Flex flexDir="column">
             <Text fontWeight="bold">{productAvailability.description}</Text>
@@ -62,16 +63,14 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
               </Text>
               <Status.Indicator />
             </Status.Root>
-            {!isNoneMeasure && <Accordion.ItemIndicator />}
+            <Accordion.ItemIndicator />
           </Flex>
         </Flex>
       </Accordion.ItemTrigger>
-      {!isNoneMeasure && (
-        <Accordion.ItemContent>
+      <Accordion.ItemContent>
+        {!isNoneMeasure && (
           <Flex w="full" gap="4" pt="2">
             {Object.entries(labels).map(([field, label]) => {
-              const productIndex = rentProducts.findIndex((item) => productAvailability.id === item.product_id);
-
               const name = `rentProducts.${productIndex}.${field}` as Path<RentFormType>;
 
               const fieldName = field as keyof typeof labels;
@@ -93,8 +92,15 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
               );
             })}
           </Flex>
-        </Accordion.ItemContent>
-      )}
+        )}
+        <Flex w="full" pt="0">
+          <InputAreaField
+            label="Observação Interna (Ajustes, Defeitos, etc)"
+            registerProps={register(`rentProducts.${productIndex}.internal_observations`)}
+            minH="24"
+          />
+        </Flex>
+      </Accordion.ItemContent>
     </Accordion.Item>
   );
 };

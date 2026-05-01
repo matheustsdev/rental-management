@@ -38,6 +38,8 @@ export class PrismaProductRepository implements IProductRepository {
       unaccent("reference") ILIKE unaccent(${searchTerm})
       OR 
       unaccent("description") ILIKE unaccent(${searchTerm})
+      OR 
+      unaccent("receipt_description") ILIKE unaccent(${searchTerm})
     )
     AND "deleted" = false
   `;

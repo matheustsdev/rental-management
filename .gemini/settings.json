@@ -1,0 +1,14 @@
+{
+  "agents": {
+    "overrides": {
+      "generalist": {
+        "enabled": false
+      }
+    }
+  },
+  "skills": {
+    "disabled": [
+      "executing-plans"
+    ]
+  }
+}

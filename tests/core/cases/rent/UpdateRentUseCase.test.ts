@@ -194,6 +194,7 @@ describe("Update rent use case", () => {
         product_price: new Decimal(100),
         product_description: "Test",
         measure_type: measures_type.DRESS,
+        internal_observations: "Ajustar barra",
         bust: 88,
         waist: 70,
         hip: 92,
@@ -211,6 +212,7 @@ describe("Update rent use case", () => {
       "rent-1",
       expect.objectContaining({
         items: expect.arrayContaining([expect.objectContaining({
+          internalObservations: "Ajustar barra",
           bust: 88,
           waist: 70,
           hip: 92,

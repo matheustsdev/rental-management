@@ -287,7 +287,7 @@ const ReceiptTicket: React.FC<IReceiptTicketProps> = ({ rent, via, isStoreVia, i
         {items.map((item, index) => (
           <View style={styles.tableRow} key={index} wrap={false}>
             <Text style={styles.colIndex}>{index + 1}</Text>
-            <Text style={styles.colItem}>{item.productDescription}</Text>
+            <Text style={styles.colItem}>{`${item.productDescription} - Ref. ${item.product?.reference}`}</Text>
             <Text style={styles.colValue}>{new Currency(item.productPrice).toString()}</Text>
           </View>
         ))}

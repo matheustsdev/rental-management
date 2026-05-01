@@ -90,6 +90,17 @@ const RentSummaryProductItem: React.FC<IRentSummaryProductItemProps> = ({ rentPr
           </Grid>
         </Box>
       )}
+
+      {rentProduct.internal_observations && (
+        <Box mt="3" p="2" bg="blue.50" borderRadius="md" borderLeftWidth="4px" borderLeftColor="blue.400">
+          <Text fontSize="xs" fontWeight="bold" color="blue.700" mb="1">
+            Observação Interna:
+          </Text>
+          <Text fontSize="sm" color="blue.900">
+            {rentProduct.internal_observations}
+          </Text>
+        </Box>
+      )}
     </Box>
   );
 };

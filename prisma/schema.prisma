@@ -40,6 +40,7 @@ model rent_products {
   product_id                String        @db.Uuid
   product_price             Decimal       @db.Decimal(10, 2)
   product_description       String
+  internal_observations     String?       @db.Text
   created_at                DateTime?     @default(now()) @db.Timestamptz(6)
   real_return_buffer_days Int?
   real_return_date        DateTime?     @db.Date

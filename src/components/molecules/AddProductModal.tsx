@@ -194,7 +194,7 @@ const AddProductModal: React.FC<IAddProductModalProps> = ({ isOpen, onClose, onS
                   <Field.ErrorText>{errors.reference?.message}</Field.ErrorText>
                 </Field.Root>
                 <Field.Root invalid={!!errors.receiptDescription}>
-                  <Field.Label>Descrição para recibo</Field.Label>
+                  <Field.Label>Descrição detalhada do produto</Field.Label>
                   <Input px="2" placeholder="Ex: Laptop" {...register("receiptDescription")} />
                   <Field.ErrorText>{errors.receiptDescription?.message}</Field.ErrorText>
                 </Field.Root>

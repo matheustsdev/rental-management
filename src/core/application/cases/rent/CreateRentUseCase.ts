@@ -52,6 +52,7 @@ export class CreateRentUseCase {
         sleeve: itemInput.sleeve ? Number(itemInput.sleeve) : null,
         height: itemInput.height ? Number(itemInput.height) : null,
         back: itemInput.back ? Number(itemInput.back) : null,
+        internalObservations: itemInput.internal_observations ?? null,
         product: {
           reference: product.reference,
           categories: product.categoryName ? {
@@ -93,6 +94,7 @@ export class CreateRentUseCase {
           sleeve: itemJson.sleeve !== null ? new Prisma.Decimal(itemJson.sleeve) : null,
           height: itemJson.height !== null ? new Prisma.Decimal(itemJson.height) : null,
           back: itemJson.back !== null ? new Prisma.Decimal(itemJson.back) : null,
+          internal_observations: itemJson.internalObservations,
           real_return_date: itemJson.realReturnDate ?? null,
           real_return_buffer_days: itemJson.realReturnBufferDays ?? null,
           deleted: false,

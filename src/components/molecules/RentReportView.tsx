@@ -158,7 +158,7 @@ const RentReportView: React.FC<IRentReportViewProps> = ({ rents, startDate, endD
 
         {rents.map((rent) => {
           const rentEntity = new RentEntity(rent);
-          const { code, clientName, rentDate, returnDate, phone, createdAt, items, internalObservations } = rentEntity;
+          const { code, clientName, rentDate, returnDate, createdAt, items, internalObservations } = rentEntity;
 
           return (
             <View key={rent.id} style={styles.rentContainer} wrap={false}>
@@ -167,18 +167,15 @@ const RentReportView: React.FC<IRentReportViewProps> = ({ rents, startDate, endD
                   #{code} - {clientName}
                 </Text>
                 <View>
+                  <Text style={styles.subInfoItem}>
+                    Data do aluguel: {createdAt ? formatDate(new Date(createdAt), "dd/MM/yyyy HH:mm") : "N/A"}
+                  </Text>
+                </View>
+                <View>
                   <Text style={styles.rentDate}>Saída: {formatDate(rentDate, "dd/MM/yyyy")}</Text>
                   <Text style={styles.rentDate}>Retorno: {formatDate(returnDate, "dd/MM/yyyy")}</Text>
                 </View>
               </View>
-
-              <View style={styles.subInfo}>
-                {phone && <Text style={styles.subInfoItem}>Tel: {phone}</Text>}
-                <Text style={styles.subInfoItem}>
-                  Cadastrado em: {createdAt ? formatDate(new Date(createdAt), "dd/MM/yyyy HH:mm") : "N/A"}
-                </Text>
-              </View>
-
               <View style={styles.table}>
                 <View style={styles.tableHeader}>
                   <Text style={styles.colProduct}>Produto</Text>
@@ -197,9 +194,18 @@ const RentReportView: React.FC<IRentReportViewProps> = ({ rents, startDate, endD
                     .join(" | ");
 
                   return (
-                    <View key={index} style={styles.tableRow}>
-                      <Text style={styles.colProduct}>{item.productDescription}</Text>
-                      <Text style={styles.colMeasures}>{activeMeasures || "Nenhuma medida necessária"}</Text>
+                    <View key={index} style={[styles.tableRow, { flexDirection: "column" }]}>
+                      <View style={{ flexDirection: "row" }}>
+                        <Text style={styles.colProduct}>{item.productDescription}</Text>
+                        <Text style={styles.colMeasures}>{activeMeasures || "Nenhuma medida necessária"}</Text>
+                      </View>
+                      {item.internalObservations && (
+                        <View style={{ marginTop: 2 }}>
+                          <Text style={[styles.obsText, { fontStyle: "italic", color: COLORS.lightText }]}>
+                            {item.internalObservations}
+                          </Text>
+                        </View>
+                      )}
                     </View>
                   );
                 })}

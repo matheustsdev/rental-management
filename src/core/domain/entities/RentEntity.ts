@@ -57,6 +57,7 @@ export class RentEntity {
             sleeve: rp.sleeve ? Number(rp.sleeve) : null,
             height: rp.height ? Number(rp.height) : null,
             back: rp.back ? Number(rp.back) : null,
+            internalObservations: rp.internal_observations,
             realReturnDate: getDateFromUtcDate(rp.real_return_date),
             realReturnBufferDays: rp.real_return_buffer_days,
             product: rp.products ? {

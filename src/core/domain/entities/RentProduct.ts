@@ -13,6 +13,7 @@ export interface RentProductProps {
   sleeve: number | null;
   height: number | null;
   back: number | null;
+  internalObservations: string | null;
   realReturnDate?: Date | null;
   realReturnBufferDays?: number | null;
   product?: {
@@ -38,6 +39,7 @@ export class RentProduct {
   get sleeve(): number | null { return this.props.sleeve; }
   get height(): number | null { return this.props.height; }
   get back(): number | null { return this.props.back; }
+  get internalObservations(): string | null { return this.props.internalObservations; }
   get realReturnDate(): Date | null | undefined { return this.props.realReturnDate; }
   get realReturnBufferDays(): number | null | undefined { return this.props.realReturnBufferDays; }
   get product(): RentProductProps["product"] { return this.props.product; }

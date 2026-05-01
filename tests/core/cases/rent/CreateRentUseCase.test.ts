@@ -39,6 +39,7 @@ describe("Create rent use case", () => {
         product_price: new Decimal(50),
         product_description: "Product 1",
         measure_type: measures_type.DRESS,
+        internal_observations: "Alguma observação aqui",
       }
     ],
   };

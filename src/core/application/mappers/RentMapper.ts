@@ -33,6 +33,7 @@ export class RentMapper {
         product_id: itemJson.productId,
         product_price: new Prisma.Decimal(itemJson.productPrice),
         product_description: itemJson.productDescription,
+        internal_observations: itemJson.internalObservations,
         created_at: null,
         real_return_buffer_days: itemJson.realReturnBufferDays ?? null,
         real_return_date: itemJson.realReturnDate ?? null,

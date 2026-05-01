@@ -64,6 +64,7 @@ export class UpdateRentUseCase {
           productId: rp.product_id,
           productPrice: Number(rp.product_price),
           productDescription: rp.product_description,
+          internalObservations: rp.internal_observations ?? null,
           measureType: rp.measure_type,
           bust: rp.bust ? Number(rp.bust) : null,
           waist: rp.waist ? Number(rp.waist) : null,

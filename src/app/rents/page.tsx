@@ -151,6 +151,8 @@ const RentPage = () => {
   };
 
   const handleGetReceipt = (rent: RentType) => {
+    console.log("Gerando recibo para aluguel:", rent);
+
     setSelectedRent(rent);
     updateInstance(<ReceiptView rent={rent} />);
     setPrintRequested(true);
