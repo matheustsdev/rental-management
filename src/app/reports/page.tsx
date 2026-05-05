@@ -1,30 +1,51 @@
 "use client";
 
 import PageContainer from "@/components/molecules/PageContainer";
-import { Button, Card, Field, HStack, Input, Stack, Text, Icon, Grid, GridItem, Flex } from "@chakra-ui/react";
+import { Accordion, Box, Button, Card, Field, HStack, Input, Stack, Text, Icon, Grid, GridItem, Flex } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { format, differenceInDays, parseISO, addDays } from "date-fns";
 import { usePDF } from "@react-pdf/renderer";
 import DailyReportView from "@/components/molecules/RentReportView";
+import ProductReportView from "@/components/molecules/ProductReportView";
 import { api } from "@/services/api";
 import { RentType } from "@/types/entities/RentType";
+import { ProductType } from "@/types/entities/ProductType";
+import { CategoryType } from "@/types/entities/CategoryType";
 import { FaFilePdf } from "react-icons/fa";
+import { LuBarChart3, LuPackage, LuChevronDown } from "react-icons/lu";
 import { toaster } from "@/components/atoms/Toaster";
 import dynamic from "next/dynamic";
 import { printPdf } from "@/utils/printPdf";
+import Select from "@/components/atoms/Select";
 
 function ReportsContent() {
+  // Rent Report States
   const [startDate, setStartDate] = useState(format(addDays(new Date(), -7), "yyyy-MM-dd"));
   const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [shouldPrint, setShouldPrint] = useState(false);
 
+  // Product Report States
+  const [productSearch, setProductSearch] = useState("");
+  const [productCategoryId, setProductCategoryId] = useState("");
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [shouldPrintProducts, setShouldPrintProducts] = useState(false);
+
   const [instance, updateInstance] = usePDF({
     document: <DailyReportView rents={[]} startDate={startDate} endDate={endDate} />,
   });
 
+  const [productInstance, updateProductInstance] = usePDF({
+    document: <ProductReportView products={[]} />,
+  });
+
   const rangeDays = differenceInDays(parseISO(endDate), parseISO(startDate));
   const isInvalidRange = rangeDays > 30 || rangeDays < 0;
+
+  useEffect(() => {
+    api.get("/categories").then((res) => setCategories(res.data.data));
+  }, []);
 
   const handleGenerateReport = async () => {
     if (isInvalidRange) return;
@@ -65,6 +86,44 @@ function ReportsContent() {
     }
   };
 
+  const handleGenerateProductReport = async () => {
+    setIsLoadingProducts(true);
+    try {
+      const response = await api.get("/products", {
+        params: {
+          search: productSearch,
+          categoryId: productCategoryId || undefined,
+          pageSize: 1000,
+          orderBy: "description",
+          ascending: true,
+        },
+      });
+      const data = response.data.data as ProductType[];
+
+      if (data.length === 0) {
+        toaster.create({
+          title: "Nenhum produto encontrado",
+          description: "Não existem produtos para os filtros selecionados.",
+          type: "info",
+        });
+        setIsLoadingProducts(false);
+        return;
+      }
+
+      const categoryName = categories.find((c) => c.id === productCategoryId)?.name;
+      updateProductInstance(<ProductReportView products={data} search={productSearch} categoryName={categoryName} />);
+      setShouldPrintProducts(true);
+    } catch {
+      toaster.create({
+        title: "Erro ao buscar dados",
+        description: "Ocorreu um problema ao buscar os produtos para o relatório.",
+        type: "error",
+      });
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  };
+
   useEffect(() => {
     if (shouldPrint && !instance.loading && instance.url) {
       printPdf(instance.url);
@@ -72,72 +131,21 @@ function ReportsContent() {
     }
   }, [instance.loading, instance.url, shouldPrint]);
 
+  useEffect(() => {
+    if (shouldPrintProducts && !productInstance.loading && productInstance.url) {
+      printPdf(productInstance.url);
+      setShouldPrintProducts(false);
+    }
+  }, [productInstance.loading, productInstance.url, shouldPrintProducts]);
+
   return (
     <PageContainer title="Relatórios" flexDir="column">
       <Stack gap="8" w="full" mt={4}>
         <Text color="gray.600">Selecione o tipo de relatório que deseja gerar.</Text>
 
-        <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)", lg: "repeat(3, 1fr)" }} gap="6">
-          <GridItem>
-            <Card.Root variant="outline" borderColor="gray.200" boxShadow="sm">
-              <Card.Header borderBottomWidth="1px" borderColor="gray.100" bg="gray.50" p="4">
-                <HStack>
-                  <Icon as={FaFilePdf} color="primary.300" />
-                  <Card.Title fontSize="md">Aluguéis por período</Card.Title>
-                </HStack>
-              </Card.Header>
-              <Card.Body p="4">
-                <Flex gap="4" direction="column">
-                  <Flex gap="4">
-                    <Field.Root invalid={rangeDays < 0}>
-                      <Field.Label fontSize="xs" fontWeight="bold">
-                        Data Inicial
-                      </Field.Label>
-                      <Input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        size="sm"
-                        px="2"
-                      />
-                    </Field.Root>
-
-                    <Field.Root invalid={rangeDays > 30 || rangeDays < 0}>
-                      <Field.Label fontSize="xs" fontWeight="bold">
-                        Data Final
-                      </Field.Label>
-                      <Input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        size="sm"
-                        px="2"
-                      />
-                    </Field.Root>
-                  </Flex>
-
-                  {(rangeDays > 30 || rangeDays < 0) && (
-                    <Text color="red.500" fontSize="xs">
-                      {rangeDays > 30 ? "Intervalo máx: 30 dias." : "Data final inválida."}
-                    </Text>
-                  )}
-
-                  <Button
-                    alignSelf="flex-end"
-                    colorPalette="primary"
-                    onClick={handleGenerateReport}
-                    loading={isLoadingData || (instance.loading && shouldPrint)}
-                    disabled={isInvalidRange}
-                    size="sm"
-                    width="1/4"
-                  >
-                    Gerar PDF
-                  </Button>
-                </Flex>
-              </Card.Body>
-            </Card.Root>
-          </GridItem>
-        </Grid>
+        <Accordion.Root defaultValue={["financeiro"]} variant="subtle" collapsible>
+          {/* Categorias entrarão aqui */}
+        </Accordion.Root>
       </Stack>
     </PageContainer>
   );
