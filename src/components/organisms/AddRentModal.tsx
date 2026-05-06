@@ -16,7 +16,6 @@ import AddRentResume from "@/components/molecules/AddRentResume";
 import { EAvailabilityStatus } from "@/constants/EAvailabilityStatus";
 import ProductMeasures from "@/components/molecules/ProductMeasures";
 import { EDiscountTypes } from "@/constants/EDiscountType";
-import { EMeasureType } from "@/constants/EMeasureType";
 import { RentProductSchema } from "@/constants/schemas/RentProductSchema";
 import { getUTCDateFromInput } from "@/utils/getUTCDateFromInput";
 import BaseFormModal from "../molecules/BaseFormModal";
@@ -42,31 +41,7 @@ const productSelectorSchema = z.object({
 });
 
 const productMeasuresSchema = z.object({
-  rentProducts: z
-    .array(
-      RentProductSchema.superRefine((data, ctx) => {
-        const { measure_type, back, bust, height, hip, shoulder, sleeve } = data;
-
-        if (measure_type === EMeasureType.DRESS) {
-          if (!bust || !hip || !shoulder) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "As medidas são obrigatórias",
-              path: ["waist", "bust", "hip", "shoulder"],
-            });
-          }
-        } else if (measure_type === EMeasureType.SUIT) {
-          if (!sleeve || !height || !back) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "As medidas são obrigatórias",
-              path: ["waist", "sleeve", "height", "back"],
-            });
-          }
-        }
-      }),
-    )
-    .min(1, "Selecione pelo menos um produto"),
+  rentProducts: z.array(RentProductSchema).min(1, "Selecione pelo menos um produto"),
 });
 
 const addRentInfoSchema = z.object({
