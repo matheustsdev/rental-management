@@ -17,7 +17,7 @@ const AddRentInfoStep: React.FC = () => {
     formState: { errors },
   } = useFormContext<RentFormType>();
 
-  const formSelectedProducts = useWatch({ control, name: "rentProducts" });
+  const productIds = useWatch({ control, name: "productIds" });
   const availableProducts = useWatch({ control, name: "allAvailableProducts" });
   const discountValue = useWatch({ control, name: "discountValue" });
   const discountType = useWatch({ control, name: "discountType" });
@@ -27,13 +27,13 @@ const AddRentInfoStep: React.FC = () => {
 
   useEffect(() => {
     const productsWithAvailabilitySelected: ProductAvailabilityType[] = availableProducts.filter((availableProduct) =>
-      formSelectedProducts.some((product) => (product.product_id || product.id) === availableProduct.id),
+      productIds.includes(availableProduct.id),
     );
 
     const productValue = productsWithAvailabilitySelected.reduce((acc, item) => acc + Number(item.price), 0);
 
-    const safeDiscountValue = Number(discountValue) || 0;
-    const safeSignal = Number(signal) || 0;
+    const safeDiscountValue = Number(discountValue) ?? 0;
+    const safeSignal = Number(signal) ?? 0;
 
     let finalTotalValue = productValue;
     if (discountType === "PERCENTAGE") {
@@ -45,7 +45,7 @@ const AddRentInfoStep: React.FC = () => {
     setValue("totalValue", productValue);
     setValue("finalTotalValue", Math.max(0, finalTotalValue));
     setValue("remainingValue", Math.max(0, finalTotalValue - safeSignal));
-  }, [formSelectedProducts, signal, discountValue, discountType, availableProducts, setValue]);
+  }, [productIds, signal, discountValue, discountType, availableProducts, setValue]);
 
   return (
     <Flex flexDir="column" gap={4} align="center">

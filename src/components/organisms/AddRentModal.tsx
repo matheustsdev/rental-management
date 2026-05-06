@@ -54,7 +54,7 @@ const addRentInfoSchema = z.object({
   remainingValue: z.number(),
   internalObservations: z.string(),
   receiptObservations: z.string(),
-  discountValue: z.number(),
+  discountValue: z.number({ invalid_type_error: "Informe um número válido" }),
   discountType: z.enum([EDiscountTypes.FIXED, EDiscountTypes.PERCENTAGE]),
 });
 
@@ -99,7 +99,6 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
     reValidateMode: "onBlur",
   });
 
-  const formSelectedProducts = useWatch({ control: methods.control, name: "rentProducts" });
   const availableProducts = useWatch({ control: methods.control, name: "allAvailableProducts" });
   const rentDate = useWatch({ control: methods.control, name: "rentDate" });
   const returnDate = useWatch({ control: methods.control, name: "returnDate" });
@@ -279,7 +278,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
       const values = methods.getValues();
 
       const selectedProducts = availableProducts.filter((product) =>
-        formSelectedProducts.some((item) => item.id === product.id),
+        values.rentProducts.some((item) => (item.product_id ?? item.id) === product.id),
       );
 
       if (selectedProducts.some((product) => product.availability !== EAvailabilityStatus.AVAILABLE)) {

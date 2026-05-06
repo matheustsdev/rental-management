@@ -2,7 +2,7 @@
 
 import { Accordion, Flex } from "@chakra-ui/react";
 import ProductMeasureItem from "@/components/atoms/ProductMeasureItem";
-import { useFormContext, useWatch } from "react-hook-form";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { RentFormType } from "../organisms/AddRentModal";
 import { useMemo } from "react";
@@ -13,17 +13,24 @@ const ProductMeasures: React.FC = () => {
     formState: { errors },
   } = useFormContext<RentFormType>();
 
-  const rentProducts = useWatch({ control, name: "rentProducts" }) || [];
-  const allAvailableProducts = useWatch({ control, name: "allAvailableProducts" }) || [];
-  const filteredProducts = useMemo(() => {
-    return (allAvailableProducts as ProductAvailabilityType[]).filter((availableProduct: ProductAvailabilityType) =>
-      rentProducts.some((rentProduct) => rentProduct.product_id === availableProduct.id),
-    );
-  }, [allAvailableProducts, rentProducts]);
+  const { fields: rentProducts } = useFieldArray({
+    control,
+    name: "rentProducts",
+  });
+
+  const allAvailableProducts = useWatch({ control, name: "allAvailableProducts" }) ?? [];
+
+  const productsMap = useMemo(() => {
+    const map = new Map<string, ProductAvailabilityType>();
+
+    allAvailableProducts.forEach((product: ProductAvailabilityType) => map.set(product.id, product));
+
+    return map;
+  }, [allAvailableProducts]);
 
   const productIds = useMemo(() => {
-    return filteredProducts.map((item) => item.id);
-  }, [filteredProducts]);
+    return rentProducts.map((field) => field.product_id);
+  }, [rentProducts]);
 
   const productIdsKey = useMemo(() => productIds.join(","), [productIds]);
 
@@ -38,11 +45,21 @@ const ProductMeasures: React.FC = () => {
           multiple
           defaultValue={productIds}
         >
-          {filteredProducts.map((rentProduct) => {
-            const rentProductId = rentProducts.findIndex((item) => item.product_id === rentProduct.id);
-            const hasError = !!(errors.rentProducts && errors.rentProducts[rentProductId]);
+          {rentProducts.map((field, index) => {
+            const productAvailability = productsMap.get(field.product_id);
 
-            return <ProductMeasureItem key={rentProduct.id} productAvailability={rentProduct} hasError={hasError} />;
+            if (!productAvailability) return null;
+
+            const hasError = !!(errors.rentProducts && errors.rentProducts[index]);
+
+            return (
+              <ProductMeasureItem
+                key={field.id}
+                productAvailability={productAvailability}
+                hasError={hasError}
+                index={index}
+              />
+            );
           })}
         </Accordion.Root>
       </Flex>

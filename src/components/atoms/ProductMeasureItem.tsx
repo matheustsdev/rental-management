@@ -7,18 +7,18 @@ import { EMeasureType } from "@/constants/EMeasureType";
 import { measureFieldsLabels } from "@/constants/MeasureFields";
 import InputField from "./InputField";
 import InputAreaField from "./InputAreaField";
-import { Path, useFormContext, useWatch } from "react-hook-form";
+import { Path, useFormContext } from "react-hook-form";
 import Currency from "@/utils/models/Currency";
 import { RentFormType } from "../organisms/AddRentModal";
 
 interface IProductMeasureItemProps {
   productAvailability: ProductAvailabilityType;
   hasError: boolean;
+  index: number;
 }
 
-const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailability, hasError }) => {
+const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailability, hasError, index }) => {
   const {
-    control,
     register,
     formState: { errors },
   } = useFormContext<RentFormType>();
@@ -26,9 +26,6 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
   const mType = productAvailability.categories?.measure_type;
   const isNoneMeasure = mType === EMeasureType.NONE;
   const labels = mType ? measureFieldsLabels[mType] : measureFieldsLabels.DRESS;
-
-  const rentProducts = useWatch({ control, name: "rentProducts" }) || [];
-  const productIndex = rentProducts.findIndex((item) => productAvailability.id === item.product_id);
 
   return (
     <Accordion.Item
@@ -71,14 +68,12 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
         {!isNoneMeasure && (
           <Flex w="full" gap="4" pt="2">
             {Object.entries(labels).map(([field, label]) => {
-              const name = `rentProducts.${productIndex}.${field}` as Path<RentFormType>;
+              const name = `rentProducts.${index}.${field}` as Path<RentFormType>;
 
               const fieldName = field as keyof typeof labels;
 
               const inputError =
-                errors.rentProducts && errors.rentProducts[productIndex]
-                  ? errors.rentProducts[productIndex][fieldName]
-                  : undefined;
+                errors.rentProducts && errors.rentProducts[index] ? errors.rentProducts[index][fieldName] : undefined;
 
               return (
                 <InputField
@@ -96,7 +91,7 @@ const ProductMeasureItem: React.FC<IProductMeasureItemProps> = ({ productAvailab
         <Flex w="full" pt="0">
           <InputAreaField
             label="Observação Interna (Ajustes, Defeitos, etc)"
-            registerProps={register(`rentProducts.${productIndex}.internal_observations`)}
+            registerProps={register(`rentProducts.${index}.internal_observations`)}
             minH="24"
           />
         </Flex>
