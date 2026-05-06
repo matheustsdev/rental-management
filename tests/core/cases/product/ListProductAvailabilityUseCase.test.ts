@@ -23,6 +23,7 @@ describe("List product availability use case", () => {
 
     expect(result.data).toEqual([]);
     expect(productRepo.listWithAvailability).toHaveBeenCalledWith(searchText, startDate, endDate, undefined);
+    expect(productRepo.count).toHaveBeenCalledWith({ search: searchText });
   });
 
   it("should pass excludeRentId when provided", async () => {
@@ -38,5 +39,6 @@ describe("List product availability use case", () => {
 
     expect(result.data).toEqual([]);
     expect(productRepo.listWithAvailability).toHaveBeenCalledWith(searchText, startDate, endDate, excludeRentId);
+    expect(productRepo.count).toHaveBeenCalledWith({ search: searchText });
   });
 });

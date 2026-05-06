@@ -10,7 +10,7 @@ export class ListProductUseCase {
   ) {}
 
   async execute(input: ListProductUseCaseInputType): Promise<ListUseCaseReturnType<ProductType>> {
-    const count = await this.productRepository.count();
+    const count = await this.productRepository.count(input);
     const data = await this.productRepository.list(input);
 
     return { data, count };

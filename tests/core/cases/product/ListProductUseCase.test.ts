@@ -22,7 +22,8 @@ describe("List product use case", () => {
 
     expect(result.data).toEqual(products);
     expect(result.count).toBe(2);
-    expect(productRepo.list).toHaveBeenCalled();
+    expect(productRepo.list).toHaveBeenCalledWith({});
+    expect(productRepo.count).toHaveBeenCalledWith({});
   });
 
   it("should filter products by reference/search", async () => {
@@ -33,5 +34,6 @@ describe("List product use case", () => {
     await useCase.execute(filters);
 
     expect(productRepo.list).toHaveBeenCalledWith(expect.objectContaining({ search: "SUIT" }));
+    expect(productRepo.count).toHaveBeenCalledWith(expect.objectContaining({ search: "SUIT" }));
   });
 });

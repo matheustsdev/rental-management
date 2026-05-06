@@ -16,50 +16,59 @@ export class PrismaProductRepository implements IProductRepository {
   }
 
   async list(params: ProductListInput): Promise<ProductType[]> {
-  const { search, orderBy, ascending, page = 1, pageSize = 10 } = params;
-  const skip = (page - 1) * pageSize;
-  const orderDirection = ascending ? "asc" : "desc";
-  const orderByKey = orderBy || "updated_at";
+    const { search, categoryId, orderBy, ascending, page = 1, pageSize = 10 } = params;
+    const skip = (page - 1) * pageSize;
+    const orderDirection = ascending ? "asc" : "desc";
+    const orderByKey = orderBy || "updated_at";
 
-  if (!search) {
+    if (!search) {
+      return this.prisma.products.findMany({
+        where: { 
+          deleted: false,
+          ...(categoryId && { category_id: categoryId })
+        },
+        skip,
+        take: pageSize,
+        orderBy: [
+          { [orderByKey]: orderDirection },
+          ...(orderByKey !== "reference" ? [{ reference: "asc" as const }] : [])
+        ],
+        include: { categories: true }
+      });
+    }
+
+    const searchTerm = `%${search}%`;
+    const categoryFilter = categoryId ? Prisma.sql`AND "category_id" = ${categoryId}::uuid` : Prisma.empty;
+    const matchedProducts = await this.prisma.$queryRaw<{ id: string }[]>`
+      SELECT id FROM "products"
+      WHERE (
+        unaccent("reference") ILIKE unaccent(${searchTerm})
+        OR 
+        unaccent("description") ILIKE unaccent(${searchTerm})
+        OR 
+        unaccent("receipt_description") ILIKE unaccent(${searchTerm})
+      )
+      AND "deleted" = false
+      ${categoryFilter}
+    `;
+
+    const ids = matchedProducts.map(p => p.id);
+
     return this.prisma.products.findMany({
-      where: { deleted: false },
+      where: {
+        id: { in: ids }
+      },
       skip,
       take: pageSize,
-      orderBy: { [orderByKey]: orderDirection },
-      include: { categories: true }
+      orderBy: [
+        { [orderByKey]: orderDirection },
+        ...(orderByKey !== "reference" ? [{ reference: "asc" as const }] : [])
+      ],
+      include: {
+        categories: true
+      }
     });
   }
-
-  const searchTerm = `%${search}%`;
-  const matchedProducts = await this.prisma.$queryRaw<{ id: string }[]>`
-    SELECT id FROM "products"
-    WHERE (
-      unaccent("reference") ILIKE unaccent(${searchTerm})
-      OR 
-      unaccent("description") ILIKE unaccent(${searchTerm})
-      OR 
-      unaccent("receipt_description") ILIKE unaccent(${searchTerm})
-    )
-    AND "deleted" = false
-  `;
-
-  const ids = matchedProducts.map(p => p.id);
-
-  return this.prisma.products.findMany({
-    where: {
-      id: { in: ids }
-    },
-    skip,
-    take: pageSize,
-    orderBy: {
-      [orderByKey]: orderDirection,
-    },
-    include: {
-      categories: true
-    }
-  });
-}
 
   async listWithAvailability(searchText: string, startDate: Date, endDate: Date, excludeRentId?: string): Promise<ProductAvailabilityType[]> {
     const products = await this.prisma.products.findMany({
@@ -173,7 +182,33 @@ export class PrismaProductRepository implements IProductRepository {
     );
   }
 
-  async count(where?: Prisma.productsWhereInput): Promise<number> {
-    return this.prisma.products.count({ where });
+  async count(params?: ProductListInput): Promise<number> {
+    const { search, categoryId } = params || {};
+
+    if (!search) {
+      return this.prisma.products.count({ 
+        where: { 
+          deleted: false,
+          ...(categoryId && { category_id: categoryId })
+        } 
+      });
+    }
+
+    const searchTerm = `%${search}%`;
+    const categoryFilter = categoryId ? Prisma.sql`AND "category_id" = ${categoryId}::uuid` : Prisma.empty;
+    const result = await this.prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT count(*) as count FROM "products"
+      WHERE (
+        unaccent("reference") ILIKE unaccent(${searchTerm})
+        OR 
+        unaccent("description") ILIKE unaccent(${searchTerm})
+        OR 
+        unaccent("receipt_description") ILIKE unaccent(${searchTerm})
+      )
+      AND "deleted" = false
+      ${categoryFilter}
+    `;
+
+    return Number(result[0].count);
   }
 }

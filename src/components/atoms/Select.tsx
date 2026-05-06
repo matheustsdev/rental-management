@@ -82,6 +82,7 @@ const Select: React.FC<IListSelectProps> = ({
                   py="2"
                   borderBottom="1px solid"
                   borderColor="whiteAlpha.400"
+                  color="black"
                 >
                   {option.label}
                   <ChakraSelect.ItemIndicator />
