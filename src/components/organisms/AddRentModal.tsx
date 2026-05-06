@@ -410,7 +410,7 @@ const AddRentModal: React.FC<IAddRentModalProps> = ({ isOpen, onClose, onSave, r
           </Steps.List>
 
           {steps.map((step, index) => (
-            <Steps.Content key={index} index={index} h="full">
+            <Steps.Content key={index} index={index} h="full" overflowY="auto" pr="2" pt="2">
               {step.description}
             </Steps.Content>
           ))}

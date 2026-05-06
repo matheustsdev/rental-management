@@ -6,6 +6,7 @@ import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { ProductAvailabilityType } from "@/types/ProductAvailabilityType";
 import { RentFormType } from "../organisms/AddRentModal";
 import { useMemo } from "react";
+import RentFinancialSummary from "./RentFinancialSummary";
 
 const ProductMeasures: React.FC = () => {
   const {
@@ -35,7 +36,7 @@ const ProductMeasures: React.FC = () => {
   const productIdsKey = useMemo(() => productIds.join(","), [productIds]);
 
   return (
-    <Flex flexDir="column" gap={4} align="center" w="full">
+    <Flex flexDir="column" gap={4} align="center" w="full" pb="4">
       <Flex w="full" align="center" justify="space-between" gap="12" flexDir="column">
         <Accordion.Root
           key={productIdsKey}
@@ -63,6 +64,8 @@ const ProductMeasures: React.FC = () => {
           })}
         </Accordion.Root>
       </Flex>
+
+      <RentFinancialSummary />
     </Flex>
   );
 };
